@@ -13,29 +13,52 @@ st.set_page_config(
 st.markdown("""
 <style>
 body {
-    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    background: linear-gradient(135deg, #0b132b, #1c2541, #3a506b);
+    color: #eaeaea;
 }
+
 h1 {
     text-align: center;
-    color: #00e5ff;
+    color: #5bc0eb;
 }
+
 .sub {
     text-align: center;
-    color: #cfd8dc;
+    color: #b0bec5;
     font-size: 18px;
 }
+
 .card {
-    background-color: #1c1f26;
-    padding: 15px;
-    border-radius: 12px;
+    background-color: #1c2541;
+    padding: 18px;
+    border-radius: 14px;
     text-align: center;
-    color: white;
+    box-shadow: 0px 6px 20px rgba(0,0,0,0.4);
 }
-.low { color: #00e676; font-weight: bold; }
-.medium { color: #ffea00; font-weight: bold; }
-.high { color: #ff5252; font-weight: bold; }
+
+.low {
+    color: #3ddc97;
+    font-weight: bold;
+}
+
+.medium {
+    color: #f4d35e;
+    font-weight: bold;
+}
+
+.high {
+    color: #ff6b6b;
+    font-weight: bold;
+}
+
+.footer {
+    text-align: center;
+    color: #b0bec5;
+    font-size: 14px;
+}
 </style>
 """, unsafe_allow_html=True)
+
 
 # ---------------- TITLE ----------------
 st.markdown("<h1>💹 Crypto Volatility & Risk Analyzer</h1>", unsafe_allow_html=True)
