@@ -9,48 +9,32 @@ st.set_page_config(
     layout="wide"
 )
 
-# ---------------- CUSTOM CSS ----------------
+# ---------------- CSS ----------------
 st.markdown("""
 <style>
 body {
     background: linear-gradient(135deg, #0b132b, #1c2541, #3a506b);
     color: #eaeaea;
 }
-
 h1 {
     text-align: center;
     color: #5bc0eb;
 }
-
 .sub {
     text-align: center;
     color: #b0bec5;
     font-size: 18px;
 }
-
 .card {
     background-color: #1c2541;
-    padding: 18px;
+    padding: 16px;
     border-radius: 14px;
     text-align: center;
-    box-shadow: 0px 6px 20px rgba(0,0,0,0.4);
+    box-shadow: 0px 4px 15px rgba(0,0,0,0.4);
 }
-
-.low {
-    color: #3ddc97;
-    font-weight: bold;
-}
-
-.medium {
-    color: #f4d35e;
-    font-weight: bold;
-}
-
-.high {
-    color: #ff6b6b;
-    font-weight: bold;
-}
-
+.low { color: #3ddc97; font-weight: bold; }
+.medium { color: #f4d35e; font-weight: bold; }
+.high { color: #ff6b6b; font-weight: bold; }
 .footer {
     text-align: center;
     color: #b0bec5;
@@ -59,48 +43,45 @@ h1 {
 </style>
 """, unsafe_allow_html=True)
 
-
 # ---------------- TITLE ----------------
 st.markdown("<h1>💹 Crypto Volatility & Risk Analyzer</h1>", unsafe_allow_html=True)
-st.markdown("<div class='sub'>Interactive Dashboard using Live Online Data</div>", unsafe_allow_html=True)
-
+st.markdown("<div class='sub'>Live Interactive Dashboard using Online Crypto Data</div>", unsafe_allow_html=True)
 st.write("")
 
-# ---------------- SIDEBAR CONTROLS ----------------
-st.sidebar.header("⚙️ Dashboard Controls")
+# ---------------- SIDEBAR ----------------
+st.sidebar.header("⚙️ Controls")
+num_coins = st.sidebar.slider("Number of Cryptos", 3, 10, 5)
+st.sidebar.caption("Data Source: CoinGecko API")
 
-num_coins = st.sidebar.slider(
-    "Select number of cryptocurrencies",
-    min_value=3,
-    max_value=10,
-    value=5
-)
+# ---------------- FETCH DATA SAFELY ----------------
+@st.cache_data(show_spinner=False)
+def fetch_crypto_data(limit):
+    url = "https://api.coingecko.com/api/v3/coins/markets"
+    params = {
+        "vs_currency": "usd",
+        "order": "market_cap_desc",
+        "per_page": limit,
+        "page": 1,
+        "sparkline": False
+    }
 
-risk_filter = st.sidebar.multiselect(
-    "Filter by Risk Level",
-    options=["Low", "Medium", "High"],
-    default=["Low", "Medium", "High"]
-)
+    try:
+        response = requests.get(url, params=params, timeout=10)
+        response.raise_for_status()
+        return response.json()
+    except:
+        return []
 
-st.sidebar.write("Data Source: CoinGecko API")
+coins = fetch_crypto_data(num_coins)
 
-# ---------------- FETCH ONLINE DATA ----------------
-url = "https://api.coingecko.com/api/v3/coins/markets"
-params = {
-    "vs_currency": "usd",
-    "order": "market_cap_desc",
-    "per_page": num_coins,
-    "page": 1,
-    "sparkline": False
-}
-
-response = requests.get(url, params=params)
-coins = response.json()
-
-crypto_data = []
+# ---------------- PROCESS DATA (SAFE) ----------------
+rows = []
 
 for coin in coins:
-    change = coin["price_change_percentage_24h"]
+    change = coin.get("price_change_percentage_24h")
+
+    if change is None:
+        change = 0.0
 
     if change >= 10:
         risk = "High"
@@ -109,52 +90,42 @@ for coin in coins:
     else:
         risk = "Low"
 
-    crypto_data.append({
-        "Crypto": coin["name"],
-        "Symbol": coin["symbol"].upper(),
-        "Price (USD)": coin["current_price"],
+    rows.append({
+        "Crypto": coin.get("name", "N/A"),
+        "Symbol": coin.get("symbol", "").upper(),
+        "Price (USD)": coin.get("current_price", 0),
         "24h Change (%)": round(change, 2),
         "Risk Level": risk
     })
 
-df = pd.DataFrame(crypto_data)
+df = pd.DataFrame(rows)
 
-# ---------------- APPLY FILTER ----------------
-df = df[df["Risk Level"].isin(risk_filter)]
-
-# ---------------- KPI METRICS ----------------
+# ---------------- METRICS ----------------
 c1, c2, c3 = st.columns(3)
 
 with c1:
-    st.metric("🪙 Cryptos Displayed", len(df))
-
+    st.metric("🪙 Cryptos", len(df))
 with c2:
-    if not df.empty:
-        st.metric("📈 Highest Change (%)", df["24h Change (%)"].max())
-    else:
-        st.metric("📈 Highest Change (%)", "N/A")
-
+    st.metric("📈 Max Change (%)", df["24h Change (%)"].max() if not df.empty else 0)
 with c3:
-    st.metric("⚠️ High Risk Count", len(df[df["Risk Level"] == "High"]))
+    st.metric("⚠️ High Risk", len(df[df["Risk Level"] == "High"]))
 
 st.write("---")
 
-# ---------------- DATA TABLE ----------------
-st.subheader("📋 Live Crypto Market Table")
+# ---------------- TABLE ----------------
+st.subheader("📋 Live Crypto Market Data")
 st.dataframe(df, use_container_width=True)
 
-# ---------------- INTERACTIVE CHART ----------------
-st.subheader("📊 Volatility Comparison Chart")
+# ---------------- CHART ----------------
+st.subheader("📊 Volatility Comparison")
 if not df.empty:
-    st.bar_chart(
-        data=df.set_index("Crypto")["24h Change (%)"]
-    )
+    st.bar_chart(df.set_index("Crypto")["24h Change (%)"])
 else:
-    st.warning("No data available for selected filters.")
+    st.warning("No data available at the moment.")
 
 # ---------------- FOOTER ----------------
 st.write("---")
 st.markdown(
-    "<p style='text-align:center;color:gray;'>Infosys Springboard | Streamlit Interactive Dashboard</p>",
+    "<div class='footer'>Infosys Springboard | Streamlit Interactive Crypto Dashboard</div>",
     unsafe_allow_html=True
 )
