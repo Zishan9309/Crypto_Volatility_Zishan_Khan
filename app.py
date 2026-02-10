@@ -46,87 +46,6 @@ body {
 .metric h2 {
     color: #4dd0e1;
 }
-</style>
-""", unsafe_allow_html=True)
-
-# ---------------- FETCH DATA (SAFE) ----------------
-def fetch_crypto_data(limit):
-    url = "https://api.coingecko.com/api/v3/coins/markets"
-    params = {
-        "vs_currency": "usd",
-        "order": "market_cap_desc",
-        "per_page": limit,
-        "page": 1,
-        "sparkline": False
-    }
-
-    headers = {
-        "Accept": "application/json",
-        "User-Agent": "Mozilla/5.0 (Streamlit Crypto Dashboard)"
-    }
-
-    try:
-        response = requests.get(url, params=params, headers=headers, timeout=10)
-        response.raise_for_status()
-        return response.json()
-    except Exception as e:
-        st.error(f"API Error: {e}")
-        return []
-
-
-# ---------------- RISK LOGIC ----------------
-def calculate_risk(change):
-    if abs(change) < 5:
-        return "Low"
-    elif abs(change) < 10:
-        return "Medium"
-    else:
-        return "High"
-
-# ---------------- SIDEBAR ----------------
-st.sidebar.header("⚙️ Controls")
-num_cryptos = st.sidebar.slider("Number of Cryptocurrencies", 5, 20, 5)
-
-if st.sidebar.button("🔄 Refresh Data"):
-    st.cache_data.clear()
-    st.rerun()
-
-
-# ---------------- LOAD DATA ----------------
-data = fetch_crypto_data(num_cryptos)
-
-if not data:
-    st.warning("⚠️ Unable to fetch live data. Please refresh.")
-    st.stop()
-
-# ---------------- PROCESS DATA ----------------
-rows = []
-for coin in data:
-    rows.append({
-        "Cryptocurrency": coin.get("name", "N/A"),
-        "Price (USD)": coin.get("current_price", 0),
-        "24h Change (%)": round(coin.get("price_change_percentage_24h") or 0, 2),
-        "Risk": calculate_risk(coin.get("price_change_percentage_24h") or 0)
-    })
-
-df = pd.DataFrame(rows)
-
-# ---------------- HEADER CARD ----------------
-st.markdown("""
-<div class="card">
-    <span class="title">☁️ Crypto Data Fetcher</span>
-    <span style="float:right;color:#2ecc71;">● Live</span><br>
-    <span class="subtext">Real-time cryptocurrency market data</span>
-</div>
-""", unsafe_allow_html=True)
-
-# ---------------- TABLE ----------------
-
-st.markdown("<div class='card'>", unsafe_allow_html=True)
-st.markdown("<h3 style='color:#4dd0e1;'>📋 Market Overview</h3>", unsafe_allow_html=True)
-
-table_html = """
-<style>
 .crypto-table {
     width: 100%;
     border-collapse: collapse;
@@ -152,7 +71,79 @@ table_html = """
 .risk-medium { color: #f1c40f; font-weight: bold; }
 .risk-high { color: #e74c3c; font-weight: bold; }
 </style>
+""", unsafe_allow_html=True)
 
+# ---------------- FETCH DATA (SAFE) ----------------
+def fetch_crypto_data(limit):
+    url = "https://api.coingecko.com/api/v3/coins/markets"
+    params = {
+        "vs_currency": "usd",
+        "order": "market_cap_desc",
+        "per_page": limit,
+        "page": 1,
+        "sparkline": False
+    }
+    headers = {
+        "Accept": "application/json",
+        "User-Agent": "Mozilla/5.0 (Crypto Dashboard)"
+    }
+    try:
+        r = requests.get(url, params=params, headers=headers, timeout=10)
+        r.raise_for_status()
+        return r.json()
+    except:
+        return []
+
+# ---------------- RISK LOGIC ----------------
+def calculate_risk(change):
+    if abs(change) < 5:
+        return "Low"
+    elif abs(change) < 10:
+        return "Medium"
+    else:
+        return "High"
+
+# ---------------- SIDEBAR ----------------
+st.sidebar.header("⚙️ Controls")
+num_cryptos = st.sidebar.slider("Number of Cryptocurrencies", 5, 20, 5)
+
+if st.sidebar.button("🔄 Refresh Data"):
+    st.rerun()
+
+# ---------------- LOAD DATA ----------------
+data = fetch_crypto_data(num_cryptos)
+
+if not data:
+    st.warning("⚠️ Unable to fetch live data. Please refresh.")
+    st.stop()
+
+# ---------------- PROCESS DATA ----------------
+rows = []
+for coin in data:
+    change = coin.get("price_change_percentage_24h") or 0
+    rows.append({
+        "Cryptocurrency": coin.get("name", "N/A"),
+        "Price (USD)": coin.get("current_price", 0),
+        "24h Change (%)": round(change, 2),
+        "Risk": calculate_risk(change)
+    })
+
+df = pd.DataFrame(rows)
+
+# ---------------- HEADER CARD ----------------
+st.markdown("""
+<div class="card">
+    <span class="title">☁️ Crypto Data Fetcher</span>
+    <span style="float:right;color:#2ecc71;">● Live</span><br>
+    <span class="subtext">Real-time cryptocurrency market overview</span>
+</div>
+""", unsafe_allow_html=True)
+
+# ---------------- MARKET OVERVIEW TABLE ----------------
+st.markdown("<div class='card'>", unsafe_allow_html=True)
+st.markdown("<h3 style='color:#4dd0e1;'>📋 Market Overview</h3>", unsafe_allow_html=True)
+
+table_html = """
 <table class="crypto-table">
 <tr>
     <th>Cryptocurrency</th>
@@ -168,7 +159,6 @@ for _, row in df.iterrows():
         else "risk-medium" if row["Risk"] == "Medium"
         else "risk-high"
     )
-
     table_html += f"""
     <tr>
         <td>{row['Cryptocurrency']}</td>
@@ -179,15 +169,11 @@ for _, row in df.iterrows():
     """
 
 table_html += "</table>"
-
 st.markdown(table_html, unsafe_allow_html=True)
 st.markdown("</div>", unsafe_allow_html=True)
 
-
-
 # ---------------- METRICS ----------------
 c1, c2, c3 = st.columns(3)
-
 with c1:
     st.markdown(f"<div class='metric'><h3>Total Assets</h3><h2>{len(df)}</h2></div>", unsafe_allow_html=True)
 with c2:
