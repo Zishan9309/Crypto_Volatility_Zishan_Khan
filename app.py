@@ -17,7 +17,7 @@ st.set_page_config(
 st.markdown("""
 <style>
 body {
-    background-color: #0e1117;
+    background-color: #a8dadc;
     color: white;
 }
 .metric-card {
