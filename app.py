@@ -56,14 +56,23 @@ def fetch_crypto_data(limit):
         "vs_currency": "usd",
         "order": "market_cap_desc",
         "per_page": limit,
-        "page": 1
+        "page": 1,
+        "sparkline": False
     }
+
+    headers = {
+        "Accept": "application/json",
+        "User-Agent": "Mozilla/5.0 (Streamlit Crypto Dashboard)"
+    }
+
     try:
-        r = requests.get(url, params=params, timeout=10)
-        r.raise_for_status()
-        return r.json()
+        response = requests.get(url, params=params, headers=headers, timeout=10)
+        response.raise_for_status()
+        return response.json()
     except Exception as e:
+        st.error(f"API Error: {e}")
         return []
+
 
 # ---------------- RISK LOGIC ----------------
 def calculate_risk(change):
@@ -80,6 +89,8 @@ num_cryptos = st.sidebar.slider("Number of Cryptocurrencies", 5, 20, 5)
 
 if st.sidebar.button("🔄 Refresh Data"):
     st.cache_data.clear()
+    st.rerun()
+
 
 # ---------------- LOAD DATA ----------------
 data = fetch_crypto_data(num_cryptos)
