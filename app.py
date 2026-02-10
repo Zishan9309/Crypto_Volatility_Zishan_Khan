@@ -17,19 +17,29 @@ st.set_page_config(
 st.markdown("""
 <style>
 body {
-    background-color: #a8dadc;
-    color: white;
+    background-color: #1d3557;
+    color: #f1faee;
+}
+[data-testid="stSidebar"] {
+    background-color: #457b9d;
 }
 .metric-card {
-    background-color: #1a1a1a;
-    padding: 14px;
-    border-radius: 12px;
+    background-color: #457b9d;
+    padding: 18px;
+    border-radius: 14px;
     text-align: center;
+    box-shadow: 0px 4px 12px rgba(0,0,0,0.3);
+}
+.metric-card h1 {
+    color: #a8dadc;
+}
+.metric-card h3 {
+    color: #f1faee;
 }
 </style>
 """, unsafe_allow_html=True)
 
-# ---------------- FETCH DATA (SAFE) ----------------
+# ---------------- FETCH DATA ----------------
 @st.cache_data(show_spinner=False)
 def fetch_crypto_data(limit):
     url = "https://api.coingecko.com/api/v3/coins/markets"
@@ -40,7 +50,6 @@ def fetch_crypto_data(limit):
         "page": 1,
         "sparkline": False
     }
-
     try:
         response = requests.get(url, params=params, timeout=10)
         response.raise_for_status()
@@ -48,7 +57,7 @@ def fetch_crypto_data(limit):
     except:
         return []
 
-# ---------------- RISK FUNCTIONS ----------------
+# ---------------- RISK FUNCTION ----------------
 def calculate_risk(change):
     if change < 5:
         return "Low"
@@ -59,26 +68,26 @@ def calculate_risk(change):
 
 # ---------------- MAIN APP ----------------
 def main():
-    st.title("📈 Cryptocurrency Volatility & Risk Dashboard")
+    st.markdown(
+        "<h1 style='color:#a8dadc;'>📈 Cryptocurrency Volatility & Risk Dashboard</h1>",
+        unsafe_allow_html=True
+    )
     st.caption("Live crypto market analysis using CoinGecko API")
 
     # Sidebar
-    st.sidebar.header("⚙️ Controls")
+    st.sidebar.header("⚙️ Dashboard Controls")
     num_cryptos = st.sidebar.slider("Number of Cryptocurrencies", 10, 100, 50, 10)
 
     # Fetch Data
     data = fetch_crypto_data(num_cryptos)
-
     if not data:
         st.error("Unable to fetch data. Please try again later.")
         st.stop()
 
-    # ---------------- PROCESS DATA SAFELY ----------------
+    # ---------------- PROCESS DATA ----------------
     rows = []
     for coin in data:
-        change = coin.get("price_change_percentage_24h")
-        if change is None:
-            change = 0.0
+        change = coin.get("price_change_percentage_24h") or 0.0
 
         rows.append({
             "Name": coin.get("name", "N/A"),
@@ -90,36 +99,48 @@ def main():
 
     df = pd.DataFrame(rows)
 
-    # ---------------- KPIs ----------------
+    # ---------------- KPI CARDS ----------------
     c1, c2, c3 = st.columns(3)
 
     with c1:
-        st.markdown(f"<div class='metric-card'><h3>Total Cryptos</h3><h1>{len(df)}</h1></div>", unsafe_allow_html=True)
+        st.markdown(
+            f"<div class='metric-card'><h3>Total Cryptos</h3><h1>{len(df)}</h1></div>",
+            unsafe_allow_html=True
+        )
     with c2:
-        st.markdown(f"<div class='metric-card'><h3>Highest Change</h3><h1>{df['24h Change (%)'].max()}%</h1></div>", unsafe_allow_html=True)
+        st.markdown(
+            f"<div class='metric-card'><h3>Highest Change</h3><h1>{df['24h Change (%)'].max()}%</h1></div>",
+            unsafe_allow_html=True
+        )
     with c3:
-        st.markdown(f"<div class='metric-card'><h3>High Risk</h3><h1>{len(df[df['Risk Level']=='High'])}</h1></div>", unsafe_allow_html=True)
+        st.markdown(
+            f"<div class='metric-card'><h3>High Risk Assets</h3><h1>{len(df[df['Risk Level']=='High'])}</h1></div>",
+            unsafe_allow_html=True
+        )
 
-    st.write("---")
+    st.divider()
 
     # ---------------- TABLE ----------------
-    st.subheader("📋 Cryptocurrency Data")
+    st.subheader("📋 Cryptocurrency Market Data")
     st.dataframe(df, use_container_width=True)
 
     # ---------------- BAR CHART ----------------
-    st.subheader("📊 Volatility Comparison")
+    st.subheader("📊 24-Hour Volatility Comparison")
     fig_bar = px.bar(
         df,
         x="Name",
         y="24h Change (%)",
         color="Risk Level",
-        color_discrete_map={"Low": "#3ddc97", "Medium": "#f4d35e", "High": "#ff6b6b"},
-        title="24-Hour Price Change (%)"
+        color_discrete_map={
+            "Low": "#2ecc71",
+            "Medium": "#f1c40f",
+            "High": "#e74c3c"
+        }
     )
     fig_bar.update_layout(
-        plot_bgcolor="#0e1117",
-        paper_bgcolor="#0e1117",
-        font_color="white"
+        plot_bgcolor="#1d3557",
+        paper_bgcolor="#1d3557",
+        font_color="#f1faee"
     )
     st.plotly_chart(fig_bar, use_container_width=True)
 
@@ -132,19 +153,21 @@ def main():
         x=top10["Name"],
         y=top10["Current Price (USD)"],
         mode="lines+markers",
-        line=dict(color="#5bc0eb")
+        line=dict(color="#a8dadc", width=3),
+        marker=dict(size=8)
     ))
     fig_line.update_layout(
-        plot_bgcolor="#0e1117",
-        paper_bgcolor="#0e1117",
-        font_color="white",
-        title="Current Prices of Top 10 Cryptos"
+        plot_bgcolor="#1d3557",
+        paper_bgcolor="#1d3557",
+        font_color="#f1faee",
+        title="Current Prices of Top 10 Cryptocurrencies"
     )
     st.plotly_chart(fig_line, use_container_width=True)
 
     # ---------------- FOOTER ----------------
-    st.markdown("---")
-    st.caption(f"Data Source: CoinGecko API | Last updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    st.caption(
+        f"Data Source: CoinGecko API | Last Updated: {datetime.now().strftime('%d %b %Y, %H:%M:%S')}"
+    )
 
 # ---------------- RUN ----------------
 if __name__ == "__main__":
