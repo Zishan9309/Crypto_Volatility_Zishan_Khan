@@ -94,6 +94,89 @@ def fetch_crypto_data(limit):
     except:
         return []
 
+st.markdown("""
+<style>
+.market-card {
+    background: linear-gradient(145deg, #071e33, #0b2a4a);
+    border-radius: 18px;
+    padding: 22px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.market-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #e6f1ff;
+    margin-bottom: 15px;
+}
+
+.market-header h3 {
+    color: #4dd0e1;
+    margin: 0;
+}
+
+.live-dot {
+    color: #2ecc71;
+    font-size: 14px;
+}
+
+.market-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.market-table th {
+    color: #9ecbff;
+    font-weight: 600;
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #123a5a;
+}
+
+.market-table td {
+    padding: 12px 10px;
+    border-bottom: 1px solid #102a43;
+    color: #e6f1ff;
+}
+
+.market-table tr:hover td {
+    background-color: rgba(77,208,225,0.08);
+}
+
+.coin {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.coin-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background-color: #4dd0e1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #071e33;
+    font-weight: bold;
+}
+
+.positive { color: #2ecc71; }
+.negative { color: #e74c3c; }
+
+.risk-low {
+    background-color: rgba(46,204,113,0.15);
+    color: #2ecc71;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+</style>
+""", unsafe_allow_html=True)
+
 # ---------------- RISK LOGIC ----------------
 def calculate_risk(change):
     if abs(change) < 5:
@@ -140,44 +223,53 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ---------------- MARKET OVERVIEW TABLE ----------------
-st.markdown("<div class='card'>", unsafe_allow_html=True)
-st.markdown("<h3 style='color:#4dd0e1;'>📋 Market Overview</h3>", unsafe_allow_html=True)
-
 st.markdown("""
-<table class="crypto-table">
-    <thead>
-        <tr>
-            <th>Cryptocurrency</th>
-            <th>Price (USD)</th>
-            <th>24h Change (%)</th>
-            <th>Risk</th>
-        </tr>
-    </thead>
-    <tbody>
+<div class="market-card">
+    <div class="market-header">
+        <h3>☁️ Crypto Data Fetcher</h3>
+        <span class="live-dot">● Live</span>
+    </div>
+
+    <table class="market-table">
+        <thead>
+            <tr>
+                <th>Cryptocurrency</th>
+                <th>Price (USD)</th>
+                <th>24h Change</th>
+                <th>Risk</th>
+            </tr>
+        </thead>
+        <tbody>
 """, unsafe_allow_html=True)
 
-for _, row in df.iterrows():
-    risk_class = (
-        "risk-low" if row["Risk"] == "Low"
-        else "risk-medium" if row["Risk"] == "Medium"
-        else "risk-high"
-    )
+for coin in data:
+    name = coin["name"]
+    symbol = coin["symbol"].upper()
+    price = coin["current_price"]
+    change = coin["price_change_percentage_24h"] or 0
+
+    change_class = "positive" if change >= 0 else "negative"
 
     st.markdown(f"""
         <tr>
-            <td>{row['Cryptocurrency']}</td>
-            <td>${row['Price (USD)']}</td>
-            <td>{row['24h Change (%)']}%</td>
-            <td class="{risk_class}">{row['Risk']}</td>
+            <td>
+                <div class="coin">
+                    <div class="coin-icon">{symbol[0]}</div>
+                    {name} ({symbol})
+                </div>
+            </td>
+            <td>${price}</td>
+            <td class="{change_class}">{change:.2f}%</td>
+            <td><span class="risk-low">Low</span></td>
         </tr>
     """, unsafe_allow_html=True)
 
 st.markdown("""
-    </tbody>
-</table>
+        </tbody>
+    </table>
+</div>
 """, unsafe_allow_html=True)
 
-st.markdown("</div>", unsafe_allow_html=True)
 
 # ---------------- METRICS ----------------
 c1, c2, c3 = st.columns(3)
