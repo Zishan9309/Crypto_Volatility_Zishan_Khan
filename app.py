@@ -105,7 +105,7 @@ def calculate_risk(change):
 
 # ---------------- SIDEBAR ----------------
 st.sidebar.header("⚙️ Controls")
-num_cryptos = st.sidebar.slider("Number of Cryptocurrencies", 5, 20, 5)
+num_cryptos = st.sidebar.slider("Number of Cryptocurrencies", 5, 20, 8)
 
 if st.sidebar.button("🔄 Refresh Data"):
     st.rerun()
@@ -143,15 +143,18 @@ st.markdown("""
 st.markdown("<div class='card'>", unsafe_allow_html=True)
 st.markdown("<h3 style='color:#4dd0e1;'>📋 Market Overview</h3>", unsafe_allow_html=True)
 
-table_html = """
+st.markdown("""
 <table class="crypto-table">
-<tr>
-    <th>Cryptocurrency</th>
-    <th>Price (USD)</th>
-    <th>24h Change (%)</th>
-    <th>Risk</th>
-</tr>
-"""
+    <thead>
+        <tr>
+            <th>Cryptocurrency</th>
+            <th>Price (USD)</th>
+            <th>24h Change (%)</th>
+            <th>Risk</th>
+        </tr>
+    </thead>
+    <tbody>
+""", unsafe_allow_html=True)
 
 for _, row in df.iterrows():
     risk_class = (
@@ -159,17 +162,21 @@ for _, row in df.iterrows():
         else "risk-medium" if row["Risk"] == "Medium"
         else "risk-high"
     )
-    table_html += f"""
-    <tr>
-        <td>{row['Cryptocurrency']}</td>
-        <td>${row['Price (USD)']}</td>
-        <td>{row['24h Change (%)']}%</td>
-        <td class="{risk_class}">{row['Risk']}</td>
-    </tr>
-    """
 
-table_html += "</table>"
-st.markdown(table_html, unsafe_allow_html=True)
+    st.markdown(f"""
+        <tr>
+            <td>{row['Cryptocurrency']}</td>
+            <td>${row['Price (USD)']}</td>
+            <td>{row['24h Change (%)']}%</td>
+            <td class="{risk_class}">{row['Risk']}</td>
+        </tr>
+    """, unsafe_allow_html=True)
+
+st.markdown("""
+    </tbody>
+</table>
+""", unsafe_allow_html=True)
+
 st.markdown("</div>", unsafe_allow_html=True)
 
 # ---------------- METRICS ----------------
