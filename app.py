@@ -121,10 +121,69 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ---------------- TABLE ----------------
+
 st.markdown("<div class='card'>", unsafe_allow_html=True)
-st.subheader("📋 Market Overview")
-st.dataframe(df, use_container_width=True, height=300)
+st.markdown("<h3 style='color:#4dd0e1;'>📋 Market Overview</h3>", unsafe_allow_html=True)
+
+table_html = """
+<style>
+.crypto-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+.crypto-table th {
+    background-color: #0b2a4a;
+    color: #4dd0e1;
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #123a5a;
+}
+.crypto-table td {
+    background-color: #071e33;
+    color: #e6f1ff;
+    padding: 10px;
+    border-bottom: 1px solid #123a5a;
+}
+.crypto-table tr:hover td {
+    background-color: #0b2a4a;
+}
+.risk-low { color: #2ecc71; font-weight: bold; }
+.risk-medium { color: #f1c40f; font-weight: bold; }
+.risk-high { color: #e74c3c; font-weight: bold; }
+</style>
+
+<table class="crypto-table">
+<tr>
+    <th>Cryptocurrency</th>
+    <th>Price (USD)</th>
+    <th>24h Change (%)</th>
+    <th>Risk</th>
+</tr>
+"""
+
+for _, row in df.iterrows():
+    risk_class = (
+        "risk-low" if row["Risk"] == "Low"
+        else "risk-medium" if row["Risk"] == "Medium"
+        else "risk-high"
+    )
+
+    table_html += f"""
+    <tr>
+        <td>{row['Cryptocurrency']}</td>
+        <td>${row['Price (USD)']}</td>
+        <td>{row['24h Change (%)']}%</td>
+        <td class="{risk_class}">{row['Risk']}</td>
+    </tr>
+    """
+
+table_html += "</table>"
+
+st.markdown(table_html, unsafe_allow_html=True)
 st.markdown("</div>", unsafe_allow_html=True)
+
+
 
 # ---------------- METRICS ----------------
 c1, c2, c3 = st.columns(3)
