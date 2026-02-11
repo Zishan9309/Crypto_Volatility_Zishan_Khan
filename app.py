@@ -106,7 +106,7 @@ left_col, right_col = st.columns([1.5, 1])
 
 with left_col:
     # Heading in Dark Blue as requested
-    st.markdown("<h3 class='dark-blue-title'>📋 Market Risk Monitor</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 class='cyan-title'>📋 Market Risk Monitor</h3>", unsafe_allow_html=True)
     
     table_html = """<table class="crypto-table"><tr><th>Asset</th><th>Price (USD)</th><th>24h Change</th><th>Risk Level</th></tr>"""
     for coin in data[:10]:
@@ -125,7 +125,7 @@ with left_col:
 
 with right_col:
     # Heading in Dark Blue
-    st.markdown("<h3 class='dark-blue-title'>📊 7-Day Asset Trend</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 class='cyan-title'>📊 7-Day Asset Trend</h3>", unsafe_allow_html=True)
     selected_coin_name = st.selectbox("Select Asset for Detailed View", [c['name'] for c in data[:10]])
     coin = next(c for c in data if c['name'] == selected_coin_name)
     
