@@ -9,14 +9,24 @@ from datetime import datetime
 # ---------------- PAGE CONFIG ----------------
 st.set_page_config(
     page_title="Crypto Volatility & Risk Analyzer",
-    page_icon="📉",
+    page_icon="📈",
     layout="wide"
 )
 
 # ---------------- CUSTOM CSS ----------------
 st.markdown("""
 <style>
+    /* Dark Blue Color for Titles and Sections */
+    .dark-blue-title {
+        color: #1b4965 !important;
+        font-weight: 800 !important;
+        font-family: 'Inter', sans-serif;
+        margin-bottom: 10px;
+    }
+    
     .stApp { background-color: #0d1b2a; color: #e0e1dd; }
+    
+    /* Card Styling */
     .metric-card {
         background-color: #1b263b;
         padding: 20px;
@@ -24,13 +34,15 @@ st.markdown("""
         border: 1px solid #415a77;
         text-align: center;
     }
+    
+    /* Table Styling */
     .crypto-table { width: 100%; border-collapse: collapse; color: white; }
     .crypto-table th { color: #778da9; text-align: left; padding: 12px; border-bottom: 2px solid #415a77; }
     .crypto-table td { padding: 15px; border-bottom: 1px solid #1b263b; }
+    
     .badge-high { background-color: #ef476f; color: white; padding: 4px 10px; border-radius: 6px; font-weight: bold; }
     .badge-med { background-color: #ffd166; color: #0d1b2a; padding: 4px 10px; border-radius: 6px; font-weight: bold; }
     .badge-low { background-color: #06d6a0; color: white; padding: 4px 10px; border-radius: 6px; font-weight: bold; }
-    .main-title { color: #4cc9f0; font-weight: 800; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -62,38 +74,39 @@ def get_risk_info(change):
 data = fetch_real_data()
 
 if not data:
-    st.error("API Limit reached. Please wait 1 minute and refresh.")
+    st.error("API Limit reached. Please wait 1 minute.")
     st.stop()
 
-st.markdown("<h1 class='main-title'>☁️ Crypto Volatility & Risk Analyzer</h1>", unsafe_allow_html=True)
+# Heading in Dark Blue
+st.markdown("<h1 class='dark-blue-title'>☁️ Crypto Volatility & Risk Analyzer</h1>", unsafe_allow_html=True)
 
-# KPI Row
-cols = st.columns(4)
-with cols[0]:
-    st.markdown(f"<div class='metric-card'><h3>BTC Price</h3><h2 style='color:#4cc9f0'>${data[0]['current_price']:,}</h2></div>", unsafe_allow_html=True)
-with cols[1]:
-    vol_avg = np.mean([abs(c.get('price_change_percentage_24h', 0) or 0) for c in data])
-    st.markdown(f"<div class='metric-card'><h3>Avg Volatility</h3><h2 style='color:#ffd166'>{vol_avg:.2f}%</h2></div>", unsafe_allow_html=True)
-with cols[2]:
-    high_risk_count = sum(1 for c in data if abs(c.get('price_change_percentage_24h', 0) or 0) > 5)
-    st.markdown(f"<div class='metric-card'><h3>High Risk Assets</h3><h2 style='color:#ef476f'>{high_risk_count}</h2></div>", unsafe_allow_html=True)
-with cols[3]:
-    st.markdown("<div class='metric-card'><h3>Market Status</h3><h2 style='color:#06d6a0'>Active</h2></div>", unsafe_allow_html=True)
+# Aesthetic Sentiment Row (New Feature)
+st.markdown("### 🌐 Market Heatmap (Sentiment)")
+heatmap_data = pd.DataFrame([{
+    "Asset": c['symbol'].upper(),
+    "Change": c['price_change_percentage_24h'],
+    "Size": 1 # Uniform size for aesthetic look
+} for c in data])
+
+fig_heat = px.treemap(heatmap_data, path=['Asset'], values='Size',
+                      color='Change', color_continuous_scale='RdYlGn',
+                      range_color=[-10, 10])
+fig_heat.update_layout(margin=dict(t=0, l=0, r=0, b=0), height=150, paper_bgcolor='rgba(0,0,0,0)')
+st.plotly_chart(fig_heat, use_container_width=True)
 
 st.write("---")
 
 left_col, right_col = st.columns([1.5, 1])
 
 with left_col:
-    st.markdown("### 📋 Market Risk Monitor")
+    # Changed "Market Risk Monitor" to Dark Blue
+    st.markdown("<h3 class='dark-blue-title'>📋 Market Risk Monitor</h3>", unsafe_allow_html=True)
     
     table_html = """<table class="crypto-table"><tr><th>Asset</th><th>Price (USD)</th><th>24h Change</th><th>Risk Level</th></tr>"""
-    
     for coin in data:
         change = coin.get('price_change_percentage_24h', 0) or 0
         risk_text, risk_class = get_risk_info(change)
         color = "#06d6a0" if change >= 0 else "#ef476f"
-        
         table_html += f"""
         <tr>
             <td><img src="{coin['image']}" width="20"> {coin['name']}</td>
@@ -105,44 +118,46 @@ with left_col:
     st.markdown(table_html, unsafe_allow_html=True)
 
 with right_col:
-    st.markdown("### 📊 Asset Depth Analysis")
-    selected_coin_name = st.selectbox("Analyze Specific Coin", [c['name'] for c in data])
+    st.markdown("<h3 class='dark-blue-title'>📊 7-Day Asset Trend</h3>", unsafe_allow_html=True)
+    selected_coin_name = st.selectbox("Select Asset", [c['name'] for c in data])
     coin = next(c for c in data if c['name'] == selected_coin_name)
     
-    # GAUGE CHART
-    change_val = abs(coin.get('price_change_percentage_24h', 0) or 0)
-    fig_gauge = go.Figure(go.Indicator(
-        mode = "gauge+number",
-        value = change_val,
-        title = {'text': "Volatility Intensity"},
-        gauge = {
-            'axis': {'range': [0, 10]},
-            'bar': {'color': "#4cc9f0"},
-            'steps': [
-                {'range': [0, 2], 'color': "#06d6a0"},
-                {'range': [2, 5], 'color': "#ffd166"},
-                {'range': [5, 10], 'color': "#ef476f"}
-            ]
-        }
-    ))
-    fig_gauge.update_layout(paper_bgcolor='rgba(0,0,0,0)', font={'color': "white"}, height=250, margin=dict(l=20,r=20,t=40,b=20))
-    st.plotly_chart(fig_gauge, use_container_width=True)
-
-    # FIXED SPARKLINE LOGIC
-    st.markdown(f"**7-Day {selected_coin_name} Price Action**")
-    
-    # Safety Check for 'sparkline_in_7d'
-    if 'sparkline_in_7d' in coin and 'price' in coin['sparkline_in_7d']:
-        spark_data = coin['sparkline_in_7d']['price']
-        fig_spark = px.line(spark_data, color_discrete_sequence=['#4cc9f0'])
-        fig_spark.update_layout(
-            xaxis_visible=False, yaxis_visible=False, 
-            paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-            margin=dict(l=0,r=0,t=0,b=0), height=120
+    # 7-DAY CHART WITH AXES AND VALUES
+    if 'sparkline_in_7d' in coin:
+        spark_prices = coin['sparkline_in_7d']['price']
+        # Creating x-axis labels (hours)
+        hours = list(range(len(spark_prices)))
+        
+        fig_trend = go.Figure()
+        fig_trend.add_trace(go.Scatter(
+            x=hours, y=spark_prices,
+            mode='lines',
+            line=dict(color='#4cc9f0', width=3),
+            fill='tozeroy',
+            fillcolor='rgba(76, 201, 240, 0.1)'
+        ))
+        
+        fig_trend.update_layout(
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(0,0,0,0)',
+            font=dict(color="white"),
+            margin=dict(l=40, r=20, t=20, b=40),
+            height=300,
+            xaxis=dict(
+                title="Hours (Last 7 Days)",
+                showgrid=False,
+                showline=True,
+                linecolor='#415a77'
+            ),
+            yaxis=dict(
+                title="Price (USD)",
+                showgrid=True,
+                gridcolor='#1b263b',
+                showline=True,
+                linecolor='#415a77'
+            )
         )
-        st.plotly_chart(fig_spark, use_container_width=True)
-    else:
-        st.warning("Sparkline data unavailable for this asset.")
+        st.plotly_chart(fig_trend, use_container_width=True)
 
 st.markdown("---")
-st.caption(f"Data via CoinGecko | Sync Time: {datetime.now().strftime('%H:%M:%S')}")
+st.caption(f"Sync: {datetime.now().strftime('%H:%M:%S')} | Concept: Risk Matrix v1.2")
