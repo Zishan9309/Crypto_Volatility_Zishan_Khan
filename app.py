@@ -92,7 +92,7 @@ with head_right:
 st.write("---")
 
 # 2. SCROLLABLE MARKET RISK MONITOR
-st.markdown("<div class='dark-blue-section'>📋 Market Risk Monitor (Scrollable)</div>", unsafe_allow_html=True)
+st.markdown("<div class='cyan-title'>📋 Market Risk Monitor </div>", unsafe_allow_html=True)
 
 table_rows = ""
 for coin in data:
@@ -138,7 +138,7 @@ st.write("---")
 col_a, col_b = st.columns([1.2, 1])
 
 with col_a:
-    st.markdown("<div class='dark-blue-section'>📊 7-Day Asset Trend</div>", unsafe_allow_html=True)
+    st.markdown("<div class='cyan-title'>📊 7-Day Asset Trend</div>", unsafe_allow_html=True)
     selected_coin = st.selectbox("SELECT COIN FOR DEPTH ANALYSIS", [c['name'] for c in data])
     coin_obj = next(c for c in data if c['name'] == selected_coin)
     
