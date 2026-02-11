@@ -17,7 +17,6 @@ st.set_page_config(
 # ---------------- EXACT BODY & UI STYLING ----------------
 st.markdown("""
 <style>
-    /* Exact background color from image */
     .stApp {
         background-color: #0d1b2a !important;
     }
@@ -41,7 +40,6 @@ st.markdown("""
         margin-bottom: 15px;
     }
 
-    /* Standard Card for Plotly Charts */
     .stPlotlyChart {
         background-color: #1b263b;
         border-radius: 12px;
@@ -58,7 +56,7 @@ def fetch_real_data():
     params = {
         "vs_currency": "usd",
         "order": "market_cap_desc",
-        "per_page": 12,
+        "per_page": 25,  # Increased to make scrolling useful
         "page": 1,
         "sparkline": "true",
         "price_change_percentage": "24h"
@@ -93,11 +91,11 @@ with head_right:
 
 st.write("---")
 
-# 2. MAIN TABLE (Market Risk Monitor) - Full Width below heading
-st.markdown("<div class='dark-blue-section'>📋 Market Risk Monitor</div>", unsafe_allow_html=True)
+# 2. SCROLLABLE MARKET RISK MONITOR
+st.markdown("<div class='dark-blue-section'>📋 Market Risk Monitor (Scrollable)</div>", unsafe_allow_html=True)
 
 table_rows = ""
-for coin in data[:10]:
+for coin in data:
     change = coin.get('price_change_percentage_24h', 0) or 0
     risk_text, risk_color = get_risk_info(change)
     change_color = "#06d6a0" if change >= 0 else "#ef476f"
@@ -111,28 +109,32 @@ for coin in data[:10]:
     </tr>
     """
 
+# THE KEY FIX: Added 'max-height' and 'overflow-y: auto' to the wrapper div
 full_table_html = f"""
-<div style="background:#1b263b; padding:15px; border-radius:12px; border:1px solid #415a77; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color:white;">
-    <table style="width:100%; border-collapse:collapse; text-align:left;">
-        <thead>
-            <tr style="border-bottom: 2px solid #415a77; color:#778da9; font-size:11px; letter-spacing:1px;">
-                <th style="padding:12px;">ASSET</th>
-                <th style="padding:12px;">PRICE (USD)</th>
-                <th style="padding:12px;">24H CHANGE</th>
-                <th style="padding:12px;">RISK STATUS</th>
-            </tr>
-        </thead>
-        <tbody>
-            {table_rows}
-        </tbody>
-    </table>
+<div style="background:#1b263b; padding:15px; border-radius:12px; border:1px solid #415a77; font-family:sans-serif; color:white;">
+    <div style="max-height: 400px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #4cc9f0 #1b263b;">
+        <table style="width:100%; border-collapse:collapse; text-align:left;">
+            <thead style="position: sticky; top: 0; background: #1b263b; z-index: 10;">
+                <tr style="border-bottom: 2px solid #415a77; color:#778da9; font-size:11px; letter-spacing:1px;">
+                    <th style="padding:12px;">ASSET</th>
+                    <th style="padding:12px;">PRICE (USD)</th>
+                    <th style="padding:12px;">24H CHANGE</th>
+                    <th style="padding:12px;">RISK STATUS</th>
+                </tr>
+            </thead>
+            <tbody>
+                {table_rows}
+            </tbody>
+        </table>
+    </div>
 </div>
 """
-components.html(full_table_html, height=520)
+# Height here should be slightly larger than the max-height above
+components.html(full_table_html, height=450)
 
 st.write("---")
 
-# 3. CHARTS SECTION (Below Table)
+# 3. CHARTS SECTION
 col_a, col_b = st.columns([1.2, 1])
 
 with col_a:
@@ -144,7 +146,7 @@ with col_a:
         y_data = coin_obj['sparkline_in_7d']['price']
         fig_t = go.Figure()
         fig_t.add_trace(go.Scatter(y=y_data, mode='lines', line=dict(color='#4cc9f0', width=3), fill='tozeroy', fillcolor='rgba(76, 201, 240, 0.1)'))
-        fig_t.update_layout(
+        fig_trend_layout = fig_t.update_layout(
             paper_bgcolor='#1b263b', plot_bgcolor='rgba(0,0,0,0)', font_color="white",
             margin=dict(l=40, r=10, t=10, b=40), height=300,
             xaxis=dict(title="Timeline (Hours)", showgrid=False),
@@ -162,13 +164,5 @@ with col_b:
                    color=list(risk_counts.keys()), color_discrete_map={'LOW':'#06d6a0','MEDIUM':'#ffd166','HIGH':'#ef476f'})
     fig_p.update_layout(paper_bgcolor='rgba(0,0,0,0)', font_color="white", height=300, margin=dict(t=10,b=10))
     st.plotly_chart(fig_p, use_container_width=True)
-
-# 4. BOTTOM HEATMAP
-st.write("---")
-st.markdown("<h3 class='cyan-title' style='font-size:15px;'>🌐 Market Volatility Comparison</h3>", unsafe_allow_html=True)
-h_df = pd.DataFrame([{"Asset": c['symbol'].upper(), "Vol": c['price_change_percentage_24h']} for c in data])
-fig_h = px.bar(h_df, x='Asset', y='Vol', color='Vol', color_continuous_scale='RdYlGn')
-fig_h.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font_color="white", height=200, margin=dict(t=10,b=10))
-st.plotly_chart(fig_h, use_container_width=True)
 
 st.caption(f"SYSTEM LIVE | SYNC: {datetime.now().strftime('%H:%M:%S')} | NAGPUR, MH")
