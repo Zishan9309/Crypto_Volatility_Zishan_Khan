@@ -9,6 +9,7 @@ from datetime import datetime
 st.set_page_config(page_title="Crypto Volatility & Risk Analyzer", layout="wide")
 
 # --- CUSTOM CSS FOR EXACT UI MATCH ---
+# FIXED: Changed unsafe_allow_index to unsafe_allow_html
 st.markdown("""
     <style>
     .stApp {
@@ -68,15 +69,16 @@ st.markdown("""
         color: #0d1b2a;
     }
     </style>
-    """, unsafe_allow_index=True)
+    """, unsafe_allow_html=True)
 
 # --- RISK CALCULATION ENGINE ---
 def calculate_volatility(sparkline_data):
-    # Calculate log returns
+    if not sparkline_data:
+        return 0, "N/A", "risk-low"
+    
     prices = np.array(sparkline_data)
     returns = np.diff(prices) / prices[:-1]
     
-    # Standard Deviation (Volatility)
     volatility = np.std(returns) * 100 
     
     if volatility > 1.5:
@@ -123,20 +125,18 @@ with col_left:
         <p><b>Data Provider:</b> CoinGecko API</p>
         <p><b>Risk Model:</b> 7-Day Variance Analysis</p>
     </div>
-    """, unsafe_allow_index=True)
+    """, unsafe_allow_html=True)
     
-    # 7-Day Trend Section (Moved to side for better flow)
     data = fetch_crypto_data()
     if data:
-        st.markdown('<div class="card">', unsafe_allow_index=True)
+        st.markdown('<div class="card">', unsafe_allow_html=True)
         st.subheader("📈 Trend Visualizer")
         selected_coin_name = st.selectbox("Choose Asset", [c['name'] for c in data])
         coin = next(item for item in data if item["name"] == selected_coin_name)
         
-        # Volatility Calculation
         vol, risk_label, risk_class = calculate_volatility(coin['sparkline_in_7d']['price'])
         
-        st.metric("Volatility Index", f"{vol:.2f}%", help="Standard Deviation of 7d returns")
+        st.metric("Volatility Index", f"{vol:.2f}%")
         
         fig = go.Figure()
         fig.add_trace(go.Scatter(
@@ -152,10 +152,10 @@ with col_left:
             yaxis=dict(showgrid=False, showticklabels=False)
         )
         st.plotly_chart(fig, use_container_width=True)
-        st.markdown('</div>', unsafe_allow_index=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
 with col_right:
-    st.markdown('<div class="card">', unsafe_allow_index=True)
+    st.markdown('<div class="card">', unsafe_allow_html=True)
     header_col1, header_col2 = st.columns([2, 1])
     with header_col1:
         st.subheader("☁️ Live Risk Monitor")
@@ -167,7 +167,6 @@ with col_right:
     if not data:
         st.error("Failed to fetch data. Please wait or check API limit.")
     else:
-        # Custom HTML Table to match image styling
         table_html = """
         <table class="crypto-table">
             <tr>
@@ -193,6 +192,6 @@ with col_right:
             """
         
         table_html += "</table>"
-        st.markdown(table_html, unsafe_allow_index=True)
-        st.caption(f"Last updated: {datetime.now().strftime('%H:%M:%S')} | Logic: Standard Deviation on 168h dataset")
-    st.markdown('</div>', unsafe_allow_index=True)
+        st.markdown(table_html, unsafe_allow_html=True)
+        st.caption(f"Last updated: {datetime.now().strftime('%H:%M:%S')}")
+    st.markdown('</div>', unsafe_allow_html=True)
