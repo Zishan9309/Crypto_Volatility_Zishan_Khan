@@ -117,7 +117,7 @@ with col_b:
 left_col, right_col = st.columns([1.6, 1])
 
 with left_col:
-    st.markdown("<div class='dark-blue-section'>📋 Market Risk Monitor</div>", unsafe_allow_html=True)
+    st.markdown("<div class='cyan-title'>📋 Market Risk Monitor</div>", unsafe_allow_html=True)
     
     # Table HTML Construction
     table_rows = ""
@@ -155,7 +155,7 @@ with left_col:
     components.html(full_table_html, height=550)
 
 with right_col:
-    st.markdown("<div class='dark-blue-section'>📊 7-Day Asset Trend</div>", unsafe_allow_html=True)
+    st.markdown("<div class='cyan-title'>📊 7-Day Asset Trend</div>", unsafe_allow_html=True)
     
     selected_coin = st.selectbox("ANALYZE DEPTH", [c['name'] for c in data])
     coin_obj = next(c for c in data if c['name'] == selected_coin)
