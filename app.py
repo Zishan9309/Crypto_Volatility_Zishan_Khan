@@ -12,15 +12,15 @@ if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
 
 
-# ---------------- CSS: AESTHETIC OVERHAUL ----------------
+# ---------------- THE "THIN CARD" CSS ----------------
 st.markdown("""
 <style>
-/* 1. Remove Streamlit Header and Blank Space */
+/* 1. Remove Streamlit Header & Blank Space */
 header, [data-testid="stHeader"], [data-testid="stToolbar"] {
     display: none !important;
 }
 
-/* Hard reset for top padding */
+/* Remove default top padding to shift content up */
 .block-container {
     padding-top: 0rem !important;
     padding-bottom: 0rem !important;
@@ -28,126 +28,108 @@ header, [data-testid="stHeader"], [data-testid="stToolbar"] {
 
 /* 2. Global Background (Deep Navy) */
 .stApp {
-    background: radial-gradient(circle, #1b4965 0%, #0d1b2a 100%) !important;
+    background-color: #0d1b2a !important;
 }
 
-/* 3. Centered Flex Wrapper */
-.main-wrapper {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-}
-
-/* 4. The Login Card (Clean White Aesthetic) */
+/* 3. Centered Thin Card Aesthetic */
 .login-card {
     background: #ffffff;
-    padding: 50px 45px;
-    border-radius: 12px;
+    padding: 40px 30px;
+    border-radius: 8px;
     width: 100%;
-    max-width: 400px;
-    box-shadow: 0px 15px 35px rgba(0, 0, 0, 0.4);
+    max-width: 320px; /* Made the box very thin as requested */
+    margin: 80px auto; 
+    box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.5);
     text-align: center;
-    margin: 40px auto;
 }
 
-/* 5. Typography */
+/* 4. Cyan Heading */
 .login-title {
-    color: #1b4965;
+    color: #4cc9f0; /* Specific Cyan color */
     font-family: 'Inter', sans-serif;
-    font-size: 32px;
+    font-size: 28px;
     font-weight: 700;
     margin-bottom: 30px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
+/* 5. Labels & Inputs */
 .field-label {
     color: #333333;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
     text-align: left;
     display: block;
-    margin-bottom: 8px;
-    letter-spacing: 0.5px;
+    margin-bottom: 6px;
 }
 
-/* 6. Inputs Styling */
 div[data-testid="stForm"] { border: none !important; padding: 0 !important; }
 
 input {
     background-color: #f8f9fa !important;
     color: #0d1b2a !important;
     border: 1px solid #dee2e6 !important;
-    height: 45px !important;
-    border-radius: 6px !important;
+    height: 40px !important;
+    border-radius: 4px !important;
+    margin-bottom: 10px;
 }
 
-input:focus {
-    border-color: #4cc9f0 !important;
-    box-shadow: 0 0 10px rgba(76, 201, 240, 0.3) !important;
-}
-
-/* 7. Button (Cyan Gradient) */
+/* 6. Action Button */
 div.stButton > button {
-    background: linear-gradient(135deg, #1b4965 0%, #4cc9f0 100%) !important;
+    background-color: #1b4965 !important;
     color: white !important;
     font-weight: 700 !important;
     width: 100%;
-    border-radius: 6px !important;
-    padding: 12px !important;
-    margin-top: 20px;
+    border-radius: 4px !important;
+    padding: 10px !important;
+    margin-top: 10px;
     border: none !important;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    transition: 0.3s ease;
+    transition: 0.3s;
 }
 
 div.stButton > button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0px 8px 20px rgba(76, 201, 240, 0.4);
-    filter: brightness(1.1);
+    background-color: #4cc9f0 !important; /* Glow Cyan on hover */
+    color: #0d1b2a !important;
+    box-shadow: 0px 0px 15px rgba(76, 201, 240, 0.4);
 }
 
-/* 8. Footer Links */
 .footer-links {
-    margin-top: 25px;
-    font-size: 13px;
-    color: #6c757d;
+    margin-top: 20px;
+    font-size: 11px;
+    color: #778da9;
 }
-.footer-links a {
-    color: #1b4965;
-    text-decoration: none;
-    font-weight: 600;
-}
+.footer-links a { color: #1b4965; text-decoration: none; font-weight: bold;}
 
 </style>
 """, unsafe_allow_html=True)
 
 
-# ---------------- LOGIN FUNCTION ----------------
+# ---------------- LOGIN LOGIC ----------------
 def show_login():
-    # Vertical spacer removed, handled by margin in CSS
-    _, col_mid, _ = st.columns([1, 1.2, 1])
+    # Use center column for horizontal alignment
+    _, col_mid, _ = st.columns([1, 0.8, 1])
 
     with col_mid:
         st.markdown('<div class="login-card">', unsafe_allow_html=True)
         st.markdown('<div class="login-title">Login</div>', unsafe_allow_html=True)
 
-        # Using custom labels for better control
-        st.markdown('<span class="field-label">Username:</span>', unsafe_allow_html=True)
-        username = st.text_input("User", label_visibility="collapsed", placeholder="Enter username")
+        with st.form("auth_form", clear_on_submit=False):
+            st.markdown('<span class="field-label">Username:</span>', unsafe_allow_html=True)
+            username = st.text_input("User", label_visibility="collapsed", placeholder="Enter username")
 
-        st.markdown('<br><span class="field-label">Password:</span>', unsafe_allow_html=True)
-        password = st.text_input("Pass", type="password", label_visibility="collapsed", placeholder="Enter password")
+            st.markdown('<span class="field-label">Password:</span>', unsafe_allow_html=True)
+            password = st.text_input("Pass", type="password", label_visibility="collapsed", placeholder="Enter password")
 
-        st.checkbox("Show Password", key="show_pwd")
+            # Standard checkbox
+            st.checkbox("Show Password", key="show_pwd")
 
-        if st.button("SIGN IN"):
-            # Credentials support derived from development interests
-            if username == "admin" and password == "crypto123":
-                st.session_state.authenticated = True
-                st.rerun()
-            else:
-                st.error("Invalid Username or Password")
+            if st.form_submit_button("SIGN IN"):
+                if username == "admin" and password == "crypto123":
+                    st.session_state.authenticated = True
+                    st.rerun()
+                else:
+                    st.error("Access Denied")
 
         st.markdown("""
         <div class="footer-links">
@@ -158,10 +140,10 @@ def show_login():
         st.markdown('</div>', unsafe_allow_html=True)
 
 
-# ---------------- APP FLOW ----------------
+# ---------------- NAVIGATION ----------------
 if not st.session_state.authenticated:
     show_login()
 else:
-    # This leads to the Cryptocurrency Dashboard
+    # Ensure dashboard.py exists in the same folder
     import dashboard
     dashboard.main()
