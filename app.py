@@ -11,9 +11,10 @@ st.set_page_config(
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
 
-# ---------------- CSS: RESET & LOGIN STYLING ----------------
+# ---------------- AESTHETIC CSS ----------------
 st.markdown("""
 <style>
+/* 1. TOP NAVBAR FIX */
 [data-testid="stHeader"] {
     background-color: #0d1b2a !important;
     height: 60px !important;
@@ -36,9 +37,8 @@ header, [data-testid="stHeader"], .st-emotion-cache-18ni7ve {
     margin-top: -20px !important;
 }
 
-.stApp {
-    background-color: #0d1b2a !important;
-}
+/* 2. BACKGROUND & CARD */
+.stApp { background-color: #0d1b2a !important; }
 
 .login-card {
     background: transparent;
@@ -66,6 +66,7 @@ header, [data-testid="stHeader"], .st-emotion-cache-18ni7ve {
     margin-bottom: 5px;
 }
 
+/* 3. INPUTS & ICONS */
 div[data-testid="stForm"] { border: none !important; padding: 0 !important; }
 
 input {
@@ -89,6 +90,7 @@ input {
     background-position: 12px center;
 }
 
+/* 4. CENTERED CYAN BUTTON */
 div.stFormSubmitButton {
     display: flex !important;
     justify-content: center !important;
@@ -115,9 +117,10 @@ div.stFormSubmitButton > button:hover {
 </style>
 """, unsafe_allow_html=True)
 
+# ---------------- NAVBAR CONTENT ----------------
 st.markdown("""
     <div style="position: fixed; top: 18px; left: 20px; z-index: 10000; color: white; font-weight: 800; font-family: sans-serif; font-size: 20px; letter-spacing: 1px;">
-        
+        CRYPTO RISK ANALYZER
     </div>
 """, unsafe_allow_html=True)
 
