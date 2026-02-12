@@ -2,60 +2,54 @@ import streamlit as st
 
 # --- PAGE CONFIG ---
 st.set_page_config(
-    page_title="Crypto Risk Analyzer - Secure Login", 
+    page_title="Secure Access | Crypto Analyzer",
+    page_icon="🔒",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
-# --- INITIALIZE SESSION STATE ---
-if 'authenticated' not in st.session_state:
-    st.session_state['authenticated'] = False
-
-# --- THE HARD-RESET CSS ---
-# This targets the specific Streamlit containers that create the "blank box" space.
+# --- CSS: THE MODERN AESTHETIC ---
 st.markdown("""
 <style>
-    /* 1. Global Background (Matches Dashboard Navy) */
+    /* 1. Global Background - Deep Navy */
     .stApp {
         background-color: #0d1b2a !important;
     }
 
-    /* 2. REMOVE TOP BLANK SPACE COMPLETELY */
-    /* Target the header bar and collapse it */
+    /* 2. REMOVE BLANK HEADER BOX */
     header, [data-testid="stHeader"] { 
         display: none !important;
         height: 0 !important;
     }
     
-    /* Force the main container to start at pixel 0 */
     .block-container {
-        padding-top: 0rem !important;
+        padding-top: 2rem !important;
         padding-bottom: 0rem !important;
-        margin-top: 0rem !important;
     }
 
-    /* 3. THE CENTERED LOGIN CARD */
+    /* 3. CENTERED AESTHETIC CARD */
     .login-card {
-        background-color: #ffffff; 
-        padding: 40px 50px;
-        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.95); /* High-contrast white card */
+        padding: 50px 45px;
+        border-radius: 12px;
         width: 100%;
-        max-width: 420px;
-        margin: 60px auto; /* Controls distance from the absolute top */
-        box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.5);
+        max-width: 400px; /* Minimized modern width */
+        margin: 60px auto; 
+        box-shadow: 0px 15px 35px rgba(0, 0, 0, 0.4);
         text-align: center;
     }
 
+    /* 4. MODERN TYPOGRAPHY */
     .login-heading {
-        color: #555555;
+        color: #1b4965;
         font-family: 'Inter', sans-serif;
-        font-size: 30px;
-        font-weight: 500;
+        font-size: 32px;
+        font-weight: 700;
         margin-bottom: 30px;
         display: block;
+        text-align: center;
     }
 
-    /* 4. ALIGNED LABELS & INPUTS */
     .field-label {
         color: #333333;
         font-size: 14px;
@@ -63,93 +57,100 @@ st.markdown("""
         text-align: left;
         display: block;
         margin-bottom: 8px;
+        letter-spacing: 0.5px;
     }
 
-    /* Remove Streamlit default widget borders inside the card */
-    div[data-testid="stForm"] { 
-        border: none !important; 
-        padding: 0 !important; 
-    }
+    /* 5. INPUT FIELD STYLING */
+    div[data-testid="stForm"] { border: none !important; padding: 0 !important; }
     
     input {
-        background-color: #ffffff !important;
-        color: #333333 !important;
-        border: 1px solid #dddddd !important;
+        background-color: #f8f9fa !important;
+        color: #0d1b2a !important;
+        border: 1px solid #dee2e6 !important;
         height: 45px !important;
-        border-radius: 5px !important;
+        border-radius: 6px !important;
+        padding-left: 10px !important;
+    }
+    
+    input:focus {
+        border-color: #4cc9f0 !important;
+        box-shadow: 0 0 10px rgba(76, 201, 240, 0.3) !important;
     }
 
-    /* 5. AESTHETIC SIGN IN BUTTON */
+    /* 6. INTERACTIVE SIGN IN BUTTON */
     div.stButton > button {
-        background-color: #1b4965 !important; 
+        background: linear-gradient(135deg, #1b4965 0%, #4cc9f0 100%) !important;
         color: #ffffff !important;
         font-weight: 700 !important;
         width: 100%;
-        border-radius: 5px !important;
+        border-radius: 6px !important;
         padding: 12px !important;
         margin-top: 20px;
         text-transform: uppercase;
         border: none !important;
-        transition: 0.3s;
         letter-spacing: 1px;
+        transition: all 0.3s ease;
     }
     
     div.stButton > button:hover {
-        background-color: #4cc9f0 !important; 
-        color: #0d1b2a !important;
-        box-shadow: 0px 0px 15px rgba(76, 201, 240, 0.4);
+        transform: translateY(-2px);
+        box-shadow: 0px 8px 20px rgba(76, 201, 240, 0.4);
+        filter: brightness(1.1);
     }
 
-    /* 6. FOOTER LINKS */
+    /* 7. FOOTER LINKS */
     .footer-links {
         margin-top: 25px;
         font-size: 13px;
-        color: #666666;
+        color: #6c757d;
+        text-align: center;
     }
-    .footer-links a { 
-        color: #1b4965; 
-        text-decoration: none; 
-        font-weight: bold;
+    .footer-links a {
+        color: #1b4965;
+        text-decoration: none;
+        font-weight: 600;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# --- LOGIN UI LOGIC ---
+# --- LOGIN LOGIC ---
+if 'authenticated' not in st.session_state:
+    st.session_state['authenticated'] = False
+
 def show_login():
-    # Columns create the horizontal centering
+    # Centering columns
     _, col_mid, _ = st.columns([1, 1.2, 1])
     
     with col_mid:
-        # The main card container
         st.markdown('<div class="login-card">', unsafe_allow_html=True)
         st.markdown('<span class="login-heading">Login</span>', unsafe_allow_html=True)
         
         with st.form("auth_form", clear_on_submit=False):
             # Username Field
             st.markdown('<span class="field-label">Username:</span>', unsafe_allow_html=True)
-            username = st.text_input("Username", label_visibility="collapsed", placeholder="Enter username")
+            username = st.text_input("Username", label_visibility="collapsed", placeholder="Enter your username")
             
-            st.write("") # Small gap
+            st.write("") # Aesthetic spacing
             
             # Password Field
             st.markdown('<span class="field-label">Password:</span>', unsafe_allow_html=True)
-            password = st.text_input("Password", type="password", label_visibility="collapsed", placeholder="Enter password")
+            password = st.text_input("Password", type="password", label_visibility="collapsed", placeholder="Enter your password")
             
-            # Show Password Checkbox (Standard UI)
-            st.checkbox("Show Password")
+            # Interactive Checkbox
+            st.checkbox("Show Password", key="show_pwd")
             
-            # Submit Action
+            # Gradient Button
             submit = st.form_submit_button("SIGN IN")
             
             if submit:
-                # Based on your previous setup (admin/crypto123)
+                # Using standard credentials from previous versions
                 if username == "admin" and password == "crypto123":
                     st.session_state['authenticated'] = True
                     st.rerun()
                 else:
                     st.error("Invalid Username or Password")
         
-        # Footer Links matching your reference image
+        # Bottom Navigation Links
         st.markdown("""
         <div class="footer-links">
             Forgot <a href="#">Username / Password</a>?<br>
@@ -159,10 +160,12 @@ def show_login():
                     
         st.markdown('</div>', unsafe_allow_html=True)
 
-# --- APP NAVIGATION ---
+# --- APP FLOW ---
 if not st.session_state['authenticated']:
     show_login()
 else:
-    # This calls your dashboard script
-    import dashboard
-    dashboard.main()
+    # This leads to your Milestone 1 Dashboard
+    st.success("Successfully Authenticated!")
+    if st.button("Enter Dashboard"):
+        import dashboard
+        dashboard.main()
