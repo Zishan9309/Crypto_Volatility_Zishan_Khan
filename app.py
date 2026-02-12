@@ -120,7 +120,7 @@ div.stFormSubmitButton > button:hover {
 # ---------------- NAVBAR CONTENT ----------------
 st.markdown("""
     <div style="position: fixed; top: 18px; left: 20px; z-index: 10000; color: white; font-weight: 800; font-family: sans-serif; font-size: 20px; letter-spacing: 1px;">
-        CRYPTO RISK ANALYZER
+        
     </div>
 """, unsafe_allow_html=True)
 
