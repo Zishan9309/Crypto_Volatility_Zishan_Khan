@@ -23,19 +23,29 @@ def main():
             margin-bottom: 20px;
         }
 
+        /* KPI Card Styling */
+        .kpi-card {
+            background-color: #1b263b;
+            border: 1px solid #415a77;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0px 4px 10px rgba(0,0,0,0.3);
+        }
+        .kpi-label { color: #778da9; font-size: 12px; font-weight: 600; text-transform: uppercase; }
+        .kpi-value { color: white; font-size: 24px; font-weight: 800; margin-top: 5px; }
+
         div[data-testid="stSelectbox"] label p {
             color: white !important;
             font-weight: 600 !important;
         }
         
-        /* Logout Button Style */
         div.stButton > button:has(div:contains("LOGOUT")) {
             background-color: transparent !important;
-            color: #ef476f !important; /* Redish color for logout */
+            color: #ef476f !important;
             border: 1px solid #ef476f !important;
             font-weight: 700 !important;
             border-radius: 4px !important;
-            transition: 0.3s;
         }
         
         div.stButton > button:has(div:contains("LOGOUT")):hover {
@@ -77,10 +87,10 @@ def main():
         if abs_change > 2: return "MEDIUM", "#ffd166"
         return "LOW", "#06d6a0"
 
-    # ---------------- MAIN APP LOGIC ----------------
+    # ---------------- DATA PROCESSING ----------------
     data = fetch_real_data()
 
-    # Updated Heading with Logout Button
+    # Heading & Logout
     head_left, head_mid, head_right = st.columns([3, 1, 1])
     with head_left:
         st.markdown("<h1 class='cyan-title'>☁️ Crypto Volatility & Risk Analyzer</h1>", unsafe_allow_html=True)
@@ -99,6 +109,31 @@ def main():
         st.warning("⚠️ API connection busy. Please wait a moment and click Refresh.")
         st.stop()
 
+    # Calculate Summary Stats
+    total_coins = len(data)
+    high_risk_count = 0
+    low_risk_count = 0
+    for coin in data:
+        r_txt, _ = get_risk_info(coin.get('price_change_percentage_24h', 0))
+        if r_txt == "HIGH": high_risk_count += 1
+        elif r_txt == "LOW": low_risk_count += 1
+    
+    risk_percent = (high_risk_count / total_coins) * 100 if total_coins > 0 else 0
+
+    # 1.5 MARKET OVERVIEW SUMMARY BOXES
+    sum_col1, sum_col2, sum_col3, sum_col4 = st.columns(4)
+    with sum_col1:
+        st.markdown(f"<div class='kpi-card'><div class='kpi-label'>Total Coins</div><div class='kpi-value'>{total_coins}</div></div>", unsafe_allow_html=True)
+    with sum_col2:
+        st.markdown(f"<div class='kpi-card'><div class='kpi-label'>High Risk Assets</div><div class='kpi-value' style='color:#ef476f;'>{high_risk_count}</div></div>", unsafe_allow_html=True)
+    with sum_col3:
+        st.markdown(f"<div class='kpi-card'><div class='kpi-label'>Low Risk Assets</div><div class='kpi-value' style='color:#06d6a0;'>{low_risk_count}</div></div>", unsafe_allow_html=True)
+    with sum_col4:
+        st.markdown(f"<div class='kpi-card'><div class='kpi-label'>Risk Exposure</div><div class='kpi-value' style='color:#4cc9f0;'>{risk_percent:.1f}%</div></div>", unsafe_allow_html=True)
+
+    st.write("") # Spacer
+
+    # 2. MARKET RISK MONITOR
     st.markdown("<div class='cyan-title'>📋 Market Risk Monitor </div>", unsafe_allow_html=True)
     table_rows = ""
     for coin in data:
@@ -135,6 +170,7 @@ def main():
     components.html(full_table_html, height=450)
     st.write("---")
 
+    # 3. CHARTS
     col_a, col_b = st.columns([1.2, 1])
     with col_a:
         st.markdown("<div class='cyan-title'>📊 7-Day Asset Trend</div>", unsafe_allow_html=True)
