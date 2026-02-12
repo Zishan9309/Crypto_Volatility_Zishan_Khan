@@ -11,7 +11,7 @@ st.set_page_config(
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
 
-# ---------------- THE ULTIMATE CLEANUP & MODERN CSS ----------------
+# ---------------- THE FULL-SYNC CSS ----------------
 st.markdown("""
 <style>
 /* 1. TOP NAVBAR FIX */
@@ -28,12 +28,11 @@ st.markdown("""
     z-index: 9999 !important;
 }
 
-/* 2. DELETE THE WHITE RECTANGLE & GHOST BOXES */
-header, [data-testid="stHeader"], .st-emotion-cache-18ni7ve, .st-emotion-cache-1kyx60p {
+/* 2. REMOVE TOP BLANK BOXES */
+header, [data-testid="stHeader"], .st-emotion-cache-18ni7ve {
     display: none !important;
 }
 
-/* Remove default padding to shift everything UP */
 .block-container {
     padding-top: 0rem !important;
     margin-top: -20px !important;
@@ -49,13 +48,13 @@ header, [data-testid="stHeader"], .st-emotion-cache-18ni7ve, .st-emotion-cache-1
     background: transparent;
     width: 100%;
     max-width: 400px; 
-    margin: 60px auto; /* Centered horizontally, shifted UP slightly */
-    text-align: center; /* Centers the LOGIN title and the BUTTON */
+    margin: 60px auto; 
+    text-align: center; 
 }
 
-/* 5. Centered Cyan LOGIN Text */
+/* 5. CENTERED CYAN LOGIN HEADING */
 .login-title {
-    color: #4cc9f0; 
+    color: #4cc9f0 !important; /* Cyan Sync */
     font-family: 'Inter', sans-serif;
     font-size: 34px;
     font-weight: 700;
@@ -74,7 +73,6 @@ header, [data-testid="stHeader"], .st-emotion-cache-18ni7ve, .st-emotion-cache-1
     margin-bottom: 5px;
 }
 
-/* Styling the Streamlit Inputs to look modern */
 div[data-testid="stForm"] { border: none !important; padding: 0 !important; }
 
 input {
@@ -82,11 +80,11 @@ input {
     color: #0d1b2a !important;
     border-radius: 8px !important;
     height: 48px !important;
-    padding-left: 45px !important; /* Space for the icon */
+    padding-left: 45px !important;
     border: 1px solid #ced4da !important;
 }
 
-/* Injecting Icons via CSS Background */
+/* Icon Injections */
 [data-testid="stTextInput"]:has(input[placeholder*="username"]) input {
     background-image: url('https://img.icons8.com/material-rounded/24/0d1b2a/user.png');
     background-repeat: no-repeat;
@@ -99,28 +97,30 @@ input {
     background-position: 12px center;
 }
 
-/* 7. CENTERED LOGIN BUTTON */
-.button-container {
+/* 7. CENTERED CYAN LOGIN BUTTON */
+div.stButton {
     display: flex;
     justify-content: center;
     width: 100%;
 }
 
 div.stButton > button {
-    background-color: #ffffff !important;
-    color: #0d1b2a !important;
+    background-color: #4cc9f0 !important; /* Cyan Sync */
+    color: #0d1b2a !important; /* Dark text for contrast */
     font-weight: 800 !important;
-    width: 120px !important; /* Compact button */
+    width: 140px !important; 
     border-radius: 6px !important;
-    border: 1px solid #ced4da !important;
+    border: none !important;
     text-transform: uppercase;
-    margin: 20px auto !important;
-    display: block !important;
+    margin-top: 40px !important; /* Shifted slightly down */
+    padding: 10px !important;
+    transition: 0.3s;
 }
 
 div.stButton > button:hover {
-    border-color: #4cc9f0 !important;
-    box-shadow: 0px 0px 10px rgba(76, 201, 240, 0.3);
+    background-color: #ffffff !important; /* White glow on hover */
+    box-shadow: 0px 0px 15px rgba(76, 201, 240, 0.5);
+    transform: scale(1.05);
 }
 </style>
 """, unsafe_allow_html=True)
@@ -134,7 +134,6 @@ st.markdown("""
 
 # ---------------- LOGIN LOGIC ----------------
 def show_login():
-    # Columns for horizontal centering
     _, col_mid, _ = st.columns([1, 1.5, 1])
 
     with col_mid:
@@ -142,19 +141,17 @@ def show_login():
         st.markdown('<div class="login-title">LOGIN</div>', unsafe_allow_html=True)
 
         with st.form("auth_form"):
-            # Username with icon placeholder
             st.markdown('<span class="field-label">USERNAME</span>', unsafe_allow_html=True)
             username = st.text_input("user", label_visibility="collapsed", placeholder="Enter username")
 
-            # Password with icon placeholder
             st.markdown('<span class="field-label">PASSWORD</span>', unsafe_allow_html=True)
             password = st.text_input("pass", type="password", label_visibility="collapsed", placeholder="••••••••")
 
-            # Sign In Button in the middle
+            # Sign In Button 
             submit = st.form_submit_button("LOGIN")
             
             if submit:
-                # Authentic Peer: I've kept your standard credentials for ease of testing
+                # Testing with admin/crypto123
                 if username == "admin" and password == "crypto123":
                     st.session_state.authenticated = True
                     st.rerun()
@@ -167,6 +164,5 @@ def show_login():
 if not st.session_state.authenticated:
     show_login()
 else:
-    # Ensure dashboard.py exists in the same folder with a main() function
     import dashboard
     dashboard.main()
