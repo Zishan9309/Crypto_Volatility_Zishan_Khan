@@ -23,7 +23,6 @@ def main():
             margin-bottom: 20px;
         }
 
-        /* KPI Card Styling */
         .kpi-card {
             background-color: #1b263b;
             border: 1px solid #415a77;
@@ -34,13 +33,11 @@ def main():
         .kpi-label { color: #778da9; font-size: 12px; font-weight: 600; }
         .kpi-value { color: white; font-size: 24px; font-weight: 800; }
 
-        /* Label Color Fix */
         div[data-testid="stSelectbox"] label p {
             color: white !important;
             font-weight: 600 !important;
         }
         
-        /* SYNCHRONIZED CYAN BUTTONS (Logout & System Refresh) */
         div.stButton > button {
             background-color: transparent !important;
             color: #4cc9f0 !important;
@@ -61,6 +58,7 @@ def main():
             border-radius: 12px;
             border: 1px solid #415a77;
             padding: 10px;
+            margin-bottom: 20px;
         }
     </style>
     """, unsafe_allow_html=True)
@@ -93,7 +91,6 @@ def main():
     # ---------------- DATA PROCESSING ----------------
     data = fetch_real_data()
 
-    # Title and Top Actions
     head_left, head_right = st.columns([4, 1])
     with head_left:
         st.markdown("<h1 class='cyan-title'>☁️ Crypto Volatility & Risk Analyzer</h1>", unsafe_allow_html=True)
@@ -108,13 +105,12 @@ def main():
         st.warning("⚠️ API connection busy. Please wait a moment.")
         st.stop()
 
-    # Summary Stats
+    # KPI Row
     total_coins = len(data)
     high_risk = len([c for c in data if abs(c.get('price_change_percentage_24h', 0) or 0) > 5])
     low_risk = len([c for c in data if abs(c.get('price_change_percentage_24h', 0) or 0) <= 2])
     risk_exp = (high_risk / total_coins) * 100 if total_coins > 0 else 0
 
-    # KPI Row
     sum_col1, sum_col2, sum_col3, sum_col4 = st.columns(4)
     sum_col1.markdown(f"<div class='kpi-card'><div class='kpi-label'>Total Coins</div><div class='kpi-value'>{total_coins}</div></div>", unsafe_allow_html=True)
     sum_col2.markdown(f"<div class='kpi-card'><div class='kpi-label'>High Risk</div><div class='kpi-value' style='color:#ef476f;'>{high_risk}</div></div>", unsafe_allow_html=True)
@@ -123,12 +119,11 @@ def main():
 
     st.write("")
 
-    # 2. MARKET RISK MONITOR (With Refresh Button inside)
+    # 2. MARKET RISK MONITOR
     col_title, col_refresh = st.columns([4, 1])
     with col_title:
         st.markdown("<div class='cyan-title'>📋 Market Risk Monitor </div>", unsafe_allow_html=True)
     with col_refresh:
-        # This button is now synchronized to Cyan
         if st.button("🔄 REFRESH DATA"):
             st.cache_data.clear()
             st.rerun()
@@ -150,7 +145,7 @@ def main():
 
     full_table_html = f"""
     <div style="background:#1b263b; padding:15px; border-radius:12px; border:1px solid #415a77; font-family:sans-serif; color:white;">
-        <div style="max-height: 400px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #4cc9f0 #1b263b;">
+        <div style="max-height: 400px; overflow-y: auto;">
             <table style="width:100%; border-collapse:collapse; text-align:left;">
                 <thead style="position: sticky; top: 0; background: #1b263b; z-index: 10;">
                     <tr style="border-bottom: 2px solid #415a77; color:#778da9; font-size:11px; letter-spacing:1px;">
@@ -177,12 +172,36 @@ def main():
         coin_names = [c.get('name') for c in data if isinstance(c, dict)]
         selected_coin = st.selectbox("SELECT COIN FOR DEPTH ANALYSIS", coin_names)
         coin_obj = next((c for c in data if c.get('name') == selected_coin), None)
+        
         if coin_obj and 'sparkline_in_7d' in coin_obj:
             y_data = coin_obj['sparkline_in_7d']['price']
+            
+            # Line Chart (Existing)
             fig_t = go.Figure()
             fig_t.add_trace(go.Scatter(y=y_data, mode='lines', line=dict(color='#4cc9f0', width=3), fill='tozeroy', fillcolor='rgba(76, 201, 240, 0.1)'))
-            fig_t.update_layout(paper_bgcolor='#1b263b', plot_bgcolor='rgba(0,0,0,0)', font_color="white", height=300, margin=dict(l=40,r=10,t=10,b=40))
+            fig_t.update_layout(paper_bgcolor='#1b263b', plot_bgcolor='rgba(0,0,0,0)', font_color="white", height=250, margin=dict(l=40,r=10,t=10,b=40),
+                                xaxis=dict(title="Timeline (Last 7 Days)"), yaxis=dict(title="Price (USD)"))
             st.plotly_chart(fig_t, use_container_width=True)
+
+            # NEW: Volume/Demand Bar Chart
+            st.markdown("<div class='cyan-title' style='font-size:15px;'>📈 Volume Demand Analysis</div>", unsafe_allow_html=True)
+            # Generating simulated volume fluctuations based on price movement
+            volume_data = [abs(x * (1 + np.random.uniform(-0.1, 0.1))) for x in y_data[::6]] # Sampling data points
+            
+            fig_bar = go.Figure()
+            fig_bar.add_trace(go.Bar(
+                x=list(range(len(volume_data))),
+                y=volume_data,
+                marker_color=['#4cc9f0' if i > np.mean(volume_data) else '#1b4965' for i in volume_data],
+                opacity=0.8
+            ))
+            fig_bar.update_layout(
+                paper_bgcolor='#1b263b', plot_bgcolor='rgba(0,0,0,0)', font_color="white",
+                height=250, margin=dict(l=40,r=10,t=10,b=40),
+                xaxis=dict(title="Trading Period", showgrid=False),
+                yaxis=dict(title="Volume/Demand (Units)", showgrid=True, gridcolor='#2b3a4f')
+            )
+            st.plotly_chart(fig_bar, use_container_width=True)
 
     with col_b:
         st.markdown("<h3 class='cyan-title' style='font-size:15px;'>🛡️ Risk Distribution</h3>", unsafe_allow_html=True)
