@@ -8,111 +8,131 @@ st.set_page_config(page_title="Crypto Risk Analyzer - Secure Login", layout="wid
 if 'authenticated' not in st.session_state:
     st.session_state['authenticated'] = False
 
-# --- CSS: THE "ONE BOX" SOLUTION ---
+# --- CSS: THE EXACT STRUCTURED LOGIN FORM ---
 st.markdown("""
 <style>
-    /* 1. Global Background */
+    /* 1. Global Deep Navy Background */
     .stApp {
         background-color: #0d1b2a !important;
     }
 
-    /* 2. Hide extra Streamlit elements that create empty space */
+    /* 2. Hide Streamlit Header */
     header, [data-testid="stHeader"] { visibility: hidden; height: 0; }
     
-    /* 3. The Main Login Div */
+    /* 3. The Main Login Card (Centered) */
     .login-card {
-        background-color: #1b263b;
-        padding: 50px 40px;
-        border-radius: 15px;
-        border: 2px solid #4cc9f0; /* Aesthetic Cyan Border */
+        background-color: #ffffff; /* White card as per screenshot */
+        padding: 50px 60px;
+        border-radius: 8px;
         width: 100%;
-        max-width: 380px; 
-        margin: 100px auto; /* Centering horizontally and pushing from top */
-        box-shadow: 0px 0px 30px rgba(76, 201, 240, 0.2);
+        max-width: 500px; 
+        margin: 80px auto; 
+        box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.5);
         text-align: center;
     }
 
-    /* 4. Heading inside the box */
+    /* 4. Heading (Dark Gray for standard look) */
     .login-heading {
-        color: #4cc9f0;
+        color: #555555;
         font-family: 'Inter', sans-serif;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: 2px;
-        margin-bottom: 35px;
+        font-size: 32px;
+        font-weight: 500;
+        margin-bottom: 30px;
         display: block;
     }
 
-    /* 5. Left-Aligned Labels */
+    /* 5. Left-Aligned Labels (Dark Blue/Gray) */
     .field-label {
-        color: #778da9;
-        font-size: 11px;
+        color: #333333;
+        font-size: 14px;
         font-weight: 600;
         text-align: left;
         display: block;
         margin-bottom: 8px;
-        letter-spacing: 1px;
     }
 
-    /* 6. Input Style Overrides */
+    /* 6. Input Overrides (White background, light borders) */
     div[data-testid="stForm"] { border: none !important; padding: 0 !important; }
     
     input {
-        background-color: #0d1b2a !important;
-        color: white !important;
-        border: 1px solid #415a77 !important;
+        background-color: #ffffff !important;
+        color: #333333 !important;
+        border: 1px solid #dddddd !important;
+        height: 45px !important;
     }
 
-    /* 7. Centered Button inside the box */
+    /* 7. The SIGN IN Button (Matching Dashboard Cyan) */
     div.stButton > button {
-        background: linear-gradient(90deg, #4cc9f0, #4895ef) !important;
-        color: #0d1b2a !important;
-        font-weight: 900 !important;
+        background-color: #1b4965 !important; /* Your specific Dark Blue */
+        color: #ffffff !important;
+        font-weight: 600 !important;
         width: 100%;
-        border-radius: 8px !important;
+        border-radius: 4px !important;
         padding: 12px !important;
         margin-top: 20px;
         text-transform: uppercase;
         border: none !important;
+        letter-spacing: 1px;
     }
     
     div.stButton > button:hover {
-        box-shadow: 0px 0px 20px #4cc9f0;
-        transform: scale(1.02);
+        background-color: #4cc9f0 !important; /* Hover glows Cyan */
+        color: #0d1b2a !important;
+    }
+
+    /* 8. Footer links */
+    .footer-links {
+        margin-top: 20px;
+        font-size: 13px;
+        color: #666666;
+    }
+    .footer-links a {
+        color: #1b4965;
+        text-decoration: none;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# --- LOGIN FORM CONTENT ---
+# --- LOGIN UI FUNCTION ---
 def show_login():
-    # Use columns strictly to center the div on the page
-    _, col_mid, _ = st.columns([1, 1.5, 1])
+    _, col_mid, _ = st.columns([1, 1.8, 1])
     
     with col_mid:
-        # ALL contents are wrapped in this DIV
+        # Card Wrapper
         st.markdown('<div class="login-card">', unsafe_allow_html=True)
+        st.markdown('<span class="login-heading">Login</span>', unsafe_allow_html=True)
         
-        st.markdown('<span class="login-heading">System Login</span>', unsafe_allow_html=True)
-        
-        # Wrapping in a form to keep button and inputs together
-        with st.form("auth_form", clear_on_submit=False):
+        with st.form("auth_form"):
+            # Email Field
+            st.markdown('<span class="field-label">Email:</span>', unsafe_allow_html=True)
+            email = st.text_input("Email", label_visibility="collapsed", placeholder="Enter email")
             
-            st.markdown('<span class="field-label">USERNAME</span>', unsafe_allow_html=True)
-            username = st.text_input("User", label_visibility="collapsed", placeholder="admin")
+            st.write("") 
             
-            st.write("") # Spacer
+            # Password Field
+            st.markdown('<span class="field-label">Password:</span>', unsafe_allow_html=True)
+            password = st.text_input("Password", type="password", label_visibility="collapsed", placeholder="Enter password")
             
-            st.markdown('<span class="field-label">PASSWORD</span>', unsafe_allow_html=True)
-            password = st.text_input("Pass", type="password", label_visibility="collapsed", placeholder="••••••••")
+            # Checkbox Placeholder
+            st.checkbox("Show Password")
             
-            submit = st.form_submit_button("Access Dashboard")
+            submit = st.form_submit_button("SIGN IN")
             
             if submit:
-                if username == "admin" and password == "crypto123":
+                # Using the admin credentials previously discussed
+                if email == "admin" and password == "crypto123":
                     st.session_state['authenticated'] = True
                     st.rerun()
                 else:
                     st.error("Invalid Login Credentials")
+        
+        # Bottom Links
+        st.markdown("""
+        <div class="footer-links">
+            Forgot <a href="#">Username / Password</a>?<br>
+            Don't have an account? <a href="#">Sign up</a>
+        </div>
+        """, unsafe_allow_html=True)
                     
         st.markdown('</div>', unsafe_allow_html=True)
 
@@ -120,10 +140,6 @@ def show_login():
 if not st.session_state['authenticated']:
     show_login()
 else:
-    # Ensure you have a file named dashboard.py with a main() function
-    try:
-        import dashboard
-        dashboard.main()
-    except ImportError:
-        st.success("Authenticated! (Please ensure dashboard.py is in the folder)")
-        st.info("You can now paste your Dashboard code inside a main() function in dashboard.py")
+    # Runs the dashboard.py file
+    import dashboard
+    dashboard.main()
