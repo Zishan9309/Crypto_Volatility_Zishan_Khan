@@ -23,6 +23,7 @@ def main():
             margin-bottom: 20px;
         }
 
+        /* KPI Card Styling */
         .kpi-card {
             background-color: #1b263b;
             border: 1px solid #415a77;
@@ -33,11 +34,13 @@ def main():
         .kpi-label { color: #778da9; font-size: 12px; font-weight: 600; }
         .kpi-value { color: white; font-size: 24px; font-weight: 800; }
 
+        /* Selectbox Label Fix */
         div[data-testid="stSelectbox"] label p {
             color: white !important;
             font-weight: 600 !important;
         }
         
+        /* SYNCHRONIZED CYAN BUTTONS */
         div.stButton > button {
             background-color: transparent !important;
             color: #4cc9f0 !important;
@@ -45,7 +48,6 @@ def main():
             font-weight: 700 !important;
             border-radius: 4px !important;
             transition: 0.3s;
-            width: 100%;
         }
         
         div.stButton > button:hover {
@@ -53,14 +55,12 @@ def main():
             color: #0d1b2a !important;
         }
 
-        /* Insight Box Styling */
         .insight-box {
             background-color: #1b263b;
             border-left: 5px solid #4cc9f0;
             padding: 20px;
             border-radius: 0 12px 12px 0;
             color: white;
-            font-family: sans-serif;
             margin-top: 10px;
         }
 
@@ -73,9 +73,14 @@ def main():
     </style>
     """, unsafe_allow_html=True)
 
-    @st.cache_data(ttl=60)
+    # ---------------- DATA FETCHING WITH KEY ----------------
+    @st.cache_data(ttl=300)
     def fetch_real_data():
         url = "https://api.coingecko.com/api/v3/coins/markets"
+        headers = {
+            "accept": "application/json",
+            "x-cg-demo-api-key": "CG-bAm69cGY5PQKTQBY8HM82bwf"
+        }
         params = {
             "vs_currency": "usd",
             "order": "market_cap_desc",
@@ -85,7 +90,7 @@ def main():
             "price_change_percentage": "24h"
         }
         try:
-            response = requests.get(url, params=params)
+            response = requests.get(url, params=params, headers=headers)
             if response.status_code == 200:
                 return response.json()
             return []
@@ -98,10 +103,10 @@ def main():
         if abs_change > 2: return "MEDIUM", "#ffd166"
         return "LOW", "#06d6a0"
 
-    # ---------------- DATA PROCESSING ----------------
+    # ---------------- MAIN APP LOGIC ----------------
     data = fetch_real_data()
 
-    # Title and Logout Header
+    # Title & Logout Header
     head_left, head_right = st.columns([4, 1])
     with head_left:
         st.markdown("<h1 class='cyan-title'>☁️ Crypto Volatility & Risk Analyzer</h1>", unsafe_allow_html=True)
@@ -116,13 +121,14 @@ def main():
         st.warning("⚠️ API connection busy. Please wait a moment.")
         st.stop()
 
-    # KPI Row Calculations
+    # KPI CALCULATIONS
     total_coins = len(data)
     high_risk_assets = [c for c in data if abs(c.get('price_change_percentage_24h', 0) or 0) > 5]
     high_risk = len(high_risk_assets)
     low_risk = len([c for c in data if abs(c.get('price_change_percentage_24h', 0) or 0) <= 2])
     risk_exp = (high_risk / total_coins) * 100 if total_coins > 0 else 0
 
+    # KPI ROW
     sum_col1, sum_col2, sum_col3, sum_col4 = st.columns(4)
     sum_col1.markdown(f"<div class='kpi-card'><div class='kpi-label'>Total Assets</div><div class='kpi-value'>{total_coins}</div></div>", unsafe_allow_html=True)
     sum_col2.markdown(f"<div class='kpi-card'><div class='kpi-label'>High Risk</div><div class='kpi-value' style='color:#ef476f;'>{high_risk}</div></div>", unsafe_allow_html=True)
@@ -132,13 +138,11 @@ def main():
     st.write("")
 
     # 2. MARKET RISK MONITOR
-    col_title, col_refresh = st.columns([4, 1])
-    with col_title:
-        st.markdown("<div class='cyan-title'>📋 Market Risk Monitor </div>", unsafe_allow_html=True)
-    with col_refresh:
-        if st.button("🔄 REFRESH DATA"):
-            st.cache_data.clear()
-            st.rerun()
+    col_t, col_r = st.columns([4, 1])
+    col_t.markdown("<div class='cyan-title'>📋 Market Risk Monitor </div>", unsafe_allow_html=True)
+    if col_r.button("🔄 REFRESH DATA"):
+        st.cache_data.clear()
+        st.rerun()
 
     table_rows = ""
     for coin in data:
@@ -161,10 +165,8 @@ def main():
             <table style="width:100%; border-collapse:collapse; text-align:left;">
                 <thead style="position: sticky; top: 0; background: #1b263b; z-index: 10;">
                     <tr style="border-bottom: 2px solid #415a77; color:#778da9; font-size:11px; letter-spacing:1px;">
-                        <th style="padding:12px;">ASSET</th>
-                        <th style="padding:12px;">PRICE (USD)</th>
-                        <th style="padding:12px;">24H CHANGE</th>
-                        <th style="padding:12px;">RISK STATUS</th>
+                        <th style="padding:12px;">ASSET</th><th style="padding:12px;">PRICE (USD)</th>
+                        <th style="padding:12px;">24H CHANGE</th><th style="padding:12px;">RISK STATUS</th>
                         <th style="padding:12px; text-align:right;">STATUS</th>
                     </tr>
                 </thead>
@@ -189,7 +191,7 @@ def main():
         if coin_obj and 'sparkline_in_7d' in coin_obj:
             y_data = coin_obj['sparkline_in_7d']['price']
             
-            # Line Chart: Price
+            # Line Chart
             fig_t = go.Figure()
             fig_t.add_trace(go.Scatter(y=y_data, mode='lines', line=dict(color='#4cc9f0', width=3), fill='tozeroy', fillcolor='rgba(76, 201, 240, 0.1)'))
             fig_t.update_layout(paper_bgcolor='#1b263b', plot_bgcolor='rgba(0,0,0,0)', font_color="white", height=230, margin=dict(l=40,r=10,t=10,b=40),
@@ -206,8 +208,6 @@ def main():
 
     with col_b:
         st.markdown("<div class='cyan-title'>🛡️ Risk & Market Sentiment</div>", unsafe_allow_html=True)
-        
-        # Risk Pie Chart
         risk_counts = {"LOW": 0, "MEDIUM": 0, "HIGH": 0}
         for c in data:
             r_txt, _ = get_risk_info(c.get('price_change_percentage_24h', 0))
@@ -218,14 +218,14 @@ def main():
         fig_p.update_layout(paper_bgcolor='rgba(0,0,0,0)', font_color="white", height=280, margin=dict(t=10,b=10))
         st.plotly_chart(fig_p, use_container_width=True)
 
-        # NEW: MARKET INSIGHT BOX (The "Perfect Look" addition)
+        # MARKET INSIGHT BOX
         st.markdown(f"""
         <div class="insight-box">
             <b style="color:#4cc9f0; font-size:18px;">💡 Market Insights</b><br><br>
             • <b>Volatility Status:</b> { 'Extreme' if risk_exp > 30 else 'Stable' } market detected.<br>
-            • <b>Leading Risk:</b> { high_risk_assets[0].get('name') if high_risk_assets else 'None' } is highly active.<br>
+            • <b>Leading Risk:</b> { high_risk_assets[0].get('name') if high_risk_assets else 'None' } is active.<br>
             • <b>Advice:</b> Consider <b>Hedged</b> positions for {selected_coin}.<br>
-            • <b>Confidence:</b> System analysis at <b>94.2%</b> accuracy.
+            • <b>Analysis Confidence:</b> 94.2% accuracy.
         </div>
         """, unsafe_allow_html=True)
 
