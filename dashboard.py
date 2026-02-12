@@ -29,6 +29,10 @@ def main():
             border: 1px solid #415a77;
             padding: 10px;
         }
+        /* Targets all selectbox labels and forces them to white */
+        div[data-testid="stSelectbox"] label p {
+        color: white !important;
+        }
     </style>
     """, unsafe_allow_html=True)
 
@@ -122,9 +126,19 @@ def main():
     # 3. CHARTS SECTION
     col_a, col_b = st.columns([1.2, 1])
     with col_a:
-        st.markdown("<div class='cyan-title'>📊 7-Day Asset Trend</div>", unsafe_allow_html=True)
-        coin_names = [c.get('name') for c in data if isinstance(c, dict)]
-        selected_coin = st.selectbox("SELECT COIN FOR DEPTH ANALYSIS", coin_names)
+    st.markdown("<div class='cyan-title'>📊 7-Day Asset Trend</div>", unsafe_allow_html=True)
+    
+    # CSS to force the selectbox label to white
+    st.markdown("""
+        <style>
+        div[data-testid="stSelectbox"] label p {
+            color: white !important;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+    
+    coin_names = [c.get('name') for c in data if isinstance(c, dict)]
+    selected_coin = st.selectbox("SELECT COIN FOR DEPTH ANALYSIS", coin_names)
         
         coin_obj = next((c for c in data if c.get('name') == selected_coin), None)
         
