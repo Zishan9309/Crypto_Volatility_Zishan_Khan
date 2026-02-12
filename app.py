@@ -8,7 +8,7 @@ st.set_page_config(page_title="Crypto Risk Analyzer - Secure Login", layout="wid
 if 'authenticated' not in st.session_state:
     st.session_state['authenticated'] = False
 
-# --- CSS: REMOVE TOP SPACING & CENTER HEADING ---
+# --- CSS: ELIMINATING TOP GAP ---
 st.markdown("""
 <style>
     /* 1. Global Deep Navy Background */
@@ -16,28 +16,31 @@ st.markdown("""
         background-color: #0d1b2a !important;
     }
 
-    /* 2. REMOVE BLANK BOX: Completely hide header and remove top padding */
+    /* 2. REMOVE TOP BLANK SPACE: Target the header and container padding */
     header, [data-testid="stHeader"] { 
         visibility: hidden !important; 
         height: 0 !important; 
         padding: 0 !important;
     }
-    .block-container {
-        padding-top: 2rem !important; /* Minimal spacing from top */
-    }
     
-    /* 3. The Main Login Card (Minimized Width) */
+    /* This removes the massive default gap at the top of Streamlit apps */
+    .block-container {
+        padding-top: 0rem !important;
+        padding-bottom: 0rem !important;
+    }
+
+    /* 3. Centered Login Card */
     .login-card {
         background-color: #ffffff; 
         padding: 40px 45px;
         border-radius: 8px;
         width: 100%;
-        max-width: 400px; /* Compact width */
-        margin: 0 auto; 
+        max-width: 400px;
+        margin: 50px auto; /* Reduced top margin to bring it higher */
         box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.5);
     }
 
-    /* 4. Centered Heading Style */
+    /* 4. Login Heading (Centered inside card) */
     .login-heading {
         color: #555555;
         font-family: 'Inter', sans-serif;
@@ -45,10 +48,10 @@ st.markdown("""
         font-weight: 500;
         margin-bottom: 25px;
         display: block;
-        text-align: center; /* Center the word 'Login' */
+        text-align: center;
     }
 
-    /* 5. Left-Aligned Labels */
+    /* 5. Field Labels (Left Aligned) */
     .field-label {
         color: #333333;
         font-size: 14px;
@@ -58,7 +61,7 @@ st.markdown("""
         margin-bottom: 6px;
     }
 
-    /* 6. Input Styling */
+    /* 6. Form/Input Styling */
     div[data-testid="stForm"] { border: none !important; padding: 0 !important; }
     
     input {
@@ -68,7 +71,7 @@ st.markdown("""
         height: 42px !important;
     }
 
-    /* 7. SIGN IN Button (Project Color Palette) */
+    /* 7. Button Styling */
     div.stButton > button {
         background-color: #1b4965 !important; 
         color: #ffffff !important;
@@ -92,41 +95,35 @@ st.markdown("""
         color: #666666;
         text-align: center;
     }
-    .footer-links a {
-        color: #1b4965;
-        text-decoration: none;
-    }
+    .footer-links a { color: #1b4965; text-decoration: none; }
 </style>
 """, unsafe_allow_html=True)
 
-# --- LOGIN UI FUNCTION ---
+# --- LOGIN UI ---
 def show_login():
-    # Centering the card horizontally using Streamlit columns
+    # Use center column to place the card
     _, col_mid, _ = st.columns([1, 1.2, 1])
     
     with col_mid:
-        # The entire content is wrapped in the 'login-card' div
+        # All content starts here - no extra divs above this
         st.markdown('<div class="login-card">', unsafe_allow_html=True)
         st.markdown('<span class="login-heading">Login</span>', unsafe_allow_html=True)
         
         with st.form("auth_form"):
-            # Username Field
             st.markdown('<span class="field-label">Username:</span>', unsafe_allow_html=True)
             username = st.text_input("Username", label_visibility="collapsed", placeholder="Enter username")
             
             st.write("") 
             
-            # Password Field
             st.markdown('<span class="field-label">Password:</span>', unsafe_allow_html=True)
             password = st.text_input("Password", type="password", label_visibility="collapsed", placeholder="Enter password")
             
-            # Show Password Checkbox
             st.checkbox("Show Password")
             
             submit = st.form_submit_button("SIGN IN")
             
             if submit:
-                # Credentials check
+                # Based on your previous interest in software development and Python
                 if username == "admin" and password == "crypto123":
                     st.session_state['authenticated'] = True
                     st.rerun()
@@ -146,6 +143,6 @@ def show_login():
 if not st.session_state['authenticated']:
     show_login()
 else:
-    # Ensure you have dashboard.py in the same directory
+    # This triggers your main software dashboard
     import dashboard
     dashboard.main()
