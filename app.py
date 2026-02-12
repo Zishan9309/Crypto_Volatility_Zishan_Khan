@@ -14,94 +14,97 @@ if "authenticated" not in st.session_state:
 st.markdown("""
 <style>
 
-    /* ===== GLOBAL BACKGROUND ===== */
-    .stApp {
-        background-color: #0d1b2a !important;
-    }
+/* ===== REMOVE STREAMLIT TOP WHITE AREA COMPLETELY ===== */
+header {display: none !important;}
+[data-testid="stHeader"] {display: none !important;}
+[data-testid="stToolbar"] {display: none !important;}
+.stToolbar {display: none !important;}
+.stDecoration {display: none !important;}
 
-    /* ===== REMOVE STREAMLIT HEADER / WHITE SPACE ===== */
-    header {visibility: hidden !important;}
-    [data-testid="stHeader"] {display: none !important;}
-    [data-testid="stToolbar"] {display: none !important;}
-    .stToolbar {display: none !important;}
-    .stDecoration {display: none !important;}
+[data-testid="stAppViewContainer"] {
+    margin-top: -70px !important;
+}
 
-    .block-container {
-        padding-top: 0rem !important;
-    }
+/* Remove default padding */
+.block-container {
+    padding-top: 0rem !important;
+}
 
-    /* ===== LOGIN CARD ===== */
-    .login-card {
-        background-color: #ffffff;
-        padding: 40px 45px;
-        border-radius: 8px;
-        width: 100%;
-        max-width: 400px;
-        margin: 80px auto 0 auto;
-        box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.5);
-    }
+/* ===== GLOBAL BACKGROUND ===== */
+.stApp {
+    background-color: #0d1b2a !important;
+}
 
-    /* ===== HEADING ===== */
-    .login-heading {
-        color: #555555;
-        font-family: 'Inter', sans-serif;
-        font-size: 28px;
-        font-weight: 500;
-        margin-bottom: 25px;
-        text-align: center;
-    }
+/* ===== LOGIN CARD ===== */
+.login-card {
+    background-color: #ffffff;
+    padding: 40px 45px;
+    border-radius: 8px;
+    width: 100%;
+    max-width: 400px;
+    margin: 120px auto 0 auto;
+    box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.5);
+}
 
-    /* ===== LABELS ===== */
-    .field-label {
-        color: #333333;
-        font-size: 14px;
-        font-weight: 600;
-        margin-bottom: 6px;
-        display: block;
-    }
+/* ===== HEADING ===== */
+.login-heading {
+    color: #555555;
+    font-size: 28px;
+    font-weight: 500;
+    margin-bottom: 25px;
+    text-align: center;
+}
 
-    /* ===== INPUT FIELDS ===== */
-    input {
-        background-color: #ffffff !important;
-        color: #333333 !important;
-        border: 1px solid #dddddd !important;
-        height: 42px !important;
-    }
+/* ===== LABELS ===== */
+.field-label {
+    color: #333333;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    display: block;
+}
 
-    /* ===== BUTTON ===== */
-    div.stButton > button {
-        background-color: #1b4965 !important;
-        color: #ffffff !important;
-        font-weight: 600 !important;
-        width: 100%;
-        border-radius: 4px !important;
-        padding: 10px !important;
-        margin-top: 15px;
-        text-transform: uppercase;
-        border: none !important;
-    }
+/* ===== INPUT FIELDS ===== */
+input {
+    background-color: #ffffff !important;
+    color: #333333 !important;
+    border: 1px solid #dddddd !important;
+    height: 42px !important;
+}
 
-    div.stButton > button:hover {
-        background-color: #4cc9f0 !important;
-        color: #0d1b2a !important;
-    }
+/* ===== BUTTON ===== */
+div.stButton > button {
+    background-color: #1b4965 !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
+    width: 100%;
+    border-radius: 4px !important;
+    padding: 10px !important;
+    margin-top: 15px;
+    text-transform: uppercase;
+    border: none !important;
+}
 
-    /* ===== FOOTER ===== */
-    .footer-links {
-        margin-top: 20px;
-        font-size: 12px;
-        color: #666666;
-        text-align: center;
-    }
+div.stButton > button:hover {
+    background-color: #4cc9f0 !important;
+    color: #0d1b2a !important;
+}
 
-    .footer-links a {
-        color: #1b4965;
-        text-decoration: none;
-    }
+/* ===== FOOTER ===== */
+.footer-links {
+    margin-top: 20px;
+    font-size: 12px;
+    color: #666666;
+    text-align: center;
+}
+
+.footer-links a {
+    color: #1b4965;
+    text-decoration: none;
+}
 
 </style>
 """, unsafe_allow_html=True)
-
 
 # --- LOGIN FUNCTION ---
 def show_login():
