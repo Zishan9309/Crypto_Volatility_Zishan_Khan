@@ -12,49 +12,58 @@ if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
 
 
-# ---------------- THE "THIN CARD" CSS ----------------
+# ---------------- NAVBAR & THIN CARD CSS ----------------
 st.markdown("""
 <style>
-/* 1. Remove Streamlit Header & Blank Space */
-header, [data-testid="stHeader"], [data-testid="stToolbar"] {
-    display: none !important;
+/* 1. MAKE HEADER A TOPMOST NAVBAR */
+[data-testid="stHeader"] {
+    background-color: #1b4965 !important; /* Navy Blue Navbar */
+    height: 60px !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    padding: 0 20px !important;
+    border-bottom: 2px solid #4cc9f0 !important; /* Cyan accent line */
+    z-index: 9999 !important;
 }
 
-/* Remove default top padding to shift content up */
+/* 2. REMOVE BLANK SPACE BELOW NAVBAR */
 .block-container {
     padding-top: 0rem !important;
     padding-bottom: 0rem !important;
 }
 
-/* 2. Global Background (Deep Navy) */
+/* 3. Global Background */
 .stApp {
     background-color: #0d1b2a !important;
 }
 
-/* 3. Centered Thin Card Aesthetic */
+/* 4. THE THIN LOGIN CARD */
 .login-card {
     background: #ffffff;
     padding: 40px 30px;
     border-radius: 8px;
     width: 100%;
-    max-width: 320px; /* Made the box very thin as requested */
-    margin: 80px auto; 
+    max-width: 340px; /* Very thin width */
+    margin: 120px auto; /* Margin pushes it down from the navbar */
     box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.5);
     text-align: center;
 }
 
-/* 4. Cyan Heading */
+/* 5. Cyan Heading */
 .login-title {
-    color: #4cc9f0; /* Specific Cyan color */
+    color: #4cc9f0; 
     font-family: 'Inter', sans-serif;
-    font-size: 28px;
+    font-size: 26px;
     font-weight: 700;
-    margin-bottom: 30px;
+    margin-bottom: 25px;
     text-transform: uppercase;
-    letter-spacing: 1px;
 }
 
-/* 5. Labels & Inputs */
+/* 6. Form Styling */
 .field-label {
     color: #333333;
     font-size: 13px;
@@ -70,49 +79,45 @@ input {
     background-color: #f8f9fa !important;
     color: #0d1b2a !important;
     border: 1px solid #dee2e6 !important;
-    height: 40px !important;
+    height: 42px !important;
     border-radius: 4px !important;
-    margin-bottom: 10px;
 }
 
-/* 6. Action Button */
+/* 7. Action Button */
 div.stButton > button {
-    background-color: #1b4965 !important;
-    color: white !important;
+    background-color: #4cc9f0 !important; /* Cyan Button */
+    color: #0d1b2a !important;
     font-weight: 700 !important;
     width: 100%;
     border-radius: 4px !important;
     padding: 10px !important;
-    margin-top: 10px;
+    margin-top: 15px;
     border: none !important;
-    transition: 0.3s;
 }
 
 div.stButton > button:hover {
-    background-color: #4cc9f0 !important; /* Glow Cyan on hover */
-    color: #0d1b2a !important;
+    background-color: #1b4965 !important;
+    color: white !important;
     box-shadow: 0px 0px 15px rgba(76, 201, 240, 0.4);
 }
-
-.footer-links {
-    margin-top: 20px;
-    font-size: 11px;
-    color: #778da9;
-}
-.footer-links a { color: #1b4965; text-decoration: none; font-weight: bold;}
-
 </style>
 """, unsafe_allow_html=True)
 
+# ---------------- NAVBAR CONTENT ----------------
+# We use a custom div to place text inside the full-width top bar area
+st.markdown("""
+    <div style="position: fixed; top: 15px; left: 20px; z-index: 10000; color: white; font-weight: bold; font-family: sans-serif; font-size: 18px; letter-spacing: 1px;">
+        CRYPTO RISK ANALYZER
+    </div>
+""", unsafe_allow_html=True)
 
 # ---------------- LOGIN LOGIC ----------------
 def show_login():
-    # Use center column for horizontal alignment
-    _, col_mid, _ = st.columns([1, 0.8, 1])
+    _, col_mid, _ = st.columns([1, 1, 1])
 
     with col_mid:
         st.markdown('<div class="login-card">', unsafe_allow_html=True)
-        st.markdown('<div class="login-title">Login</div>', unsafe_allow_html=True)
+        st.markdown('<div class="login-title">Sign In</div>', unsafe_allow_html=True)
 
         with st.form("auth_form", clear_on_submit=False):
             st.markdown('<span class="field-label">Username:</span>', unsafe_allow_html=True)
@@ -121,29 +126,19 @@ def show_login():
             st.markdown('<span class="field-label">Password:</span>', unsafe_allow_html=True)
             password = st.text_input("Pass", type="password", label_visibility="collapsed", placeholder="Enter password")
 
-            # Standard checkbox
-            st.checkbox("Show Password", key="show_pwd")
-
-            if st.form_submit_button("SIGN IN"):
+            if st.form_submit_button("LOGIN"):
                 if username == "admin" and password == "crypto123":
                     st.session_state.authenticated = True
                     st.rerun()
                 else:
                     st.error("Access Denied")
 
-        st.markdown("""
-        <div class="footer-links">
-            Forgot <a href="#">Username / Password</a>?<br>
-            Don't have an account? <a href="#">Sign up</a>
-        </div>
-        """, unsafe_allow_html=True)
         st.markdown('</div>', unsafe_allow_html=True)
 
-
-# ---------------- NAVIGATION ----------------
+# ---------------- APP FLOW ----------------
 if not st.session_state.authenticated:
     show_login()
 else:
-    # Ensure dashboard.py exists in the same folder
+    # This leads to your Dashboard page
     import dashboard
     dashboard.main()
