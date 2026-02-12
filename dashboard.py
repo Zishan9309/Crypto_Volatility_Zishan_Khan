@@ -7,20 +7,12 @@ import plotly.graph_objects as go
 import numpy as np
 from datetime import datetime
 
-# ---------------- PAGE CONFIG (MUST BE AT THE VERY TOP) ----------------
-# Note: If app.py already has a set_page_config, this one will be ignored
-# but it is kept here for standalone functionality.
-
 def main():
-    # ---------------- EXACT BODY & UI STYLING ----------------
+    # ---------------- UI STYLING ----------------
     st.markdown("""
     <style>
-        .stApp {
-            background-color: #0d1b2a !important;
-        }
-        header, [data-testid="stHeader"] {
-            background-color: #0d1b2a !important;
-        }
+        .stApp { background-color: #0d1b2a !important; }
+        header, [data-testid="stHeader"] { background-color: #0d1b2a !important; }
         
         .cyan-title {
             color: #4cc9f0 !important;
@@ -31,13 +23,6 @@ def main():
             margin-bottom: 20px;
         }
         
-        .dark-blue-section {
-            color: #1b4965 !important;
-            font-weight: 800;
-            font-size: 26px;
-            margin-bottom: 15px;
-        }
-
         .stPlotlyChart {
             background-color: #1b263b;
             border-radius: 12px;
@@ -47,7 +32,7 @@ def main():
     </style>
     """, unsafe_allow_html=True)
 
-    # ---------------- DATA FETCHING ----------------
+    # ---------------- DATA FETCHING WITH SAFETY ----------------
     @st.cache_data(ttl=60)
     def fetch_real_data():
         url = "https://api.coingecko.com/api/v3/coins/markets"
@@ -61,8 +46,11 @@ def main():
         }
         try:
             response = requests.get(url, params=params)
-            return response.json()
-        except:
+            if response.status_code == 200:
+                return response.json()
+            else:
+                return [] # Return empty list if API limit hit
+        except Exception:
             return []
 
     def get_risk_info(change):
@@ -73,10 +61,6 @@ def main():
 
     # ---------------- MAIN APP LOGIC ----------------
     data = fetch_real_data()
-
-    if not data:
-        st.error("API Limit reached. Please wait 1 minute.")
-        return # Use return instead of stop inside a function
 
     # 1. MAIN HEADING
     head_left, head_right = st.columns([4, 1])
@@ -89,23 +73,30 @@ def main():
 
     st.write("---")
 
+    # ERROR HANDLING UI
+    if not data or not isinstance(data, list):
+        st.warning("⚠️ API connection busy or limit reached. Please wait a moment and click Refresh.")
+        st.stop()
+
     # 2. SCROLLABLE MARKET RISK MONITOR
     st.markdown("<div class='cyan-title'>📋 Market Risk Monitor </div>", unsafe_allow_html=True)
 
     table_rows = ""
     for coin in data:
-        change = coin.get('price_change_percentage_24h', 0) or 0
-        risk_text, risk_color = get_risk_info(change)
-        change_color = "#06d6a0" if change >= 0 else "#ef476f"
-        
-        table_rows += f"""
-        <tr style="border-bottom: 1px solid #2b3a4f;">
-            <td style="padding:14px;"><img src="{coin['image']}" width="22" style="vertical-align:middle;margin-right:12px;"><b>{coin['name']}</b></td>
-            <td style="padding:14px; font-family:monospace;">${coin['current_price']:,}</td>
-            <td style="padding:14px; color:{change_color}; font-weight:bold;">{change:.2f}%</td>
-            <td style="padding:14px;"><span style="background:{risk_color}; color:#0d1b2a; padding:3px 10px; border-radius:4px; font-weight:900; font-size:10px;">{risk_text}</span></td>
-        </tr>
-        """
+        # Extra safety check: ensure coin is a dictionary
+        if isinstance(coin, dict):
+            change = coin.get('price_change_percentage_24h', 0) or 0
+            risk_text, risk_color = get_risk_info(change)
+            change_color = "#06d6a0" if change >= 0 else "#ef476f"
+            
+            table_rows += f"""
+            <tr style="border-bottom: 1px solid #2b3a4f;">
+                <td style="padding:14px;"><img src="{coin.get('image', '')}" width="22" style="vertical-align:middle;margin-right:12px;"><b>{coin.get('name', 'Unknown')}</b></td>
+                <td style="padding:14px; font-family:monospace;">${coin.get('current_price', 0):,}</td>
+                <td style="padding:14px; color:{change_color}; font-weight:bold;">{change:.2f}%</td>
+                <td style="padding:14px;"><span style="background:{risk_color}; color:#0d1b2a; padding:3px 10px; border-radius:4px; font-weight:900; font-size:10px;">{risk_text}</span></td>
+            </tr>
+            """
 
     full_table_html = f"""
     <div style="background:#1b263b; padding:15px; border-radius:12px; border:1px solid #415a77; font-family:sans-serif; color:white;">
@@ -119,9 +110,7 @@ def main():
                         <th style="padding:12px;">RISK STATUS</th>
                     </tr>
                 </thead>
-                <tbody>
-                    {table_rows}
-                </tbody>
+                <tbody>{table_rows}</tbody>
             </table>
         </div>
     </div>
@@ -132,30 +121,28 @@ def main():
 
     # 3. CHARTS SECTION
     col_a, col_b = st.columns([1.2, 1])
-
     with col_a:
         st.markdown("<div class='cyan-title'>📊 7-Day Asset Trend</div>", unsafe_allow_html=True)
-        selected_coin = st.selectbox("SELECT COIN FOR DEPTH ANALYSIS", [c['name'] for c in data])
-        coin_obj = next(c for c in data if c['name'] == selected_coin)
+        coin_names = [c.get('name') for c in data if isinstance(c, dict)]
+        selected_coin = st.selectbox("SELECT COIN FOR DEPTH ANALYSIS", coin_names)
         
-        if 'sparkline_in_7d' in coin_obj:
+        coin_obj = next((c for c in data if c.get('name') == selected_coin), None)
+        
+        if coin_obj and 'sparkline_in_7d' in coin_obj:
             y_data = coin_obj['sparkline_in_7d']['price']
             fig_t = go.Figure()
             fig_t.add_trace(go.Scatter(y=y_data, mode='lines', line=dict(color='#4cc9f0', width=3), fill='tozeroy', fillcolor='rgba(76, 201, 240, 0.1)'))
-            fig_t.update_layout(
-                paper_bgcolor='#1b263b', plot_bgcolor='rgba(0,0,0,0)', font_color="white",
-                margin=dict(l=40, r=10, t=10, b=40), height=300,
-                xaxis=dict(title="Timeline (Hours)", showgrid=False),
-                yaxis=dict(title="USD", showgrid=True, gridcolor='#2b3a4f')
-            )
+            fig_t.update_layout(paper_bgcolor='#1b263b', plot_bgcolor='rgba(0,0,0,0)', font_color="white", height=300, margin=dict(l=40,r=10,t=10,b=40))
             st.plotly_chart(fig_t, use_container_width=True)
 
     with col_b:
         st.markdown("<h3 class='cyan-title' style='font-size:15px;'>🛡️ Risk Distribution</h3>", unsafe_allow_html=True)
         risk_counts = {"LOW": 0, "MEDIUM": 0, "HIGH": 0}
         for c in data:
-            r_txt, _ = get_risk_info(c['price_change_percentage_24h'])
-            risk_counts[r_txt] += 1
+            if isinstance(c, dict):
+                r_txt, _ = get_risk_info(c.get('price_change_percentage_24h', 0))
+                risk_counts[r_txt] += 1
+        
         fig_p = px.pie(values=list(risk_counts.values()), names=list(risk_counts.keys()), 
                         color=list(risk_counts.keys()), color_discrete_map={'LOW':'#06d6a0','MEDIUM':'#ffd166','HIGH':'#ef476f'})
         fig_p.update_layout(paper_bgcolor='rgba(0,0,0,0)', font_color="white", height=300, margin=dict(t=10,b=10))
@@ -163,6 +150,5 @@ def main():
 
     st.caption(f"SYSTEM LIVE | SYNC: {datetime.now().strftime('%H:%M:%S')} | NAGPUR, MH")
 
-# 4. EXECUTION WRAPPER
 if __name__ == "__main__":
     main()
