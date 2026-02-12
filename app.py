@@ -11,7 +11,7 @@ st.set_page_config(
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
 
-# ---------------- THE FULL-SYNC CSS ----------------
+# ---------------- THE "HARD-FIX" CSS ----------------
 st.markdown("""
 <style>
 /* 1. TOP NAVBAR FIX */
@@ -28,7 +28,7 @@ st.markdown("""
     z-index: 9999 !important;
 }
 
-/* 2. REMOVE TOP BLANK BOXES */
+/* 2. REMOVE BLANK BOXES */
 header, [data-testid="stHeader"], .st-emotion-cache-18ni7ve {
     display: none !important;
 }
@@ -49,12 +49,11 @@ header, [data-testid="stHeader"], .st-emotion-cache-18ni7ve {
     width: 100%;
     max-width: 400px; 
     margin: 60px auto; 
-    text-align: center; 
 }
 
 /* 5. CENTERED CYAN LOGIN HEADING */
 .login-title {
-    color: #4cc9f0 !important; /* Cyan Sync */
+    color: #4cc9f0 !important; 
     font-family: 'Inter', sans-serif;
     font-size: 34px;
     font-weight: 700;
@@ -97,30 +96,30 @@ input {
     background-position: 12px center;
 }
 
-/* 7. CENTERED CYAN LOGIN BUTTON */
-div.stButton {
-    display: flex;
-    justify-content: center;
-    width: 100%;
-    margin-left: 50px;
+/* 7. THE FIX: CENTERED CYAN LOGIN BUTTON */
+/* Target the specific container that Streamlit uses for form buttons */
+div.stFormSubmitButton {
+    display: flex !important;
+    justify-content: center !important;
+    width: 100% !important;
+    margin-top: 30px !important; /* Space it down */
 }
 
-div.stButton > button {
-    background-color: #4cc9f0 !important; /* Cyan Sync */
+div.stFormSubmitButton > button {
+    background-color: #4cc9f0 !important; /* Forces Cyan Color */
     color: #0d1b2a !important; /* Dark text for contrast */
     font-weight: 800 !important;
-    width: 140px !important; 
+    width: 160px !important; 
     border-radius: 6px !important;
     border: none !important;
     text-transform: uppercase;
-    margin-top: 40px !important; /* Shifted slightly down */
-    padding: 10px !important;
+    padding: 12px !important;
     transition: 0.3s;
 }
 
-div.stButton > button:hover {
-    background-color: #ffffff !important; /* White glow on hover */
-    box-shadow: 0px 0px 15px rgba(76, 201, 240, 0.5);
+div.stFormSubmitButton > button:hover {
+    background-color: #ffffff !important;
+    box-shadow: 0px 0px 20px rgba(76, 201, 240, 0.6);
     transform: scale(1.05);
 }
 </style>
@@ -128,12 +127,12 @@ div.stButton > button:hover {
 
 # ---------------- NAVBAR CONTENT ----------------
 st.markdown("""
-    <div style="position: fixed; top: 18px; left: 20px; z-index: 10000; color: #4cc9f0; font-weight: 800; font-family: sans-serif; font-size: 20px; letter-spacing: 1px;">
+    <div style="position: fixed; top: 18px; left: 20px; z-index: 10000; color: white; font-weight: 800; font-family: sans-serif; font-size: 20px; letter-spacing: 1px;">
         CRYPTO RISK ANALYZER
     </div>
 """, unsafe_allow_html=True)
 
-# ---------------- LOGIN LOGIC ----------------
+# ---------------- LOGIN UI ----------------
 def show_login():
     _, col_mid, _ = st.columns([1, 1.5, 1])
 
@@ -148,11 +147,11 @@ def show_login():
             st.markdown('<span class="field-label">PASSWORD</span>', unsafe_allow_html=True)
             password = st.text_input("pass", type="password", label_visibility="collapsed", placeholder="••••••••")
 
-            # Sign In Button 
+            # The button is automatically placed in the center via the CSS above
             submit = st.form_submit_button("LOGIN")
             
             if submit:
-                # Testing with admin/crypto123
+                # Based on your interest in software development and Python
                 if username == "admin" and password == "crypto123":
                     st.session_state.authenticated = True
                     st.rerun()
@@ -165,5 +164,6 @@ def show_login():
 if not st.session_state.authenticated:
     show_login()
 else:
+    # This calls the main logic for your cryptocurrency project
     import dashboard
     dashboard.main()
