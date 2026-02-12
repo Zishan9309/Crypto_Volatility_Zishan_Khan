@@ -102,6 +102,7 @@ div.stButton {
     display: flex;
     justify-content: center;
     width: 100%;
+    margin-left: 50px;
 }
 
 div.stButton > button {
@@ -127,7 +128,7 @@ div.stButton > button:hover {
 
 # ---------------- NAVBAR CONTENT ----------------
 st.markdown("""
-    <div style="position: fixed; top: 18px; left: 20px; z-index: 10000; color: white; font-weight: 800; font-family: sans-serif; font-size: 20px; letter-spacing: 1px;">
+    <div style="position: fixed; top: 18px; left: 20px; z-index: 10000; color: #4cc9f0; font-weight: 800; font-family: sans-serif; font-size: 20px; letter-spacing: 1px;">
         CRYPTO RISK ANALYZER
     </div>
 """, unsafe_allow_html=True)
