@@ -2,13 +2,13 @@ import streamlit as st
 import streamlit.components.v1 as components
 
 # --- PAGE CONFIG ---
-st.set_page_config(page_title="Crypto Risk Analyzer - Login", layout="wide")
+st.set_page_config(page_title="Crypto Risk Analyzer - Secure Login", layout="wide")
 
 # --- INITIALIZE SESSION STATE ---
 if 'authenticated' not in st.session_state:
     st.session_state['authenticated'] = False
 
-# --- CSS: 100% WIDTH HEADER & CENTERED CARD ---
+# --- CSS: REMOVE TOP SPACING & CENTER HEADING ---
 st.markdown("""
 <style>
     /* 1. Global Deep Navy Background */
@@ -16,47 +16,28 @@ st.markdown("""
         background-color: #0d1b2a !important;
     }
 
-    /* 2. THE TOP BAR (100% WIDTH) */
-    /* Target the Streamlit header to make it full width and shift to top */
-    [data-testid="stHeader"] {
-        background-color: #1b4965 !important; /* Project Navy Blue */
-        width: 100% !important;
-        left: 0 !important;
-        right: 0 !important;
-        height: 60px !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        color: white !important;
-        border-bottom: 2px solid #4cc9f0; /* Cyan accent line */
+    /* 2. REMOVE BLANK BOX: Completely hide header and remove top padding */
+    header, [data-testid="stHeader"] { 
+        visibility: hidden !important; 
+        height: 0 !important; 
+        padding: 0 !important;
+    }
+    .block-container {
+        padding-top: 2rem !important; /* Minimal spacing from top */
     }
     
-    /* Remove padding that Streamlit adds to the main page container */
-    .block-container {
-        padding-top: 0rem !important;
-        padding-left: 0rem !important;
-        padding-right: 0rem !important;
-        max-width: 100% !important;
-    }
-
-    /* 3. THE CENTERED LOGIN CARD */
-    .login-wrapper {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 85vh; /* Centers card vertically below the header */
-        width: 100%;
-    }
-
+    /* 3. The Main Login Card (Minimized Width) */
     .login-card {
         background-color: #ffffff; 
         padding: 40px 45px;
         border-radius: 8px;
         width: 100%;
-        max-width: 420px; /* Kept compact as requested */
+        max-width: 400px; /* Compact width */
+        margin: 0 auto; 
         box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.5);
     }
 
+    /* 4. Centered Heading Style */
     .login-heading {
         color: #555555;
         font-family: 'Inter', sans-serif;
@@ -64,9 +45,10 @@ st.markdown("""
         font-weight: 500;
         margin-bottom: 25px;
         display: block;
-        text-align: center;
+        text-align: center; /* Center the word 'Login' */
     }
 
+    /* 5. Left-Aligned Labels */
     .field-label {
         color: #333333;
         font-size: 14px;
@@ -76,7 +58,7 @@ st.markdown("""
         margin-bottom: 6px;
     }
 
-    /* Form and Button Styling */
+    /* 6. Input Styling */
     div[data-testid="stForm"] { border: none !important; padding: 0 !important; }
     
     input {
@@ -86,6 +68,7 @@ st.markdown("""
         height: 42px !important;
     }
 
+    /* 7. SIGN IN Button (Project Color Palette) */
     div.stButton > button {
         background-color: #1b4965 !important; 
         color: #ffffff !important;
@@ -102,54 +85,67 @@ st.markdown("""
         background-color: #4cc9f0 !important; 
         color: #0d1b2a !important;
     }
+
+    .footer-links {
+        margin-top: 20px;
+        font-size: 12px;
+        color: #666666;
+        text-align: center;
+    }
+    .footer-links a {
+        color: #1b4965;
+        text-decoration: none;
+    }
 </style>
 """, unsafe_allow_html=True)
 
-# --- INJECT TEXT INTO THE FULL-WIDTH HEADER ---
-# Since Streamlit's header is usually empty, we inject text via CSS/HTML
-st.markdown("""
-    <script>
-        var header = window.parent.document.querySelector('header');
-        header.innerHTML = '<div style="color:white; font-weight:bold; font-family:sans-serif; letter-spacing:2px;">CRYPTO RISK ANALYZER SYSTEM</div>';
-    </script>
-    """, unsafe_allow_html=True)
-
-# --- LOGIN UI ---
+# --- LOGIN UI FUNCTION ---
 def show_login():
-    # Wrapper to center the card vertically and horizontally
-    st.markdown('<div class="login-wrapper">', unsafe_allow_html=True)
+    # Centering the card horizontally using Streamlit columns
+    _, col_mid, _ = st.columns([1, 1.2, 1])
     
-    # Nested container to hold the card
-    with st.container():
+    with col_mid:
+        # The entire content is wrapped in the 'login-card' div
         st.markdown('<div class="login-card">', unsafe_allow_html=True)
         st.markdown('<span class="login-heading">Login</span>', unsafe_allow_html=True)
         
         with st.form("auth_form"):
+            # Username Field
             st.markdown('<span class="field-label">Username:</span>', unsafe_allow_html=True)
             username = st.text_input("Username", label_visibility="collapsed", placeholder="Enter username")
             
+            st.write("") 
+            
+            # Password Field
             st.markdown('<span class="field-label">Password:</span>', unsafe_allow_html=True)
             password = st.text_input("Password", type="password", label_visibility="collapsed", placeholder="Enter password")
             
+            # Show Password Checkbox
             st.checkbox("Show Password")
             
             submit = st.form_submit_button("SIGN IN")
             
             if submit:
-                # Synthesized credentials based on development preferences
+                # Credentials check
                 if username == "admin" and password == "crypto123":
                     st.session_state['authenticated'] = True
                     st.rerun()
                 else:
-                    st.error("Invalid Credentials")
+                    st.error("Invalid Username or Password")
         
+        st.markdown("""
+        <div class="footer-links">
+            Forgot <a href="#">Username / Password</a>?<br>
+            Don't have an account? <a href="#">Sign up</a>
+        </div>
+        """, unsafe_allow_html=True)
+                    
         st.markdown('</div>', unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
 
 # --- APP FLOW ---
 if not st.session_state['authenticated']:
     show_login()
 else:
-    # Ensure dashboard.py exists in your folder with a main() function
+    # Ensure you have dashboard.py in the same directory
     import dashboard
     dashboard.main()
