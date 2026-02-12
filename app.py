@@ -8,39 +8,50 @@ st.set_page_config(page_title="Crypto Risk Analyzer - Secure Login", layout="wid
 if 'authenticated' not in st.session_state:
     st.session_state['authenticated'] = False
 
-# --- CSS: ELIMINATING TOP GAP ---
+# --- THE ULTIMATE "ZERO GAP" CSS ---
 st.markdown("""
 <style>
-    /* 1. Global Deep Navy Background */
+    /* 1. Global Background */
     .stApp {
         background-color: #0d1b2a !important;
     }
 
-    /* 2. REMOVE TOP BLANK SPACE: Target the header and container padding */
+    /* 2. COMPLETELY REMOVE ALL TOP ELEMENTS & PADDING */
+    /* Target the very first div in the body */
     header, [data-testid="stHeader"] { 
-        visibility: hidden !important; 
-        height: 0 !important; 
-        padding: 0 !important;
+        display: none !important;
     }
     
-    /* This removes the massive default gap at the top of Streamlit apps */
+    /* Remove the default padding from the main block */
     .block-container {
-        padding-top: 0rem !important;
-        padding-bottom: 0rem !important;
+        padding: 0rem !important;
+        max-width: 100% !important;
     }
 
-    /* 3. Centered Login Card */
+    /* Remove the gap between the top and the first element */
+    [data-testid="stVerticalBlock"] {
+        gap: 0rem !important;
+    }
+    
+    /* 3. The Main Card Container */
+    .login-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh; /* This fills the whole screen to center vertically */
+        width: 100%;
+    }
+
     .login-card {
         background-color: #ffffff; 
         padding: 40px 45px;
         border-radius: 8px;
         width: 100%;
         max-width: 400px;
-        margin: 50px auto; /* Reduced top margin to bring it higher */
         box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.5);
+        text-align: center;
     }
 
-    /* 4. Login Heading (Centered inside card) */
     .login-heading {
         color: #555555;
         font-family: 'Inter', sans-serif;
@@ -48,10 +59,8 @@ st.markdown("""
         font-weight: 500;
         margin-bottom: 25px;
         display: block;
-        text-align: center;
     }
 
-    /* 5. Field Labels (Left Aligned) */
     .field-label {
         color: #333333;
         font-size: 14px;
@@ -61,7 +70,7 @@ st.markdown("""
         margin-bottom: 6px;
     }
 
-    /* 6. Form/Input Styling */
+    /* Form Overrides */
     div[data-testid="stForm"] { border: none !important; padding: 0 !important; }
     
     input {
@@ -71,7 +80,6 @@ st.markdown("""
         height: 42px !important;
     }
 
-    /* 7. Button Styling */
     div.stButton > button {
         background-color: #1b4965 !important; 
         color: #ffffff !important;
@@ -93,7 +101,6 @@ st.markdown("""
         margin-top: 20px;
         font-size: 12px;
         color: #666666;
-        text-align: center;
     }
     .footer-links a { color: #1b4965; text-decoration: none; }
 </style>
@@ -101,19 +108,19 @@ st.markdown("""
 
 # --- LOGIN UI ---
 def show_login():
-    # Use center column to place the card
-    _, col_mid, _ = st.columns([1, 1.2, 1])
+    # Using a single wrapper div to force the card to the absolute center
+    st.markdown('<div class="login-wrapper">', unsafe_allow_html=True)
     
-    with col_mid:
-        # All content starts here - no extra divs above this
+    # We don't use st.columns here because it can create extra div boxes
+    # Instead we inject the HTML Card directly
+    container = st.container()
+    with container:
         st.markdown('<div class="login-card">', unsafe_allow_html=True)
         st.markdown('<span class="login-heading">Login</span>', unsafe_allow_html=True)
         
         with st.form("auth_form"):
             st.markdown('<span class="field-label">Username:</span>', unsafe_allow_html=True)
             username = st.text_input("Username", label_visibility="collapsed", placeholder="Enter username")
-            
-            st.write("") 
             
             st.markdown('<span class="field-label">Password:</span>', unsafe_allow_html=True)
             password = st.text_input("Password", type="password", label_visibility="collapsed", placeholder="Enter password")
@@ -123,12 +130,11 @@ def show_login():
             submit = st.form_submit_button("SIGN IN")
             
             if submit:
-                # Based on your previous interest in software development and Python
                 if username == "admin" and password == "crypto123":
                     st.session_state['authenticated'] = True
                     st.rerun()
                 else:
-                    st.error("Invalid Username or Password")
+                    st.error("Invalid Credentials")
         
         st.markdown("""
         <div class="footer-links">
@@ -136,13 +142,12 @@ def show_login():
             Don't have an account? <a href="#">Sign up</a>
         </div>
         """, unsafe_allow_html=True)
-                    
         st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # --- APP FLOW ---
 if not st.session_state['authenticated']:
     show_login()
 else:
-    # This triggers your main software dashboard
     import dashboard
     dashboard.main()
