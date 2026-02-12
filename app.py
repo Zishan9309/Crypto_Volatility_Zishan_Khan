@@ -1,71 +1,71 @@
 import streamlit as st
-import streamlit.components.v1 as components
 
 # --- PAGE CONFIG ---
-st.set_page_config(page_title="Crypto Risk Analyzer - Secure Login", layout="wide")
+st.set_page_config(
+    page_title="Crypto Risk Analyzer - Secure Login", 
+    layout="wide",
+    initial_sidebar_state="collapsed"
+)
 
 # --- INITIALIZE SESSION STATE ---
 if 'authenticated' not in st.session_state:
     st.session_state['authenticated'] = False
 
-# --- THE ULTIMATE ZERO-GAP CSS ---
+# --- THE HARD-RESET CSS ---
+# This targets the specific Streamlit containers that create the "blank box" space.
 st.markdown("""
 <style>
-    /* 1. Global Background (Deep Navy) */
+    /* 1. Global Background (Matches Dashboard Navy) */
     .stApp {
         background-color: #0d1b2a !important;
     }
 
-    /* 2. COMPLETELY COLLAPSE TOP PADDING & HEADER */
-    /* Target the header bar and force it to disappear */
+    /* 2. REMOVE TOP BLANK SPACE COMPLETELY */
+    /* Target the header bar and collapse it */
     header, [data-testid="stHeader"] { 
         display: none !important;
         height: 0 !important;
     }
     
-    /* Target the main content area and remove all default padding */
+    /* Force the main container to start at pixel 0 */
     .block-container {
         padding-top: 0rem !important;
         padding-bottom: 0rem !important;
         margin-top: 0rem !important;
     }
 
-    /* Target the vertical spacing between Streamlit widgets */
-    [data-testid="stVerticalBlock"] {
-        gap: 0rem !important;
-    }
-
-    /* 3. THE CENTERED LOGIN CARD (Shifted to Top) */
+    /* 3. THE CENTERED LOGIN CARD */
     .login-card {
         background-color: #ffffff; 
-        padding: 40px 45px;
-        border-radius: 8px;
+        padding: 40px 50px;
+        border-radius: 10px;
         width: 100%;
-        max-width: 400px;
-        margin: 20px auto; /* Small 20px margin from the absolute top */
+        max-width: 420px;
+        margin: 60px auto; /* Controls distance from the absolute top */
         box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.5);
+        text-align: center;
     }
 
     .login-heading {
         color: #555555;
         font-family: 'Inter', sans-serif;
-        font-size: 28px;
+        font-size: 30px;
         font-weight: 500;
-        margin-bottom: 25px;
+        margin-bottom: 30px;
         display: block;
-        text-align: center;
     }
 
+    /* 4. ALIGNED LABELS & INPUTS */
     .field-label {
         color: #333333;
         font-size: 14px;
         font-weight: 600;
         text-align: left;
         display: block;
-        margin-bottom: 6px;
+        margin-bottom: 8px;
     }
 
-    /* 4. Streamlit Form & Input Styling */
+    /* Remove Streamlit default widget borders inside the card */
     div[data-testid="stForm"] { 
         border: none !important; 
         padding: 0 !important; 
@@ -75,34 +75,36 @@ st.markdown("""
         background-color: #ffffff !important;
         color: #333333 !important;
         border: 1px solid #dddddd !important;
-        height: 42px !important;
-        border-radius: 4px !important;
+        height: 45px !important;
+        border-radius: 5px !important;
     }
 
-    /* 5. Centered SIGN IN Button */
+    /* 5. AESTHETIC SIGN IN BUTTON */
     div.stButton > button {
         background-color: #1b4965 !important; 
         color: #ffffff !important;
-        font-weight: 600 !important;
+        font-weight: 700 !important;
         width: 100%;
-        border-radius: 4px !important;
-        padding: 10px !important;
-        margin-top: 15px;
+        border-radius: 5px !important;
+        padding: 12px !important;
+        margin-top: 20px;
         text-transform: uppercase;
         border: none !important;
         transition: 0.3s;
+        letter-spacing: 1px;
     }
     
     div.stButton > button:hover {
         background-color: #4cc9f0 !important; 
         color: #0d1b2a !important;
+        box-shadow: 0px 0px 15px rgba(76, 201, 240, 0.4);
     }
 
+    /* 6. FOOTER LINKS */
     .footer-links {
-        margin-top: 20px;
-        font-size: 12px;
+        margin-top: 25px;
+        font-size: 13px;
         color: #666666;
-        text-align: center;
     }
     .footer-links a { 
         color: #1b4965; 
@@ -112,37 +114,42 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# --- LOGIN UI ---
+# --- LOGIN UI LOGIC ---
 def show_login():
-    # Use center column only for responsive width
+    # Columns create the horizontal centering
     _, col_mid, _ = st.columns([1, 1.2, 1])
     
     with col_mid:
-        # Every element is strictly contained within this single DIV
+        # The main card container
         st.markdown('<div class="login-card">', unsafe_allow_html=True)
         st.markdown('<span class="login-heading">Login</span>', unsafe_allow_html=True)
         
         with st.form("auth_form", clear_on_submit=False):
+            # Username Field
             st.markdown('<span class="field-label">Username:</span>', unsafe_allow_html=True)
             username = st.text_input("Username", label_visibility="collapsed", placeholder="Enter username")
             
-            st.write("") 
+            st.write("") # Small gap
             
+            # Password Field
             st.markdown('<span class="field-label">Password:</span>', unsafe_allow_html=True)
             password = st.text_input("Password", type="password", label_visibility="collapsed", placeholder="Enter password")
             
+            # Show Password Checkbox (Standard UI)
             st.checkbox("Show Password")
             
+            # Submit Action
             submit = st.form_submit_button("SIGN IN")
             
             if submit:
-                # Credentials check
+                # Based on your previous setup (admin/crypto123)
                 if username == "admin" and password == "crypto123":
                     st.session_state['authenticated'] = True
                     st.rerun()
                 else:
                     st.error("Invalid Username or Password")
         
+        # Footer Links matching your reference image
         st.markdown("""
         <div class="footer-links">
             Forgot <a href="#">Username / Password</a>?<br>
@@ -152,10 +159,10 @@ def show_login():
                     
         st.markdown('</div>', unsafe_allow_html=True)
 
-# --- APP FLOW ---
+# --- APP NAVIGATION ---
 if not st.session_state['authenticated']:
     show_login()
 else:
-    # Ensure you have dashboard.py in the same folder with a main() function
+    # This calls your dashboard script
     import dashboard
     dashboard.main()
