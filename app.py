@@ -11,7 +11,7 @@ st.set_page_config(
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
 
-# ---------------- THE ULTIMATE CENTER-BUTTON CSS ----------------
+# ---------------- THE "HARD-FIX" CSS ----------------
 st.markdown("""
 <style>
 /* 1. TOP NAVBAR FIX */
@@ -96,19 +96,20 @@ input {
     background-position: 12px center;
 }
 
-/* 7. FORCE BUTTON TO MIDDLE AND DOWN */
-/* Target the div that wraps the button inside the form */
-[data-testid="stForm"] > div:last-child {
+/* 7. THE FIX: CENTERED CYAN LOGIN BUTTON */
+/* Target the specific container that Streamlit uses for form buttons */
+div.stFormSubmitButton {
     display: flex !important;
     justify-content: center !important;
-    padding-top: 35px !important; /* Shifts the button slightly down */
+    width: 100% !important;
+    margin-top: 30px !important; /* Space it down */
 }
 
-div.stButton > button {
-    background-color: #4cc9f0 !important; /* Synchronized Cyan */
-    color: #0d1b2a !important;
+div.stFormSubmitButton > button {
+    background-color: #4cc9f0 !important; /* Forces Cyan Color */
+    color: #0d1b2a !important; /* Dark text for contrast */
     font-weight: 800 !important;
-    width: 180px !important; /* Slightly wider for better balance */
+    width: 160px !important; 
     border-radius: 6px !important;
     border: none !important;
     text-transform: uppercase;
@@ -116,10 +117,10 @@ div.stButton > button {
     transition: 0.3s;
 }
 
-div.stButton > button:hover {
+div.stFormSubmitButton > button:hover {
     background-color: #ffffff !important;
-    box-shadow: 0px 0px 20px rgba(76, 201, 240, 0.7);
-    transform: translateY(-2px);
+    box-shadow: 0px 0px 20px rgba(76, 201, 240, 0.6);
+    transform: scale(1.05);
 }
 </style>
 """, unsafe_allow_html=True)
@@ -146,11 +147,11 @@ def show_login():
             st.markdown('<span class="field-label">PASSWORD</span>', unsafe_allow_html=True)
             password = st.text_input("pass", type="password", label_visibility="collapsed", placeholder="••••••••")
 
-            # Centering logic is now handled by the CSS targeting the last-child div
+            # The button is automatically placed in the center via the CSS above
             submit = st.form_submit_button("LOGIN")
             
             if submit:
-                # Simple logic for Milestone 1 demo
+                # Based on your interest in software development and Python
                 if username == "admin" and password == "crypto123":
                     st.session_state.authenticated = True
                     st.rerun()
@@ -163,5 +164,6 @@ def show_login():
 if not st.session_state.authenticated:
     show_login()
 else:
+    # This calls the main logic for your cryptocurrency project
     import dashboard
     dashboard.main()
