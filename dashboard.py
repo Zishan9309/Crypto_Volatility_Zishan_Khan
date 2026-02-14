@@ -42,8 +42,8 @@ def main():
         
         /* SYNCHRONIZED CYAN BUTTONS */
         div.stButton > button {
-            background-color: transparent !important;
-            color: #4cc9f0 !important;
+            background-color: #4cc9f0 !important;
+            color: #ffffff !important;
             border: 1px solid #4cc9f0 !important;
             font-weight: 700 !important;
             border-radius: 4px !important;
@@ -51,8 +51,8 @@ def main():
         }
         
         div.stButton > button:hover {
-            background-color: #4cc9f0 !important;
-            color: #0d1b2a !important;
+            background-color: #ffffff !important;
+            color: #4cc9f0 !important;
         }
 
         .insight-box {
