@@ -110,7 +110,7 @@ div.stButton > button:hover {
 """, unsafe_allow_html=True)
 
 # [cite_start]---------------- NAVBAR (Milestone 1 Project Branding) [cite: 1, 6] ----------------
-st.markdown('<div style="position: fixed; top: 18px; left: 20px; z-index: 10000; color: white; font-weight: 800; font-size: 20px; letter-spacing: 1px;">CRYPTO RISK ANALYZER</div>', unsafe_allow_html=True)
+st.markdown('<div style="position: fixed; top: 18px; left: 20px; z-index: 10000; color: white; font-weight: 800; font-size: 20px; letter-spacing: 1px;"></div>', unsafe_allow_html=True)
 
 # [cite_start]---------------- AUTH PAGES (Decision Support Module) [cite: 20] ----------------
 def show_auth():
