@@ -10,6 +10,7 @@ st.set_page_config(
 )
 
 # ---------------- USER DATABASE (Milestone 1 Local Storage) ----------------
+# [cite_start]Requirement: Store fetched data into local storage (JSON/CSV) 
 USER_DB = "users.json"
 
 def load_users():
@@ -39,7 +40,7 @@ if "auth_mode" not in st.session_state:
 # ---------------- AUTH UI STYLING ----------------
 st.markdown("""
 <style>
-/* 1. TOP NAVBAR */
+[cite_start]/* 1. TOP NAVBAR (Milestone 1 UI Requirement) [cite: 9, 17] */
 [data-testid="stHeader"] {
     background-color: #0d1b2a !important;
     height: 60px !important;
@@ -78,15 +79,15 @@ div.stFormSubmitButton > button {
     text-transform: uppercase; padding: 12px !important; margin-top: 20px;
 }
 
-/* 4. TOGGLE TEXT STYLING (Transparent Buttons as Links) */
-.toggle-container {
-    text-align: center;
-    margin-top: 25px;
-    color: #778da9;
+/* 4. TOGGLE TEXT STYLING */
+.toggle-question {
+    color: #ffffff !important; /* Changed to White as requested */
     font-size: 14px;
+    margin-top: 25px;
+    display: inline-block;
 }
 
-/* Make the Streamlit button look like a text link */
+/* Make the Streamlit button look like a Cyan text link */
 div.stButton > button {
     background: none !important;
     border: none !important;
@@ -99,6 +100,7 @@ div.stButton > button {
     box-shadow: none !important;
     display: inline !important;
     width: auto !important;
+    margin-left: 5px !important;
 }
 
 div.stButton > button:hover {
@@ -107,10 +109,10 @@ div.stButton > button:hover {
 </style>
 """, unsafe_allow_html=True)
 
-# ---------------- NAVBAR ----------------
-st.markdown('<div style="position: fixed; top: 18px; left: 20px; z-index: 10000; color: white; font-weight: 800; font-size: 20px; letter-spacing: 1px;"></div>', unsafe_allow_html=True)
+# [cite_start]---------------- NAVBAR (Milestone 1 Project Branding) [cite: 1, 6] ----------------
+st.markdown('<div style="position: fixed; top: 18px; left: 20px; z-index: 10000; color: white; font-weight: 800; font-size: 20px; letter-spacing: 1px;">CRYPTO RISK ANALYZER</div>', unsafe_allow_html=True)
 
-# ---------------- AUTH PAGES ----------------
+# [cite_start]---------------- AUTH PAGES (Decision Support Module) [cite: 20] ----------------
 def show_auth():
     _, col_mid, _ = st.columns([1, 1.5, 1])
     
@@ -125,7 +127,6 @@ def show_auth():
                 st.markdown('<span class="field-label">PASSWORD</span>', unsafe_allow_html=True)
                 pwd = st.text_input("pass", type="password", label_visibility="collapsed", placeholder="••••••••")
                 
-                # Primary action button
                 if st.form_submit_button("LOGIN"):
                     users = load_users()
                     if user in users and users[user]["password"] == pwd:
@@ -135,9 +136,9 @@ def show_auth():
                     else:
                         st.error("Invalid credentials.")
             
-            # Text link navigation
-            st.write("Don't have an account?")
-            if st.button("Register"):
+            # White Question + Cyan Link
+            st.markdown('<span class="toggle-question">Don\'t have an account?</span>', unsafe_allow_html=True)
+            if st.button("Register", key="go_to_reg"):
                 st.session_state.auth_mode = "register"
                 st.rerun()
 
@@ -151,7 +152,6 @@ def show_auth():
                 st.markdown('<span class="field-label">PASSWORD</span>', unsafe_allow_html=True)
                 reg_pwd = st.text_input("reg_pass", type="password", label_visibility="collapsed", placeholder="Password")
                 
-                # Primary action button in Cyan
                 if st.form_submit_button("REGISTER"):
                     if reg_name and reg_user and reg_pwd:
                         if save_user(reg_name, reg_user, reg_pwd):
@@ -163,17 +163,18 @@ def show_auth():
                     else:
                         st.warning("All fields required.")
 
-            # Text link navigation
-            st.write("Already have an account?")
-            if st.button("Login"):
+            # White Question + Cyan Link
+            st.markdown('<span class="toggle-question">Already have an account?</span>', unsafe_allow_html=True)
+            if st.button("Login", key="go_to_login"):
                 st.session_state.auth_mode = "login"
                 st.rerun()
         
         st.markdown('</div>', unsafe_allow_html=True)
 
-# ---------------- APP FLOW ----------------
+# [cite_start]---------------- APP FLOW (Milestone 1 Workflow) [cite: 238] ----------------
 if not st.session_state.authenticated:
     show_auth()
 else:
+    # [cite_start]Navigate to the Data Visualization Module [cite: 33, 248]
     import dashboard
     dashboard.main()
