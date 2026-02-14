@@ -71,7 +71,6 @@ header, [data-testid="stHeader"] { display: none !important; }
 /* 3. INPUTS & CYAN BUTTONS */
 input { background-color: #ffffff !important; color: #0d1b2a !important; border-radius: 8px !important; height: 48px !important; }
 
-/* Target Form Submit Button */
 div.stFormSubmitButton > button {
     background-color: #4cc9f0 !important; color: #0d1b2a !important;
     font-weight: 800 !important; width: 100% !important;
@@ -79,25 +78,37 @@ div.stFormSubmitButton > button {
     text-transform: uppercase; padding: 12px !important; margin-top: 20px;
 }
 
-/* 4. TOGGLE LINK STYLING */
-.register-link-container {
+/* 4. TOGGLE TEXT STYLING (Transparent Buttons as Links) */
+.toggle-container {
     text-align: center;
     margin-top: 25px;
     color: #778da9;
     font-size: 14px;
 }
 
-.clickable-text {
-    color: #4cc9f0;
-    font-weight: 700;
-    text-decoration: underline;
-    cursor: pointer;
+/* Make the Streamlit button look like a text link */
+div.stButton > button {
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+    color: #4cc9f0 !important;
+    text-decoration: underline !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    text-transform: none !important;
+    box-shadow: none !important;
+    display: inline !important;
+    width: auto !important;
+}
+
+div.stButton > button:hover {
+    color: #ffffff !important;
 }
 </style>
 """, unsafe_allow_html=True)
 
 # ---------------- NAVBAR ----------------
-st.markdown('<div style="position: fixed; top: 18px; left: 20px; z-index: 10000; color: white; font-weight: 800; font-size: 20px; letter-spacing: 1px;">CRYPTO RISK ANALYZER</div>', unsafe_allow_html=True)
+st.markdown('<div style="position: fixed; top: 18px; left: 20px; z-index: 10000; color: white; font-weight: 800; font-size: 20px; letter-spacing: 1px;"></div>', unsafe_allow_html=True)
 
 # ---------------- AUTH PAGES ----------------
 def show_auth():
@@ -114,6 +125,7 @@ def show_auth():
                 st.markdown('<span class="field-label">PASSWORD</span>', unsafe_allow_html=True)
                 pwd = st.text_input("pass", type="password", label_visibility="collapsed", placeholder="••••••••")
                 
+                # Primary action button
                 if st.form_submit_button("LOGIN"):
                     users = load_users()
                     if user in users and users[user]["password"] == pwd:
@@ -123,9 +135,9 @@ def show_auth():
                     else:
                         st.error("Invalid credentials.")
             
-            # Simple text link instead of a button
-            st.markdown('<div class="register-link-container">Don\'t have an account?</div>', unsafe_allow_html=True)
-            if st.button("Register", key="reg_toggle_btn"):
+            # Text link navigation
+            st.write("Don't have an account?")
+            if st.button("Register"):
                 st.session_state.auth_mode = "register"
                 st.rerun()
 
@@ -139,17 +151,23 @@ def show_auth():
                 st.markdown('<span class="field-label">PASSWORD</span>', unsafe_allow_html=True)
                 reg_pwd = st.text_input("reg_pass", type="password", label_visibility="collapsed", placeholder="Password")
                 
-                # Register button remains Cyan
+                # Primary action button in Cyan
                 if st.form_submit_button("REGISTER"):
                     if reg_name and reg_user and reg_pwd:
                         if save_user(reg_name, reg_user, reg_pwd):
-                            st.success("Success! You can now Sign In.")
+                            st.success("Registration Successful!")
                             st.session_state.auth_mode = "login"
                             st.rerun()
                         else:
-                            st.error("Username already taken.")
+                            st.error("Username already exists.")
                     else:
                         st.warning("All fields required.")
+
+            # Text link navigation
+            st.write("Already have an account?")
+            if st.button("Login"):
+                st.session_state.auth_mode = "login"
+                st.rerun()
         
         st.markdown('</div>', unsafe_allow_html=True)
 
