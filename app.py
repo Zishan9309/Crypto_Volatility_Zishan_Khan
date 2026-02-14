@@ -15,14 +15,16 @@ USER_DB = "users.json"
 def load_users():
     if not os.path.exists(USER_DB):
         return {}
-    with open(USER_DB, "r") as f:
-        return json.load(f)
+    try:
+        with open(USER_DB, "r") as f:
+            return json.load(f)
+    except:
+        return {}
 
 def save_user(name, username, password):
     users = load_users()
     if username in users:
         return False
-    # Storing Name and Password associated with Username
     users[username] = {"name": name, "password": password}
     with open(USER_DB, "w") as f:
         json.dump(users, f)
@@ -69,17 +71,28 @@ header, [data-testid="stHeader"] { display: none !important; }
 /* 3. INPUTS & CYAN BUTTONS */
 input { background-color: #ffffff !important; color: #0d1b2a !important; border-radius: 8px !important; height: 48px !important; }
 
-div.stButton > button {
+/* Target Form Submit Button */
+div.stFormSubmitButton > button {
     background-color: #4cc9f0 !important; color: #0d1b2a !important;
     font-weight: 800 !important; width: 100% !important;
     border-radius: 6px !important; border: none !important;
-    text-transform: uppercase; padding: 12px !important; margin-top: 10px;
+    text-transform: uppercase; padding: 12px !important; margin-top: 20px;
 }
 
-/* 4. TOGGLE TEXT STYLING */
-.toggle-container { text-align: center; margin-top: 20px; color: #778da9; font-size: 14px; }
-.toggle-btn { color: #4cc9f0 !important; font-weight: 700; background: none !important; border: none !important; padding: 0 !important; text-decoration: underline; cursor: pointer; }
+/* 4. TOGGLE LINK STYLING */
+.register-link-container {
+    text-align: center;
+    margin-top: 25px;
+    color: #778da9;
+    font-size: 14px;
+}
 
+.clickable-text {
+    color: #4cc9f0;
+    font-weight: 700;
+    text-decoration: underline;
+    cursor: pointer;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -110,8 +123,9 @@ def show_auth():
                     else:
                         st.error("Invalid credentials.")
             
-            st.markdown('<div class="toggle-container">Don\'t have an account?</div>', unsafe_allow_html=True)
-            if st.button("Register Now"):
+            # Simple text link instead of a button
+            st.markdown('<div class="register-link-container">Don\'t have an account?</div>', unsafe_allow_html=True)
+            if st.button("Register", key="reg_toggle_btn"):
                 st.session_state.auth_mode = "register"
                 st.rerun()
 
@@ -119,27 +133,23 @@ def show_auth():
             st.markdown('<div class="auth-title">REGISTER</div>', unsafe_allow_html=True)
             with st.form("reg_form"):
                 st.markdown('<span class="field-label">NAME</span>', unsafe_allow_html=True)
-                reg_name = st.text_input("reg_name", label_visibility="collapsed", placeholder="Enter your full name")
+                reg_name = st.text_input("reg_name", label_visibility="collapsed", placeholder="Full Name")
                 st.markdown('<span class="field-label">USERNAME</span>', unsafe_allow_html=True)
-                reg_user = st.text_input("reg_user", label_visibility="collapsed", placeholder="Choose a username")
+                reg_user = st.text_input("reg_user", label_visibility="collapsed", placeholder="Username")
                 st.markdown('<span class="field-label">PASSWORD</span>', unsafe_allow_html=True)
-                reg_pwd = st.text_input("reg_pass", type="password", label_visibility="collapsed", placeholder="Create a password")
+                reg_pwd = st.text_input("reg_pass", type="password", label_visibility="collapsed", placeholder="Password")
                 
+                # Register button remains Cyan
                 if st.form_submit_button("REGISTER"):
                     if reg_name and reg_user and reg_pwd:
                         if save_user(reg_name, reg_user, reg_pwd):
-                            st.success("Registration Successful! Please Login.")
+                            st.success("Success! You can now Sign In.")
                             st.session_state.auth_mode = "login"
                             st.rerun()
                         else:
-                            st.error("Username already exists.")
+                            st.error("Username already taken.")
                     else:
-                        st.warning("Please fill all fields.")
-
-            st.markdown('<div class="toggle-container">Already have an account?</div>', unsafe_allow_html=True)
-            if st.button("Back to Login"):
-                st.session_state.auth_mode = "login"
-                st.rerun()
+                        st.warning("All fields required.")
         
         st.markdown('</div>', unsafe_allow_html=True)
 
