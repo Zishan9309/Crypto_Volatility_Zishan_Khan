@@ -40,19 +40,25 @@ def main():
             font-weight: 600 !important;
         }
         
-        /* SYNCHRONIZED CYAN BUTTONS */
+        /* UPDATED CYAN BUTTONS - Solid Cyan, White Text, No Underline */
         div.stButton > button {
             background-color: #4cc9f0 !important;
             color: #ffffff !important;
-            border: 1px solid #4cc9f0 !important;
+            border: none !important;
             font-weight: 700 !important;
-            border-radius: 4px !important;
+            border-radius: 6px !important;
+            padding: 10px 20px !important;
+            text-decoration: none !important; /* Removes underlines */
             transition: 0.3s;
+            box-shadow: 0px 4px 6px rgba(0,0,0,0.2);
         }
         
-        div.stButton > button:hover {
+        /* Remove hover underline specifically */
+        div.stButton > button:hover, div.stButton > button:focus, div.stButton > button:active {
             background-color: #ffffff !important;
             color: #4cc9f0 !important;
+            text-decoration: none !important;
+            border: 1px solid #4cc9f0 !important;
         }
 
         .insight-box {
@@ -106,8 +112,8 @@ def main():
     # ---------------- MAIN APP LOGIC ----------------
     data = fetch_real_data()
 
-    # Title & Logout Header
-    head_left, head_right = st.columns([4, 1])
+    # Title & Logout Header (Shifted Right)
+    head_left, head_right = st.columns([5, 1])
     with head_left:
         st.markdown("<h1 class='cyan-title'>☁️ Crypto Volatility & Risk Analyzer</h1>", unsafe_allow_html=True)
     with head_right:
@@ -137,10 +143,10 @@ def main():
 
     st.write("")
 
-    # 2. MARKET RISK MONITOR
-    col_t, col_r = st.columns([4, 1])
+    # 2. MARKET RISK MONITOR (Shifted Refresh Button Right)
+    col_t, col_r = st.columns([5, 1])
     col_t.markdown("<div class='cyan-title'>📋 Market Risk Monitor </div>", unsafe_allow_html=True)
-    if col_r.button("🔄 REFRESH DATA"):
+    if col_r.button("🔄 REFRESH"):
         st.cache_data.clear()
         st.rerun()
 
