@@ -9,7 +9,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# ---------------- USER STORAGE LOGIC (Milestone 1) ----------------
+# ---------------- USER DATABASE (Milestone 1 Local Storage) ----------------
 USER_DB = "users.json"
 
 def load_users():
@@ -18,11 +18,12 @@ def load_users():
     with open(USER_DB, "r") as f:
         return json.load(f)
 
-def save_user(username, password):
+def save_user(name, username, password):
     users = load_users()
     if username in users:
         return False
-    users[username] = password
+    # Storing Name and Password associated with Username
+    users[username] = {"name": name, "password": password}
     with open(USER_DB, "w") as f:
         json.dump(users, f)
     return True
@@ -31,7 +32,7 @@ def save_user(username, password):
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
 if "auth_mode" not in st.session_state:
-    st.session_state.auth_mode = "login"  # Default mode
+    st.session_state.auth_mode = "login"
 
 # ---------------- AUTH UI STYLING ----------------
 st.markdown("""
@@ -52,33 +53,40 @@ st.markdown("""
 header, [data-testid="stHeader"] { display: none !important; }
 .block-container { padding-top: 0rem !important; margin-top: -20px !important; }
 
-/* 2. CARD & TITLES */
+/* 2. BACKGROUND & CARD */
 .stApp { background-color: #0d1b2a !important; }
 .auth-card { background: transparent; width: 100%; max-width: 400px; margin: 60px auto; }
+
 .auth-title {
     color: #4cc9f0 !important; 
+    font-family: 'Inter', sans-serif;
     font-size: 34px; font-weight: 700;
     text-transform: uppercase; text-align: center; margin-bottom: 30px;
 }
+
 .field-label { color: #778da9; font-size: 13px; font-weight: 600; margin-bottom: 5px; display: block; }
 
-/* 3. INPUTS & BUTTONS */
+/* 3. INPUTS & CYAN BUTTONS */
 input { background-color: #ffffff !important; color: #0d1b2a !important; border-radius: 8px !important; height: 48px !important; }
+
 div.stButton > button {
     background-color: #4cc9f0 !important; color: #0d1b2a !important;
     font-weight: 800 !important; width: 100% !important;
     border-radius: 6px !important; border: none !important;
-    text-transform: uppercase; padding: 12px !important; margin-top: 20px;
+    text-transform: uppercase; padding: 12px !important; margin-top: 10px;
 }
-.toggle-text { color: #778da9; text-align: center; margin-top: 15px; cursor: pointer; font-size: 14px; }
-.toggle-link { color: #4cc9f0; font-weight: 700; text-decoration: none; }
+
+/* 4. TOGGLE TEXT STYLING */
+.toggle-container { text-align: center; margin-top: 20px; color: #778da9; font-size: 14px; }
+.toggle-btn { color: #4cc9f0 !important; font-weight: 700; background: none !important; border: none !important; padding: 0 !important; text-decoration: underline; cursor: pointer; }
+
 </style>
 """, unsafe_allow_html=True)
 
 # ---------------- NAVBAR ----------------
-st.markdown('<div style="position: fixed; top: 18px; left: 20px; z-index: 10000; color: white; font-weight: 800; font-size: 20px;">CRYPTO RISK ANALYZER</div>', unsafe_allow_html=True)
+st.markdown('<div style="position: fixed; top: 18px; left: 20px; z-index: 10000; color: white; font-weight: 800; font-size: 20px; letter-spacing: 1px;">CRYPTO RISK ANALYZER</div>', unsafe_allow_html=True)
 
-# ---------------- AUTHENTICATION PAGES ----------------
+# ---------------- AUTH PAGES ----------------
 def show_auth():
     _, col_mid, _ = st.columns([1, 1.5, 1])
     
@@ -89,33 +97,37 @@ def show_auth():
             st.markdown('<div class="auth-title">SIGN IN</div>', unsafe_allow_html=True)
             with st.form("login_form"):
                 st.markdown('<span class="field-label">USERNAME</span>', unsafe_allow_html=True)
-                user = st.text_input("user", label_visibility="collapsed")
+                user = st.text_input("user", label_visibility="collapsed", placeholder="Enter username")
                 st.markdown('<span class="field-label">PASSWORD</span>', unsafe_allow_html=True)
-                pwd = st.text_input("pass", type="password", label_visibility="collapsed")
+                pwd = st.text_input("pass", type="password", label_visibility="collapsed", placeholder="••••••••")
+                
                 if st.form_submit_button("LOGIN"):
                     users = load_users()
-                    if user in users and users[user] == pwd:
+                    if user in users and users[user]["password"] == pwd:
                         st.session_state.authenticated = True
+                        st.session_state.current_user = users[user]["name"]
                         st.rerun()
                     else:
                         st.error("Invalid credentials.")
             
-            # Link to Register
-            st.markdown('<div class="toggle-text">New here? </div>', unsafe_allow_html=True)
-            if st.button("Create an Account"):
+            st.markdown('<div class="toggle-container">Don\'t have an account?</div>', unsafe_allow_html=True)
+            if st.button("Register Now"):
                 st.session_state.auth_mode = "register"
                 st.rerun()
 
         else:
             st.markdown('<div class="auth-title">REGISTER</div>', unsafe_allow_html=True)
             with st.form("reg_form"):
-                st.markdown('<span class="field-label">CHOOSE USERNAME</span>', unsafe_allow_html=True)
-                new_user = st.text_input("new_user", label_visibility="collapsed")
-                st.markdown('<span class="field-label">CHOOSE PASSWORD</span>', unsafe_allow_html=True)
-                new_pwd = st.text_input("new_pass", type="password", label_visibility="collapsed")
-                if st.form_submit_button("REGISTER NOW"):
-                    if new_user and new_pwd:
-                        if save_user(new_user, new_pwd):
+                st.markdown('<span class="field-label">NAME</span>', unsafe_allow_html=True)
+                reg_name = st.text_input("reg_name", label_visibility="collapsed", placeholder="Enter your full name")
+                st.markdown('<span class="field-label">USERNAME</span>', unsafe_allow_html=True)
+                reg_user = st.text_input("reg_user", label_visibility="collapsed", placeholder="Choose a username")
+                st.markdown('<span class="field-label">PASSWORD</span>', unsafe_allow_html=True)
+                reg_pwd = st.text_input("reg_pass", type="password", label_visibility="collapsed", placeholder="Create a password")
+                
+                if st.form_submit_button("REGISTER"):
+                    if reg_name and reg_user and reg_pwd:
+                        if save_user(reg_name, reg_user, reg_pwd):
                             st.success("Registration Successful! Please Login.")
                             st.session_state.auth_mode = "login"
                             st.rerun()
@@ -124,15 +136,14 @@ def show_auth():
                     else:
                         st.warning("Please fill all fields.")
 
-            # Link to Login
-            st.markdown('<div class="toggle-text">Already have an account? </div>', unsafe_allow_html=True)
+            st.markdown('<div class="toggle-container">Already have an account?</div>', unsafe_allow_html=True)
             if st.button("Back to Login"):
                 st.session_state.auth_mode = "login"
                 st.rerun()
         
         st.markdown('</div>', unsafe_allow_html=True)
 
-# ---------------- FLOW CONTROL ----------------
+# ---------------- APP FLOW ----------------
 if not st.session_state.authenticated:
     show_auth()
 else:
