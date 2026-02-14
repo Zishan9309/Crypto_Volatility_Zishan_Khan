@@ -165,7 +165,7 @@ def main():
             <table style="width:100%; border-collapse:collapse; text-align:left;">
                 <thead style="position: sticky; top: 0; background: #1b263b; z-index: 10;">
                     <tr style="border-bottom: 2px solid #415a77; color:#778da9; font-size:11px; letter-spacing:1px;">
-                        <th style="padding:12px;">ASSET</th><th style="padding:12px;">PRICE (USD)</th>
+                        <th style="padding:12px;">CRYPTO CURRENCIES</th><th style="padding:12px;">PRICE (USD)</th>
                         <th style="padding:12px;">24H CHANGE</th><th style="padding:12px;">RISK STATUS</th>
                         <th style="padding:12px; text-align:right;">STATUS</th>
                     </tr>
