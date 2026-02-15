@@ -9,6 +9,7 @@ from datetime import datetime
 
 def main():
     # ---------------- UI STYLING & FULL SCREEN FIX ----------------
+    # [cite_start]Milestone 3: Build interactive visualizations 
     st.markdown("""
     <style>
         /* Force the entire app to use full available width */
@@ -16,6 +17,7 @@ def main():
             padding-left: 1rem !important;
             padding-right: 1rem !important;
             max-width: 100% !important;
+            padding-top: 2rem !important;
         }
 
         .stApp { background-color: #0d1b2a !important; }
@@ -75,6 +77,7 @@ def main():
         div.stButton > button:hover {
             background-color: #ffffff !important;
             color: #4cc9f0 !important;
+            text-decoration: none !important;
         }
 
         .insight-box {
@@ -87,12 +90,13 @@ def main():
             width: 100% !important;
         }
 
-        .white-edu-text { color: #ffffff !important; font-size: 16px; }
+        .white-edu-text { color: #ffffff !important; font-size: 16px; line-height: 1.6; }
         .white-bullets li { color: #ffffff !important; margin-bottom: 12px; }
     </style>
     """, unsafe_allow_html=True)
 
     # ---------------- DATA FETCHING ----------------
+    # [cite_start]Milestone 1: API Integration and Dynamic Data Fetching [cite: 12, 54]
     @st.cache_data(ttl=300)
     def fetch_real_data():
         url = "https://api.coingecko.com/api/v3/coins/markets"
@@ -106,6 +110,7 @@ def main():
         except:
             return []
 
+    # [cite_start]Milestone 4: Define thresholds for risk levels [cite: 194]
     def get_risk_info(change):
         abs_change = abs(change or 0)
         if abs_change > 5: return "HIGH", "#ef476f"
@@ -114,7 +119,7 @@ def main():
 
     data = fetch_real_data()
 
-    # ---------------- NAVBAR (FULL WIDTH) ----------------
+    # ---------------- NAVBAR ----------------
     tab_home, tab_about, tab_contact, tab_milestone = st.tabs(["🏠 HOME", "📖 ABOUT", "📞 CONTACT", "🚀 MILESTONES"])
 
     with tab_home:
@@ -196,25 +201,41 @@ def main():
             fig_p.update_layout(paper_bgcolor='rgba(0,0,0,0)', font_color="white", height=280, margin=dict(t=10,b=10))
             st.plotly_chart(fig_p, use_container_width=True)
 
+            # [cite_start]Milestone 3: Interactive Analytical Dashboard 
             st.markdown(f"""<div class="insight-box"><b style="color:#4cc9f0; font-size:18px;">💡 Market Insights</b><br><br>• <b>Volatility Status:</b> { 'Extreme' if risk_exp > 30 else 'Stable' } market detected.<br>• <b>Leading Risk:</b> { high_risk_assets[0].get('name') if high_risk_assets else 'None' } is active.<br>• <b>Advice:</b> Consider <b>Hedged</b> positions for {selected_coin}.<br>• <b>Analysis Confidence:</b> 94.2% accuracy.</div>""", unsafe_allow_html=True)
 
     with tab_about:
         st.markdown("<h2 style='color:#4cc9f0; text-align:center;'>🚀 New to Crypto Risk?</h2>", unsafe_allow_html=True)
-        st.markdown('<p class="white-edu-text">Welcome! To analyze the market like a pro, you need to understand three core pillars.</p>', unsafe_allow_html=True)
+        st.markdown('<p class="white-edu-text">Welcome! To analyze the market like a pro, you need to understand three core pillars. Use the interactive table and guides below to start your journey.</p>', unsafe_allow_html=True)
+
         info_col1, info_col2, info_col3 = st.columns(3)
-        with info_col1: st.markdown('<div class="insight-box" style="height:220px;"><b style="color:#4cc9f0; font-size:18px;">💎 What is Crypto?</b><br><br>Digital currencies secured by cryptography operating on decentralized Blockchains.</div>', unsafe_allow_html=True)
-        with info_col2: st.markdown('<div class="insight-box" style="height:220px; border-left-color:#ffd166;"><b style="color:#ffd166; font-size:18px;">📉 What is Volatility?</b><br><br>A measure of price swings over time. High volatility equates to high potential reward but increased risk.</div>', unsafe_allow_html=True)
-        with info_col3: st.markdown('<div class="insight-box" style="height:220px; border-left-color:#ef476f;"><b style="color:#ef476f; font-size:18px;">🛡️ What is Risk?</b><br><br>The probability of losing an investment, measured via statistical metrics like Sharpe and Beta.</div>', unsafe_allow_html=True)
+        [cite_start]with info_col1: st.markdown('<div class="insight-box" style="height:220px;"><b style="color:#4cc9f0; font-size:18px;">💎 What is Crypto?</b><br><br>Digital or virtual currencies secured by cryptography operating on decentralized blockchains[cite: 7, 8].</div>', unsafe_allow_html=True)
+        [cite_start]with info_col2: st.markdown('<div class="insight-box" style="height:220px; border-left-color:#ffd166;"><b style="color:#ffd166; font-size:18px;">📉 What is Volatility?</b><br><br>A measure of price swings over time. High volatility equates to high potential reward but increased risk[cite: 7].</div>', unsafe_allow_html=True)
+        [cite_start]with info_col3: st.markdown('<div class="insight-box" style="height:220px; border-left-color:#ef476f;"><b style="color:#ef476f; font-size:18px;">🛡️ What is Risk?</b><br><br>The probability of losing an investment, measured via metrics like Sharpe and Beta[cite: 8, 31].</div>', unsafe_allow_html=True)
+
         st.write("---")
+        # [cite_start]Milestone 2: Risk-Return maps using Plotly [cite: 34]
         st.markdown("<h3 style='color:white;'>📊 Risk-Level Comparison Table</h3>", unsafe_allow_html=True)
-        about_table = f"""<div style="background:#1b263b; padding:20px; border-radius:12px; border:1px solid #415a77; width:100%;"><table style="width:100%; border-collapse:collapse; color:white; font-family:sans-serif;"><thead><tr style="background:#4cc9f0; color:#0d1b2a; text-align:left;"><th style="padding:15px;">CATEGORY</th><th style="padding:15px;">VOLATILITY</th><th style="padding:15px;">INVESTOR TYPE</th><th style="padding:15px;">TYPICAL ASSET</th></tr></thead><tbody><tr style="border-bottom: 1px solid #415a77;"><td style="padding:15px; color:#06d6a0; font-weight:bold;">Low Risk</td><td style="padding:15px;">Stable (0-2%)</td><td style="padding:15px;">Conservative</td><td style="padding:15px;">Stablecoins</td></tr><tr style="border-bottom: 1px solid #415a77;"><td style="padding:15px; color:#ffd166; font-weight:bold;">Medium Risk</td><td style="padding:15px;">Moderate (2-5%)</td><td style="padding:15px;">Growth-Oriented</td><td style="padding:15px;">ETH</td></tr><tr><td style="padding:15px; color:#ef476f; font-weight:bold;">High Risk</td><td style="padding:15px;">Extreme (5%+)</td><td style="padding:15px;">Speculative</td><td style="padding:15px;">Meme coins</td></tr></tbody></table></div>"""
+        about_table = f"""<div style="background:#1b263b; padding:20px; border-radius:12px; border:1px solid #415a77; width:100%;"><table style="width:100%; border-collapse:collapse; color:white; font-family:sans-serif;"><thead><tr style="background:#4cc9f0; color:#0d1b2a; text-align:left;"><th style="padding:15px;">CATEGORY</th><th style="padding:15px;">VOLATILITY</th><th style="padding:15px;">INVESTOR TYPE</th><th style="padding:15px;">TYPICAL ASSET</th></tr></thead><tbody><tr style="border-bottom: 1px solid #415a77;"><td style="padding:15px; color:#06d6a0; font-weight:bold;">Low Risk</td><td style="padding:15px;">Stable (0-2%)</td><td style="padding:15px;">Conservative</td><td style="padding:15px;">Stablecoins / BTC</td></tr><tr style="border-bottom: 1px solid #415a77;"><td style="padding:15px; color:#ffd166; font-weight:bold;">Medium Risk</td><td style="padding:15px;">Moderate (2-5%)</td><td style="padding:15px;">Growth-Oriented</td><td style="padding:15px;">ETH / Top 10 Alts</td></tr><tr><td style="padding:15px; color:#ef476f; font-weight:bold;">High Risk</td><td style="padding:15px;">Extreme (5%+)</td><td style="padding:15px;">Speculative</td><td style="padding:15px;">Meme coins / New tokens</td></tr></tbody></table></div>"""
         st.markdown(about_table, unsafe_allow_html=True)
 
+        st.markdown("<br><h3 style='color:white;'>🔍 How to read our Dashboard</h3>", unsafe_allow_html=True)
+        [cite_start]st.markdown("""<ul class="white-bullets"><li><b>Market Monitor:</b> Live price updates and risk status [cite: 17][cite_start].</li><li><b>Trend Analysis:</b> 7-Day movement helps you spot price patterns [cite: 32][cite_start].</li><li><b>Volume Demand:</b> Shows the "interest" level of other traders [cite: 8][cite_start].</li><li><b>Sentiment:</b> Provides a combined "Confidence Score" for the asset[cite: 20].</li></ul>""", unsafe_allow_html=True)
+
     with tab_contact:
-        [cite_start]st.markdown(f"""<div class="insight-box" style="border-left-color: #ffffff;"><b style="color:#4cc9f0; font-size:20px;">DEVELOPER SUPPORT</b><br><br>For technical issues or API integration queries, please reach out to the project lead[cite: 223].<br><b>Location:</b> Nagpur, MH | [cite_start]<b>System:</b> AI-Driven Risk Analysis [cite: 10]</div>""", unsafe_allow_html=True)
+        st.markdown("""<div class="insight-box" style="border-left-color: #ffffff;">
+            <b style="color:#4cc9f0; font-size:20px;">DEVELOPER SUPPORT</b><br><br>
+            [cite_start]For technical issues or API integration queries, please reach out to the project lead[cite: 223].<br>
+            <b>Location:</b> Nagpur, MH | [cite_start]<b>System:</b> AI-Driven Risk Analysis [cite: 10]
+        </div>""", unsafe_allow_html=True)
 
     with tab_milestone:
-        [cite_start]st.markdown(f"""<div class="insight-box" style="border-left-color: #06d6a0;"><b style="color:#4cc9f0; font-size:20px;">CURRENT PROGRESS</b><br><br>✅ <b>Milestone 1:</b> Data Acquisition & Local Storage [cite: 41, 45][cite_start].<br>⏳ <b>Milestone 2:</b> Statistical Measures (Sharpe/Beta) [cite: 93, 100][cite_start].<br>⏳ <b>Milestone 3:</b> Interactive Analytical Dashboard[cite: 151].</div>""", unsafe_allow_html=True)
+        st.markdown("""<div class="insight-box" style="border-left-color: #06d6a0;">
+            <b style="color:#4cc9f0; font-size:20px;">CURRENT PROGRESS</b><br><br>
+            [cite_start]✅ <b>Milestone 1:</b> Data Acquisition & Local Storage[cite: 41, 45].<br>
+            [cite_start]⏳ <b>Milestone 2:</b> Statistical Measures (Sharpe/Beta)[cite: 93, 100].<br>
+            [cite_start]⏳ <b>Milestone 3:</b> Interactive Analytical Dashboard[cite: 151].
+        </div>""", unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()
