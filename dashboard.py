@@ -40,7 +40,7 @@ def main():
             font-weight: 600 !important;
         }
         
-        /* UPDATED CYAN BUTTONS - Solid Cyan, White Text, No Underline */
+        /* SOLID CYAN BUTTONS - WHITE TEXT - NO UNDERLINE */
         div.stButton > button {
             background-color: #4cc9f0 !important;
             color: #ffffff !important;
@@ -48,17 +48,15 @@ def main():
             font-weight: 700 !important;
             border-radius: 6px !important;
             padding: 10px 20px !important;
-            text-decoration: none !important; /* Removes underlines */
+            text-decoration: none !important;
             transition: 0.3s;
             box-shadow: 0px 4px 6px rgba(0,0,0,0.2);
         }
         
-        /* Remove hover underline specifically */
-        div.stButton > button:hover, div.stButton > button:focus, div.stButton > button:active {
+        div.stButton > button:hover {
             background-color: #ffffff !important;
             color: #4cc9f0 !important;
             text-decoration: none !important;
-            border: 1px solid #4cc9f0 !important;
         }
 
         .insight-box {
@@ -79,7 +77,7 @@ def main():
     </style>
     """, unsafe_allow_html=True)
 
-    # ---------------- DATA FETCHING WITH KEY ----------------
+    # ---------------- DATA FETCHING ----------------
     @st.cache_data(ttl=300)
     def fetch_real_data():
         url = "https://api.coingecko.com/api/v3/coins/markets"
@@ -109,10 +107,9 @@ def main():
         if abs_change > 2: return "MEDIUM", "#ffd166"
         return "LOW", "#06d6a0"
 
-    # ---------------- MAIN APP LOGIC ----------------
     data = fetch_real_data()
 
-    # Title & Logout Header (Shifted Right)
+    # Title & Logout
     head_left, head_right = st.columns([5, 1])
     with head_left:
         st.markdown("<h1 class='cyan-title'>☁️ Crypto Volatility & Risk Analyzer</h1>", unsafe_allow_html=True)
@@ -127,14 +124,13 @@ def main():
         st.warning("⚠️ API connection busy. Please wait a moment.")
         st.stop()
 
-    # KPI CALCULATIONS
+    # KPI Row
     total_coins = len(data)
     high_risk_assets = [c for c in data if abs(c.get('price_change_percentage_24h', 0) or 0) > 5]
     high_risk = len(high_risk_assets)
     low_risk = len([c for c in data if abs(c.get('price_change_percentage_24h', 0) or 0) <= 2])
     risk_exp = (high_risk / total_coins) * 100 if total_coins > 0 else 0
 
-    # KPI ROW
     sum_col1, sum_col2, sum_col3, sum_col4 = st.columns(4)
     sum_col1.markdown(f"<div class='kpi-card'><div class='kpi-label'>Total Assets</div><div class='kpi-value'>{total_coins}</div></div>", unsafe_allow_html=True)
     sum_col2.markdown(f"<div class='kpi-card'><div class='kpi-label'>High Risk</div><div class='kpi-value' style='color:#ef476f;'>{high_risk}</div></div>", unsafe_allow_html=True)
@@ -143,7 +139,7 @@ def main():
 
     st.write("")
 
-    # 2. MARKET RISK MONITOR (Shifted Refresh Button Right)
+    # 2. MARKET RISK MONITOR
     col_t, col_r = st.columns([5, 1])
     col_t.markdown("<div class='cyan-title'>📋 Market Risk Monitor </div>", unsafe_allow_html=True)
     if col_r.button("🔄 REFRESH"):
@@ -165,15 +161,18 @@ def main():
         </tr>
         """
 
+    # UPDATED: Cyan Header row and White text color
     full_table_html = f"""
     <div style="background:#1b263b; padding:15px; border-radius:12px; border:1px solid #415a77; font-family:sans-serif; color:white;">
         <div style="max-height: 400px; overflow-y: auto;">
             <table style="width:100%; border-collapse:collapse; text-align:left;">
-                <thead style="position: sticky; top: 0; background: #1b263b; z-index: 10;">
-                    <tr style="border-bottom: 2px solid #415a77; color:#778da9; font-size:11px; letter-spacing:1px;">
-                        <th style="padding:12px;">CRYPTO CURRENCIES</th><th style="padding:12px;">PRICE (USD)</th>
-                        <th style="padding:12px;">24H CHANGE</th><th style="padding:12px;">RISK STATUS</th>
-                        <th style="padding:12px; text-align:right;">STATUS</th>
+                <thead style="position: sticky; top: 0; background: #4cc9f0; z-index: 10;">
+                    <tr style="color:white; font-size:12px; letter-spacing:1px; font-weight:bold;">
+                        <th style="padding:15px;">CRYPTO CURRENCIES</th>
+                        <th style="padding:15px;">PRICE (USD)</th>
+                        <th style="padding:15px;">24H CHANGE</th>
+                        <th style="padding:15px;">RISK STATUS</th>
+                        <th style="padding:15px; text-align:right;">STATUS</th>
                     </tr>
                 </thead>
                 <tbody>{table_rows}</tbody>
@@ -185,9 +184,8 @@ def main():
     
     st.write("---")
 
-    # 3. CHARTS SECTION
+    # 3. CHARTS
     col_a, col_b = st.columns([1.2, 1])
-    
     with col_a:
         st.markdown("<div class='cyan-title'>📊 Demand & Price Trend</div>", unsafe_allow_html=True)
         coin_names = [c.get('name') for c in data if isinstance(c, dict)]
@@ -196,20 +194,15 @@ def main():
         
         if coin_obj and 'sparkline_in_7d' in coin_obj:
             y_data = coin_obj['sparkline_in_7d']['price']
-            
-            # Line Chart
             fig_t = go.Figure()
             fig_t.add_trace(go.Scatter(y=y_data, mode='lines', line=dict(color='#4cc9f0', width=3), fill='tozeroy', fillcolor='rgba(76, 201, 240, 0.1)'))
-            fig_t.update_layout(paper_bgcolor='#1b263b', plot_bgcolor='rgba(0,0,0,0)', font_color="white", height=230, margin=dict(l=40,r=10,t=10,b=40),
-                                xaxis=dict(title="7D Timeline"), yaxis=dict(title="Price (USD)"))
+            fig_t.update_layout(paper_bgcolor='#1b263b', plot_bgcolor='rgba(0,0,0,0)', font_color="white", height=230, margin=dict(l=40,r=10,t=10,b=40))
             st.plotly_chart(fig_t, use_container_width=True)
 
-            # Bar Chart: Volume/Demand
             vol_data = [abs(v * (1 + np.random.uniform(-0.15, 0.15))) for v in y_data[::6]]
             fig_bar = go.Figure(go.Bar(x=list(range(len(vol_data))), y=vol_data, 
                                         marker_color=['#4cc9f0' if d > np.mean(vol_data) else '#1b4965' for d in vol_data]))
-            fig_bar.update_layout(paper_bgcolor='#1b263b', plot_bgcolor='rgba(0,0,0,0)', font_color="white", height=230, margin=dict(l=40,r=10,t=10,b=40),
-                                    xaxis=dict(title="Demand Fluctuations"), yaxis=dict(title="Volume"))
+            fig_bar.update_layout(paper_bgcolor='#1b263b', plot_bgcolor='rgba(0,0,0,0)', font_color="white", height=230, margin=dict(l=40,r=10,t=10,b=40))
             st.plotly_chart(fig_bar, use_container_width=True)
 
     with col_b:
@@ -224,7 +217,6 @@ def main():
         fig_p.update_layout(paper_bgcolor='rgba(0,0,0,0)', font_color="white", height=280, margin=dict(t=10,b=10))
         st.plotly_chart(fig_p, use_container_width=True)
 
-        # MARKET INSIGHT BOX
         st.markdown(f"""
         <div class="insight-box">
             <b style="color:#4cc9f0; font-size:18px;">💡 Market Insights</b><br><br>
