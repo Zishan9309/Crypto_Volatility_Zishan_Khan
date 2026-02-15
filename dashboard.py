@@ -132,13 +132,88 @@ def main():
         pass # Dashboard remains visible below
 
     with tab_about:
-        st.markdown(f"""
-        <div class="insight-box">
-            <b style="color:#4cc9f0; font-size:20px;">PROJECT OBJECTIVE</b><br>
-            [cite_start]The project aims to analyze and visualize volatility patterns of cryptocurrencies to estimate risk levels over time[cite: 7]. 
-            [cite_start]It leverages real-time data from CoinGecko to compute financial indicators[cite: 8].
+        # --- Educational Header ---
+        st.markdown("<h2 style='color:#4cc9f0; text-align:center;'>🚀 New to Crypto Risk?</h2>", unsafe_allow_html=True)
+        st.write("Welcome! To analyze the market like a pro, you need to understand three core pillars. Use the interactive table and guides below to start your journey.")
+
+        # --- Pill 1: Knowledge Cards ---
+        info_col1, info_col2, info_col3 = st.columns(3)
+        
+        with info_col1:
+            st.markdown("""
+            <div class="insight-box" style="height:220px;">
+                <b style="color:#4cc9f0; font-size:18px;">💎 What is Crypto?</b><br><br>
+                Digital or virtual currencies secured by cryptography. They operate on decentralized networks called Blockchains.
+            </div>
+            """, unsafe_allow_html=True)
+            
+        with info_col2:
+            st.markdown("""
+            <div class="insight-box" style="height:220px; border-left-color:#ffd166;">
+                <b style="color:#ffd166; font-size:18px;">📉 What is Volatility?</b><br><br>
+                A measure of how much an asset's price "swings" over time. High volatility means high potential profit, but also high risk.
+            </div>
+            """, unsafe_allow_html=True)
+            
+        with info_col3:
+            st.markdown("""
+            <div class="insight-box" style="height:220px; border-left-color:#ef476f;">
+                <b style="color:#ef476f; font-size:18px;">🛡️ What is Risk?</b><br><br>
+                The probability of losing your investment. We calculate this using <b>Beta</b> and <b>Sharpe Ratios</b> to help you stay safe.
+            </div>
+            """, unsafe_allow_html=True)
+
+        st.write("---")
+
+        # --- Pill 2: Interactive Strategy Table ---
+        st.markdown("<h3 style='color:white;'>📊 Risk-Level Comparison Table</h3>", unsafe_allow_html=True)
+        
+        # Educational Table HTML
+        about_table = f"""
+        <div style="background:#1b263b; padding:20px; border-radius:12px; border:1px solid #415a77;">
+            <table style="width:100%; border-collapse:collapse; color:white; font-family:sans-serif;">
+                <thead>
+                    <tr style="background:#4cc9f0; color:#0d1b2a; text-align:left;">
+                        <th style="padding:12px;">CATEGORY</th>
+                        <th style="padding:12px;">VOLATILITY</th>
+                        <th style="padding:12px;">INVESTOR TYPE</th>
+                        <th style="padding:12px;">TYPICAL ASSET</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="border-bottom: 1px solid #415a77;">
+                        <td style="padding:12px; color:#06d6a0; font-weight:bold;">Low Risk</td>
+                        <td style="padding:12px;">Stable (0-2%)</td>
+                        <td style="padding:12px;">Conservative</td>
+                        <td style="padding:12px;">Stablecoins / BTC</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #415a77;">
+                        <td style="padding:12px; color:#ffd166; font-weight:bold;">Medium Risk</td>
+                        <td style="padding:12px;">Moderate (2-5%)</td>
+                        <td style="padding:12px;">Growth-Oriented</td>
+                        <td style="padding:12px;">ETH / Top 10 Alts</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:12px; color:#ef476f; font-weight:bold;">High Risk</td>
+                        <td style="padding:12px;">Extreme (5%+)</td>
+                        <td style="padding:12px;">Speculative</td>
+                        <td style="padding:12px;">Meme coins / New tokens</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
-        """, unsafe_allow_html=True)
+        """
+        st.markdown(about_table, unsafe_allow_html=True)
+
+        # --- Pill 3: Interactive Guide ---
+        st.write("")
+        with st.expander("🔍 Click to see How to read our Dashboard"):
+            st.markdown("""
+            * [cite_start]**Market Monitor:** Live price updates and risk status[cite: 17, 19].
+            * [cite_start]**Trend Analysis:** 7-Day movement helps you spot price patterns[cite: 32, 102].
+            * [cite_start]**Volume Demand:** Shows the "interest" level of other traders[cite: 8, 24].
+            * [cite_start]**Sentiment:** Provides a combined "Confidence Score" for the asset[cite: 20, 39].
+            """)
 
     with tab_contact:
         st.markdown(f"""
