@@ -23,6 +23,19 @@ def main():
             margin-bottom: 20px;
         }
 
+        /* TAB STYLING: White to Cyan Hover */
+        button[data-baseweb="tab"] p {
+            color: white !important;
+            transition: 0.3s;
+            font-weight: 600 !important;
+        }
+        button[data-baseweb="tab"]:hover p {
+            color: #4cc9f0 !important;
+        }
+        button[data-baseweb="tab"][aria-selected="true"] p {
+            color: #4cc9f0 !important;
+        }
+
         /* KPI Card Styling */
         .kpi-card {
             background-color: #1b263b;
@@ -75,16 +88,6 @@ def main():
             border: 1px solid #415a77;
             padding: 10px;
         }
-
-        /* NAVBAR STYLING */
-        .nav-container {
-            display: flex;
-            justify-content: flex-end;
-            gap: 20px;
-            padding: 10px 0;
-            border-bottom: 1px solid #415a77;
-            margin-bottom: 20px;
-        }
     </style>
     """, unsafe_allow_html=True)
 
@@ -133,7 +136,7 @@ def main():
         <div class="insight-box">
             <b style="color:#4cc9f0; font-size:20px;">PROJECT OBJECTIVE</b><br>
             [cite_start]The project aims to analyze and visualize volatility patterns of cryptocurrencies to estimate risk levels over time[cite: 7]. 
-            [cite_start]It leverages real-time data from CoinGecko to compute financial indicators[cite: 8, 15].
+            [cite_start]It leverages real-time data from CoinGecko to compute financial indicators[cite: 8].
         </div>
         """, unsafe_allow_html=True)
 
@@ -141,8 +144,8 @@ def main():
         st.markdown(f"""
         <div class="insight-box" style="border-left-color: #ffffff;">
             <b style="color:#4cc9f0; font-size:20px;">DEVELOPER SUPPORT</b><br>
-            [cite_start]For technical issues or API integration queries, please reach out to the project lead.<br>
-            <b>Location:</b> Nagpur, MH | <b>System:</b> AI-Driven Risk Analysis
+            [cite_start]For technical issues or API integration queries, please reach out to the project lead[cite: 223].<br>
+            <b>Location:</b> Nagpur, MH | [cite_start]<b>System:</b> AI-Driven Risk Analysis [cite: 10]
         </div>
         """, unsafe_allow_html=True)
 
@@ -150,9 +153,9 @@ def main():
         st.markdown(f"""
         <div class="insight-box" style="border-left-color: #06d6a0;">
             <b style="color:#4cc9f0; font-size:20px;">CURRENT PROGRESS</b><br>
-            [cite_start]✅ <b>Milestone 1:</b> Data Acquisition & Local Storage[cite: 41, 51].<br>
-            [cite_start]⏳ <b>Milestone 2:</b> Statistical Measures (Sharpe/Beta)[cite: 93, 105].<br>
-            [cite_start]⏳ <b>Milestone 3:</b> Interactive Analytical Dashboard[cite: 151, 161].
+            [cite_start]✅ <b>Milestone 1:</b> Data Acquisition & Local Storage[cite: 41, 45].<br>
+            [cite_start]⏳ <b>Milestone 2:</b> Statistical Measures (Sharpe/Beta)[cite: 93, 100, 101].<br>
+            [cite_start]⏳ <b>Milestone 3:</b> Interactive Analytical Dashboard[cite: 151, 154].
         </div>
         """, unsafe_allow_html=True)
 
