@@ -224,11 +224,56 @@ def main():
         </ul>""", unsafe_allow_html=True)
 
     with tab_contact:
-        st.markdown("""<div class="insight-box" style="border-left-color: #ffffff;">
-            <b style="color:#4cc9f0; font-size:20px;">DEVELOPER SUPPORT</b><br><br>
-            [cite_start]For technical issues or API integration queries, please reach out to the project lead[cite: 223].<br>
-            <b>Location:</b> Nagpur, MH | [cite_start]<b>System:</b> AI-Driven Risk Analysis 
-        </div>""", unsafe_allow_html=True)
+        # --- Contact Header ---
+        st.markdown("<h2 style='color:#4cc9f0; text-align:center;'>📞 Connect with the Developer</h2>", unsafe_allow_html=True)
+        st.markdown('<p class="white-edu-text" style="text-align:center;">Need assistance with API integration or technical support? We are here to help you deploy and scale your risk analysis system.</p>', unsafe_allow_html=True)
+
+        st.write("<br>", unsafe_allow_html=True)
+
+        # --- Contact Info Cards ---
+        cont_col1, cont_col2, cont_col3 = st.columns(3)
+        
+        with cont_col1:
+            st.markdown("""
+            <div class="insight-box" style="height:200px; text-align:center; border-left:none; border-top:5px solid #4cc9f0;">
+                <b style="color:#4cc9f0; font-size:18px;">📧 Email Support</b><br><br>
+                <span style="color:white;">Direct technical queries to:</span><br>
+                <b style="color:#ffffff;">support@cryptorisk.com</b>
+            </div>
+            """, unsafe_allow_html=True)
+            
+        with cont_col2:
+            st.markdown("""
+            <div class="insight-box" style="height:200px; text-align:center; border-left:none; border-top:5px solid #ffffff;">
+                <b style="color:#ffffff; font-size:18px;">📍 Location</b><br><br>
+                <span style="color:white;">Project Head Office:</span><br>
+                <b style="color:#ffffff;">Nagpur, Maharashtra, India</b>
+            </div>
+            """, unsafe_allow_html=True)
+            
+        with cont_col3:
+            st.markdown("""
+            <div class="insight-box" style="height:200px; text-align:center; border-left:none; border-top:5px solid #4cc9f0;">
+                <b style="color:#4cc9f0; font-size:18px;">💻 GitHub</b><br><br>
+                <span style="color:white;">Access Source Code:</span><br>
+                <b style="color:#ffffff;">github.com/zishan-khan/crypto-risk</b>
+            </div>
+            """, unsafe_allow_html=True)
+
+        st.write("<br>", unsafe_allow_html=True)
+
+        # --- Detailed Support Info ---
+        st.markdown(f"""
+        <div class="insight-box">
+            <b style="color:#4cc9f0; font-size:20px;">DEVELOPER SUPPORT DETAILS</b><br><br>
+            <ul class="white-bullets">
+                <li><b>Technical Support:</b> For issues regarding the Python backend, Flask/Dash server, or API connectivity[cite: 223, 259].</li>
+                <li><b>API Integration:</b> Help with CoinGecko or Binance data fetching and historical storage[cite: 223, 257].</li>
+                <li><b>System Overview:</b> This is an AI-driven tool designed to help traders, investors, and researchers identify risk levels through data visualization.</li>
+                <li><b>Deployment:</b> User guide and documentation are prepared for system deployment and final validation[cite: 198, 201].</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
 
     with tab_milestone:
         st.markdown("""<div class="insight-box" style="border-left-color: #06d6a0;">
