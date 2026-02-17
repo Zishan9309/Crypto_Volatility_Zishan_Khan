@@ -118,7 +118,7 @@ def main():
     data = fetch_real_data()
 
     # ---------------- NAVBAR (FULL WIDTH) ----------------
-    tab_home, tab_about, tab_contact, tab_milestone = st.tabs(["🏠 HOME", "📖 ABOUT", "📞 CONTACT", "🚀 MILESTONES"])
+    tab_home, tab_about, tab_contact, tab_milestone = st.tabs(["🏠 HOME", "📖 ABOUT", "📊 RISK ANALYTICS", "📑 REPORTS", "⚙️ SETTINGS", "📞 CONTACT"])
 
     with tab_home:
         # Header Row
@@ -222,6 +222,22 @@ def main():
             [cite_start]<li><b>Volume Demand:</b> Shows the "interest" level of other traders[cite: 8, 24].</li>
             [cite_start]<li><b>Sentiment:</b> Provides a combined "Confidence Score" for the asset[cite: 20, 39].</li>
         </ul>""", unsafe_allow_html=True)
+
+    with tab_risk:
+        st.markdown("<h2 style='color:#4cc9f0;'>📊 Quantitative Risk Analytics</h2>", unsafe_allow_html=True)
+        st.markdown('<p class="white-edu-text">This module focuses on <b>Milestone 2</b>: Computing Sharpe Ratio and Beta Coefficients for volatility benchmarking.</p>', unsafe_allow_html=True)
+        st.info("Mathematical models for Daily and Annualized Volatility are being integrated into the backend.")
+
+    with tab_reports:
+        st.markdown("<h2 style='color:#4cc9f0;'>📑 Export & Generation</h2>", unsafe_allow_html=True)
+        st.markdown('<p class="white-edu-text">Generate comprehensive risk reports in PDF or CSV format for the selected assets.</p>', unsafe_allow_html=True)
+        st.button("📥 DOWNLOAD MARKET SUMMARY (PDF)")
+
+    with tab_settings:
+        st.markdown("<h2 style='color:#4cc9f0;'>⚙️ Market Settings</h2>", unsafe_allow_html=True)
+        st.markdown('<p class="white-edu-text">Adjust system parameters for risk calculation and display preferences.</p>', unsafe_allow_html=True)
+        st.selectbox("Default Currency", ["USD ($)", "EUR (€)", "INR (₹)"])
+        st.slider("Volatility Lookback Period (Days)", 7, 30, 7)
 
     with tab_contact:
         # --- Contact Header ---
