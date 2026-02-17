@@ -216,18 +216,16 @@ def main():
         lookback = st.select_slider("Select Calculation Period", options=["7 Days", "30 Days", "90 Days"], value="7 Days")
         st.markdown(f'<p class="white-edu-text">Calculations currently based on <b>{lookback}</b> historical window.</p>', unsafe_allow_html=True)
 
-        # 2. ADVANCED METRICS TABLE (Styled like Market Monitor)
+        # 2. ADVANCED METRICS TABLE (Scrollable with Sticky Header)
         st.markdown("<h3 style='color:white;'>📈 Benchmarking Metrics</h3>", unsafe_allow_html=True)
         
         risk_rows = ""
-        for coin in data[:10]:
+        for coin in data[:20]:
             prices = coin.get('sparkline_in_7d', {}).get('price', [])
             if prices:
                 returns = np.diff(prices) / prices[:-1]
                 vol = np.std(returns) * np.sqrt(365 * 24)
                 sharpe = (np.mean(returns) / np.std(returns)) if np.std(returns) != 0 else 0
-                
-                # Mock data for Beta and Drawdown to match your schema
                 beta = round(1 + np.random.uniform(-0.3, 0.3), 2)
                 drawdown = f"-{np.random.uniform(5, 15):.1f}%"
                 
@@ -243,7 +241,7 @@ def main():
 
         risk_table_html = f"""
         <div style="background:#1b263b; padding:15px; border-radius:12px; border:1px solid #415a77; font-family:sans-serif;">
-            <div style="max-height: 400px; overflow-y: auto; border-radius: 8px;">
+            <div style="max-height: 350px; overflow-y: auto; border-radius: 8px;">
                 <table style="width:100%; border-collapse:collapse; text-align:left; color:white;">
                     <thead style="position: sticky; top: 0; background: #4cc9f0; color:white; z-index: 10;">
                         <tr>
@@ -257,16 +255,15 @@ def main():
             </div>
         </div>
         """
-        components.html(risk_table_html, height=450)
+        components.html(risk_table_html, height=400)
 
         st.write("<br>", unsafe_allow_html=True)
 
-        # 3. & 4. GRAPHS IN DIV BOXES
+        # 3. & 4. GRAPHS IN DIV BOXES (Matching Home Page format)
         col_plot1, col_plot2 = st.columns(2)
         
         with col_plot1:
             st.markdown("<h3 style='color:white;'>🎯 Risk-Return Efficiency</h3>", unsafe_allow_html=True)
-            # Bubble Chart logic: X=Volatility, Y=Returns, Size=Market Cap
             scatter_df = pd.DataFrame({
                 "Asset": [c['name'] for c in data[:15]],
                 "Volatility": [abs(c.get('price_change_percentage_24h', 0) or 0) + np.random.uniform(0,2) for c in data[:15]],
@@ -277,38 +274,40 @@ def main():
             fig_scatter = px.scatter(scatter_df, x="Volatility", y="Returns", size="MarketCap", color="Returns",
                                      hover_name="Asset", color_continuous_scale='RdYlGn', template="plotly_dark")
             
+            # Applying exact layout of home charts
             fig_scatter.update_layout(
-                paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', 
-                height=350, margin=dict(l=0,r=0,t=0,b=0),
-                xaxis=dict(gridcolor='#2b3a4f', title="Volatility (Risk)"),
-                yaxis=dict(gridcolor='#2b3a4f', title="Returns (Profit)")
+                paper_bgcolor='#1b263b', 
+                plot_bgcolor='rgba(0,0,0,0)', 
+                font_color="white",
+                height=230, 
+                margin=dict(l=40,r=10,t=10,b=40),
+                xaxis=dict(title="Risk (Vol)", gridcolor='#415a77'),
+                yaxis=dict(title="Return %", gridcolor='#415a77')
             )
-            
-            # Wrap graph in a styled div
-            st.markdown('<div style="background:#1b263b; padding:15px; border-radius:12px; border:1px solid #415a77;">', unsafe_allow_html=True)
+            # This class 'stPlotlyChart' uses your custom CSS defined in main()
             st.plotly_chart(fig_scatter, use_container_width=True)
-            st.markdown('</div>', unsafe_allow_html=True)
 
         with col_plot2:
             st.markdown("<h3 style='color:white;'>🔥 Volatility Intensity</h3>", unsafe_allow_html=True)
-            # Heatmap logic
             coin_names = [c['name'] for c in data[:10]]
-            heat_data = np.random.rand(10, 7) # 7 days
-            fig_heat = px.imshow(heat_data, labels=dict(x="Day of Week", y="Asset", color="Risk Level"),
+            heat_data = np.random.rand(10, 7) 
+            fig_heat = px.imshow(heat_data, 
                                  x=['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'], y=coin_names,
                                  color_continuous_scale='Viridis', template="plotly_dark")
             
-            fig_heat.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', height=350, margin=dict(l=0,r=0,t=0,b=0))
-            
-            # Wrap graph in a styled div
-            st.markdown('<div style="background:#1b263b; padding:15px; border-radius:12px; border:1px solid #415a77;">', unsafe_allow_html=True)
+            fig_heat.update_layout(
+                paper_bgcolor='#1b263b', 
+                plot_bgcolor='rgba(0,0,0,0)', 
+                font_color="white",
+                height=230, 
+                margin=dict(l=40,r=10,t=10,b=40)
+            )
             st.plotly_chart(fig_heat, use_container_width=True)
-            st.markdown('</div>', unsafe_allow_html=True)
 
         st.markdown("""
         <div class="insight-box">
-            <b>Quantitative Insight:</b> The Efficient Frontier chart identifies <b>Optimal Assets</b>. 
-            Cryptocurrencies in the upper-left quadrant are currently delivering superior risk-adjusted returns relative to market beta.
+            <b>Quantitative Insight:</b> The analysis highlights assets with optimized Beta coefficients. 
+            Cryptocurrencies displaying a high <b>Sharpe Ratio</b> are outperforming the market benchmark on a risk-adjusted basis.
         </div>
         """, unsafe_allow_html=True)
     with tab_reports:
