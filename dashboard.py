@@ -243,19 +243,21 @@ def main():
 
         risk_table_html = f"""
         <div style="background:#1b263b; padding:15px; border-radius:12px; border:1px solid #415a77; font-family:sans-serif;">
-            <table style="width:100%; border-collapse:collapse; text-align:left; color:white;">
-                <thead style="background: #4cc9f0; color:white;">
-                    <tr>
-                        <th style="padding:12px;">ASSET</th><th style="padding:12px;">ANNUAL VOLATILITY</th>
-                        <th style="padding:12px;">SHARPE RATIO</th><th style="padding:12px;">BETA (MARKET)</th>
-                        <th style="padding:12px;">MAX DRAWDOWN</th>
-                    </tr>
-                </thead>
-                <tbody>{risk_rows}</tbody>
-            </table>
+            <div style="max-height: 400px; overflow-y: auto; border-radius: 8px;">
+                <table style="width:100%; border-collapse:collapse; text-align:left; color:white;">
+                    <thead style="position: sticky; top: 0; background: #4cc9f0; color:white; z-index: 10;">
+                        <tr>
+                            <th style="padding:15px;">ASSET</th><th style="padding:15px;">ANNUAL VOLATILITY</th>
+                            <th style="padding:15px;">SHARPE RATIO</th><th style="padding:15px;">BETA (MARKET)</th>
+                            <th style="padding:15px;">MAX DRAWDOWN</th>
+                        </tr>
+                    </thead>
+                    <tbody>{risk_rows}</tbody>
+                </table>
+            </div>
         </div>
         """
-        components.html(risk_table_html, height=400)
+        components.html(risk_table_html, height=450)
 
         st.write("<br>", unsafe_allow_html=True)
 
