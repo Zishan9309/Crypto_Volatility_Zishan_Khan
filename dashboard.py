@@ -259,63 +259,63 @@ def main():
 
         st.write("<br>", unsafe_allow_html=True)
 
-        # 3. BAR CHART & 4. HEATMAP IN STYLED DIVS
+        # ---------------- PREVIOUS TWO CHARTS (Side by Side) ----------------
         col_plot1, col_plot2 = st.columns(2)
         
         with col_plot1:
             st.markdown("<h3 style='color:white;'>🎯 Risk-Return Efficiency</h3>", unsafe_allow_html=True)
-            
-            # Prepare Data for Bar Chart
             bar_df = pd.DataFrame({
                 "Asset": [c['name'] for c in data[:15]],
                 "Returns": [c.get('price_change_percentage_24h', 0) or 0 for c in data[:15]]
             })
-            
-            # Bar Chart: X=Assets, Y=Returns %
-            fig_bar_risk = px.bar(
-                bar_df, x="Asset", y="Returns",
-                color="Returns", 
-                color_continuous_scale=['#ef476f', '#ffd166', '#06d6a0'], # Red to Green
-                template="plotly_dark"
-            )
-            
-            fig_bar_risk.update_layout(
-                paper_bgcolor='#1b263b', 
-                plot_bgcolor='rgba(0,0,0,0)', 
-                font_color="white",
-                height=230, 
-                margin=dict(l=40,r=10,t=10,b=40),
-                xaxis=dict(title="", tickangle=-45), # Angle text for better readability
-                yaxis=dict(title="Return %", gridcolor='#415a77'),
-                coloraxis_showscale=False
-            )
+            fig_bar_risk = px.bar(bar_df, x="Asset", y="Returns", color="Returns", 
+                                 color_continuous_scale=['#ef476f', '#ffd166', '#06d6a0'], template="plotly_dark")
+            fig_bar_risk.update_layout(paper_bgcolor='#1b263b', plot_bgcolor='rgba(0,0,0,0)', font_color="white",
+                                       height=230, margin=dict(l=40,r=10,t=10,b=40), xaxis=dict(title="", tickangle=-45), 
+                                       yaxis=dict(title="Return %", gridcolor='#415a77'), coloraxis_showscale=False)
             st.plotly_chart(fig_bar_risk, use_container_width=True)
 
         with col_plot2:
             st.markdown("<h3 style='color:white;'>🔥 Volatility Intensity</h3>", unsafe_allow_html=True)
             coin_names_heat = [c['name'] for c in data[:10]]
             heat_data = np.random.rand(10, 7) 
-            fig_heat_risk = px.imshow(
-                heat_data, 
-                x=['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'], 
-                y=coin_names_heat,
-                color_continuous_scale='Viridis', 
-                template="plotly_dark"
-            )
-            
-            fig_heat_risk.update_layout(
-                paper_bgcolor='#1b263b', 
-                plot_bgcolor='rgba(0,0,0,0)', 
-                font_color="white",
-                height=230, 
-                margin=dict(l=40,r=10,t=10,b=40)
-            )
+            fig_heat_risk = px.imshow(heat_data, x=['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'], y=coin_names_heat,
+                                      color_continuous_scale='Viridis', template="plotly_dark")
+            fig_heat_risk.update_layout(paper_bgcolor='#1b263b', plot_bgcolor='rgba(0,0,0,0)', font_color="white",
+                                        height=230, margin=dict(l=40,r=10,t=10,b=40))
             st.plotly_chart(fig_heat_risk, use_container_width=True)
+
+        # ---------------- NEW 3RD CHART: VOLATILITY RADAR (Full Width) ----------------
+        st.write("<br>", unsafe_allow_html=True)
+        st.markdown("<h3 style='color:white;'>🧭 Relative Risk Distribution (Volatility Radar)</h3>", unsafe_allow_html=True)
+        
+        # Prepare radar data
+        radar_df = pd.DataFrame({
+            "Asset": [c['name'] for c in data[:8]],
+            "Volatility_Score": [abs(c.get('price_change_percentage_24h', 0) or 0) * 10 for c in data[:8]]
+        })
+        
+        fig_radar = px.line_polar(radar_df, r="Volatility_Score", theta="Asset", line_close=True,
+                                  template="plotly_dark", color_discrete_sequence=['#4cc9f0'])
+        fig_radar.update_traces(fill='toself', fillcolor='rgba(76, 201, 240, 0.3)')
+        fig_radar.update_layout(
+            paper_bgcolor='#1b263b',
+            font_color="white",
+            height=350,
+            margin=dict(l=80, r=80, t=20, b=20),
+            polar=dict(
+                bgcolor='rgba(0,0,0,0)',
+                radialaxis=dict(visible=True, gridcolor='#415a77'),
+                angularaxis=dict(gridcolor='#415a77')
+            )
+        )
+        st.plotly_chart(fig_radar, use_container_width=True)
 
         st.markdown("""
         <div class="insight-box">
-            <b>Quantitative Insight:</b> The Bar Chart identifies the percentage return performance of each asset. 
-            Green bars indicate positive efficiency, while red bars highlight assets currently underperforming the market benchmark.
+            <b>Quantitative Insight:</b> The 🧭 Volatility Radar provides a 360-degree view of risk. 
+            Assets closer to the edge represent <b>high-beta</b> instruments that require active hedging, 
+            while central assets indicate market stability.
         </div>
         """, unsafe_allow_html=True)
     with tab_reports:
