@@ -214,18 +214,18 @@ def main():
         
         # 1. INTERACTIVE TOGGLE
         lookback = st.select_slider("Select Calculation Period", options=["7 Days", "30 Days", "90 Days"], value="7 Days")
-        st.markdown(f'<p class="white-edu-text">Calculations currently based on <b>{lookback}</b> historical window.</p>', unsafe_allow_html=True)
+        st.markdown(f'<p class="white-edu-text">Calculations based on <b>{lookback}</b> window.</p>', unsafe_allow_html=True)
 
-        # 2. ADVANCED METRICS TABLE (Scrollable with Sticky Header)
+        # 2. ADVANCED METRICS TABLE (Scrollable)
         st.markdown("<h3 style='color:white;'>📈 Benchmarking Metrics</h3>", unsafe_allow_html=True)
         
         risk_rows = ""
         for coin in data[:20]:
             prices = coin.get('sparkline_in_7d', {}).get('price', [])
             if prices:
-                returns = np.diff(prices) / prices[:-1]
-                vol = np.std(returns) * np.sqrt(365 * 24)
-                sharpe = (np.mean(returns) / np.std(returns)) if np.std(returns) != 0 else 0
+                returns_calc = np.diff(prices) / prices[:-1]
+                vol = np.std(returns_calc) * np.sqrt(365 * 24)
+                sharpe = (np.mean(returns_calc) / np.std(returns_calc)) if np.std(returns_calc) != 0 else 0
                 beta = round(1 + np.random.uniform(-0.3, 0.3), 2)
                 drawdown = f"-{np.random.uniform(5, 15):.1f}%"
                 
@@ -259,55 +259,63 @@ def main():
 
         st.write("<br>", unsafe_allow_html=True)
 
-        # 3. & 4. GRAPHS IN DIV BOXES (Matching Home Page format)
+        # 3. BAR CHART & 4. HEATMAP IN STYLED DIVS
         col_plot1, col_plot2 = st.columns(2)
         
         with col_plot1:
             st.markdown("<h3 style='color:white;'>🎯 Risk-Return Efficiency</h3>", unsafe_allow_html=True)
-            scatter_df = pd.DataFrame({
+            
+            # Prepare Data for Bar Chart
+            bar_df = pd.DataFrame({
                 "Asset": [c['name'] for c in data[:15]],
-                "Volatility": [abs(c.get('price_change_percentage_24h', 0) or 0) + np.random.uniform(0,2) for c in data[:15]],
-                "Returns": [c.get('price_change_percentage_24h', 0) or 0 for c in data[:15]],
-                "MarketCap": [c.get('market_cap', 0) for c in data[:15]]
+                "Returns": [c.get('price_change_percentage_24h', 0) or 0 for c in data[:15]]
             })
             
-            fig_scatter = px.scatter(scatter_df, x="Volatility", y="Returns", size="MarketCap", color="Returns",
-                                     hover_name="Asset", color_continuous_scale='RdYlGn', template="plotly_dark")
+            # Bar Chart: X=Assets, Y=Returns %
+            fig_bar_risk = px.bar(
+                bar_df, x="Asset", y="Returns",
+                color="Returns", 
+                color_continuous_scale=['#ef476f', '#ffd166', '#06d6a0'], # Red to Green
+                template="plotly_dark"
+            )
             
-            # Applying exact layout of home charts
-            fig_scatter.update_layout(
+            fig_bar_risk.update_layout(
                 paper_bgcolor='#1b263b', 
                 plot_bgcolor='rgba(0,0,0,0)', 
                 font_color="white",
                 height=230, 
                 margin=dict(l=40,r=10,t=10,b=40),
-                xaxis=dict(title="Risk (Vol)", gridcolor='#415a77'),
-                yaxis=dict(title="Return %", gridcolor='#415a77')
+                xaxis=dict(title="", tickangle=-45), # Angle text for better readability
+                yaxis=dict(title="Return %", gridcolor='#415a77'),
+                coloraxis_showscale=False
             )
-            # This class 'stPlotlyChart' uses your custom CSS defined in main()
-            st.plotly_chart(fig_scatter, use_container_width=True)
+            st.plotly_chart(fig_bar_risk, use_container_width=True)
 
         with col_plot2:
             st.markdown("<h3 style='color:white;'>🔥 Volatility Intensity</h3>", unsafe_allow_html=True)
-            coin_names = [c['name'] for c in data[:10]]
+            coin_names_heat = [c['name'] for c in data[:10]]
             heat_data = np.random.rand(10, 7) 
-            fig_heat = px.imshow(heat_data, 
-                                 x=['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'], y=coin_names,
-                                 color_continuous_scale='Viridis', template="plotly_dark")
+            fig_heat_risk = px.imshow(
+                heat_data, 
+                x=['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'], 
+                y=coin_names_heat,
+                color_continuous_scale='Viridis', 
+                template="plotly_dark"
+            )
             
-            fig_heat.update_layout(
+            fig_heat_risk.update_layout(
                 paper_bgcolor='#1b263b', 
                 plot_bgcolor='rgba(0,0,0,0)', 
                 font_color="white",
                 height=230, 
                 margin=dict(l=40,r=10,t=10,b=40)
             )
-            st.plotly_chart(fig_heat, use_container_width=True)
+            st.plotly_chart(fig_heat_risk, use_container_width=True)
 
         st.markdown("""
         <div class="insight-box">
-            <b>Quantitative Insight:</b> The analysis highlights assets with optimized Beta coefficients. 
-            Cryptocurrencies displaying a high <b>Sharpe Ratio</b> are outperforming the market benchmark on a risk-adjusted basis.
+            <b>Quantitative Insight:</b> The Bar Chart identifies the percentage return performance of each asset. 
+            Green bars indicate positive efficiency, while red bars highlight assets currently underperforming the market benchmark.
         </div>
         """, unsafe_allow_html=True)
     with tab_reports:
