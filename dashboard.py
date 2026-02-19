@@ -143,7 +143,7 @@ def main():
         risk_exp = (high_risk / total_coins) * 100 if total_coins > 0 else 0
 
         sum_col1, sum_col2, sum_col3, sum_col4 = st.columns(4)
-        sum_col1.markdown(f"<div class='kpi-card'><div class='kpi-label'>Total Assets</div><div class='kpi-value'>{total_coins}</div></div>", unsafe_allow_html=True)
+        sum_col1.markdown(f"<div class='kpi-card'><div class='kpi-label'>Total Coins</div><div class='kpi-value'>{total_coins}</div></div>", unsafe_allow_html=True)
         sum_col2.markdown(f"<div class='kpi-card'><div class='kpi-label'>High Risk</div><div class='kpi-value' style='color:#ef476f;'>{high_risk}</div></div>", unsafe_allow_html=True)
         sum_col3.markdown(f"<div class='kpi-card'><div class='kpi-label'>Low Risk</div><div class='kpi-value' style='color:#06d6a0;'>{low_risk}</div></div>", unsafe_allow_html=True)
         sum_col4.markdown(f"<div class='kpi-card'><div class='kpi-label'>Risk Exposure</div><div class='kpi-value' style='color:#4cc9f0;'>{risk_exp:.1f}%</div></div>", unsafe_allow_html=True)
