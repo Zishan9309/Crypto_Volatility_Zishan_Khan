@@ -117,11 +117,13 @@ def main():
     data = fetch_real_data()
 
     # ---------------- NAVBAR SECTION ----------------
-    tab_home, tab_about, tab_risk, tab_reports, tab_settings, tab_contact = st.tabs([
-        "🏠 HOME", "📖 ABOUT", "📊 RISK ANALYTICS", "📑 REPORTS", "⚙️ SETTINGS", "📞 CONTACT"
+    # Updated tab names as per request
+    tab_data_acq, tab_about, tab_data_proc, tab_reports, tab_viz_dash, tab_risk_class, tab_contact = st.tabs([
+        "📡 DATA ACQUISITION", "📖 ABOUT", "⚙️ DATA PROCESSING", "📑 REPORTS", "📊 VIZ DASHBOARD", "🛡️ RISK CLASSIFICATION", "📞 CONTACT"
     ])
 
-    with tab_home:
+    with tab_data_acq:
+        # Title & Logout Header
         head_left, head_right = st.columns([5, 1])
         with head_left:
             st.markdown("<h1 class='cyan-title'>☁️ Crypto Volatility & Risk Analyzer</h1>", unsafe_allow_html=True)
@@ -200,17 +202,28 @@ def main():
 
     with tab_about:
         st.markdown("<h2 style='color:#4cc9f0; text-align:center;'>🚀 New to Crypto Risk?</h2>", unsafe_allow_html=True)
-        st.markdown('<p class="white-edu-text">Welcome! To analyze the market like a pro, you need to understand three core pillars.</p>', unsafe_allow_html=True)
+        st.markdown('<p class="white-edu-text">Welcome! To analyze the market like a pro, you need to understand three core pillars. Use the interactive table and guides below to start your journey.</p>', unsafe_allow_html=True)
+
         info_col1, info_col2, info_col3 = st.columns(3)
         with info_col1: st.markdown('<div class="insight-box" style="height:220px;"><b style="color:#4cc9f0; font-size:18px;">💎 What is Crypto?</b><br><br>Digital or virtual currencies secured by cryptography operating on decentralized blockchains.</div>', unsafe_allow_html=True)
         with info_col2: st.markdown('<div class="insight-box" style="height:220px; border-left-color:#ffd166;"><b style="color:#ffd166; font-size:18px;">📉 What is Volatility?</b><br><br>A measure of price swings over time. High volatility equates to high potential reward but increased risk.</div>', unsafe_allow_html=True)
         with info_col3: st.markdown('<div class="insight-box" style="height:220px; border-left-color:#ef476f;"><b style="color:#ef476f; font-size:18px;">🛡️ What is Risk?</b><br><br>The probability of losing an investment, measured via statistical metrics like Sharpe and Beta.</div>', unsafe_allow_html=True)
+
+        st.write("---")
         st.markdown("<h3 style='color:white;'>📊 Risk-Level Comparison Table</h3>", unsafe_allow_html=True)
-        about_table = f"""<div style="background:#1b263b; padding:20px; border-radius:12px; border:1px solid #415a77; width:100%;"><table style="width:100%; border-collapse:collapse; color:white; font-family:sans-serif;"><thead><tr style="background:#4cc9f0; color:#0d1b2a; text-align:left;"><th style="padding:15px;">CATEGORY</th><th style="padding:15px;">VOLATILITY</th><th style="padding:15px;">INVESTOR TYPE</th><th style="padding:15px;">TYPICAL ASSET</th></tr></thead><tbody><tr style="border-bottom: 1px solid #415a77;"><td style="padding:15px; color:#06d6a0; font-weight:bold;">Low Risk</td><td style="padding:15px;">Stable (0-2%)</td><td style="padding:15px;">Conservative</td><td style="padding:15px;">Stablecoins</td></tr><tr style="border-bottom: 1px solid #415a77;"><td style="padding:15px; color:#ffd166; font-weight:bold;">Medium Risk</td><td style="padding:15px;">Moderate (2-5%)</td><td style="padding:15px;">Growth-Oriented</td><td style="padding:15px;">ETH</td></tr><tr><td style="padding:15px; color:#ef476f; font-weight:bold;">High Risk</td><td style="padding:15px;">Extreme (5%+)</td><td style="padding:15px;">Speculative</td><td style="padding:15px;">Meme coins</td></tr></tbody></table></div>"""
+        about_table = f"""<div style="background:#1b263b; padding:20px; border-radius:12px; border:1px solid #415a77; width:100%;"><table style="width:100%; border-collapse:collapse; color:white; font-family:sans-serif;"><thead><tr style="background:#4cc9f0; color:#0d1b2a; text-align:left;"><th style="padding:15px;">CATEGORY</th><th style="padding:15px;">VOLATILITY</th><th style="padding:15px;">INVESTOR TYPE</th><th style="padding:15px;">TYPICAL ASSET</th></tr></thead><tbody><tr style="border-bottom: 1px solid #415a77;"><td style="padding:15px; color:#06d6a0; font-weight:bold;">Low Risk</td><td style="padding:15px;">Stable (0-2%)</td><td style="padding:15px;">Conservative</td><td style="padding:15px;">Stablecoins / BTC</td></tr><tr style="border-bottom: 1px solid #415a77;"><td style="padding:15px; color:#ffd166; font-weight:bold;">Medium Risk</td><td style="padding:15px;">Moderate (2-5%)</td><td style="padding:15px;">Growth-Oriented</td><td style="padding:15px;">ETH / Top 10 Alts</td></tr><tr><td style="padding:15px; color:#ef476f; font-weight:bold;">High Risk</td><td style="padding:15px;">Extreme (5%+)</td><td style="padding:15px;">Speculative</td><td style="padding:15px;">Meme coins / New tokens</td></tr></tbody></table></div>"""
         st.markdown(about_table, unsafe_allow_html=True)
 
-    with tab_risk:
-        st.markdown("<h1 class='cyan-title'>📊 Quantitative Risk Analytics</h1>", unsafe_allow_html=True)
+        st.markdown("<br><h3 style='color:white;'>🔍 How to read our Dashboard</h3>", unsafe_allow_html=True)
+        st.markdown("""<ul class="white-bullets">
+            <li><b>Market Monitor:</b> Live price updates and risk status.</li>
+            <li><b>Trend Analysis:</b> 7-Day movement helps you spot price patterns.</li>
+            <li><b>Volume Demand:</b> Shows the "interest" level of other traders.</li>
+            <li><b>Sentiment:</b> Provides a combined "Confidence Score" for the asset.</li>
+        </ul>""", unsafe_allow_html=True)
+
+    with tab_data_proc:
+        st.markdown("<h1 class='cyan-title'>📊 Data Processing & Risk Analytics</h1>", unsafe_allow_html=True)
         
         # 1. INTERACTIVE TOGGLE
         lookback = st.select_slider("Select Calculation Period", options=["7 Days", "30 Days", "90 Days"], value="7 Days")
@@ -257,9 +270,15 @@ def main():
         """
         components.html(risk_table_html, height=400)
 
-        st.write("<br>", unsafe_allow_html=True)
+    with tab_reports:
+        st.markdown("<h2 style='color:#4cc9f0;'>📑 Export & Generation</h2>", unsafe_allow_html=True)
+        st.markdown('<p class="white-edu-text">Generate comprehensive risk reports in PDF or CSV format for the selected assets.</p>', unsafe_allow_html=True)
+        st.button("📥 DOWNLOAD MARKET SUMMARY (PDF)")
 
-        # ---------------- PREVIOUS TWO CHARTS (Side by Side) ----------------
+    with tab_viz_dash:
+        st.markdown("<h1 class='cyan-title'>📈 Visualization Dashboard</h1>", unsafe_allow_html=True)
+        
+        # PREVIOUS TWO CHARTS (Side by Side)
         col_plot1, col_plot2 = st.columns(2)
         
         with col_plot1:
@@ -285,49 +304,36 @@ def main():
                                         height=230, margin=dict(l=40,r=10,t=10,b=40))
             st.plotly_chart(fig_heat_risk, use_container_width=True)
 
-        # ---------------- NEW 3RD CHART: VOLATILITY RADAR (Full Width) ----------------
+        # VOLATILITY RADAR
         st.write("<br>", unsafe_allow_html=True)
         st.markdown("<h3 style='color:white;'>🧭 Relative Risk Distribution (Volatility Radar)</h3>", unsafe_allow_html=True)
-        
-        # Prepare radar data
         radar_df = pd.DataFrame({
             "Asset": [c['name'] for c in data[:8]],
             "Volatility_Score": [abs(c.get('price_change_percentage_24h', 0) or 0) * 10 for c in data[:8]]
         })
-        
         fig_radar = px.line_polar(radar_df, r="Volatility_Score", theta="Asset", line_close=True,
                                   template="plotly_dark", color_discrete_sequence=['#4cc9f0'])
         fig_radar.update_traces(fill='toself', fillcolor='rgba(76, 201, 240, 0.3)')
-        fig_radar.update_layout(
-            paper_bgcolor='#1b263b',
-            font_color="white",
-            height=350,
-            margin=dict(l=80, r=80, t=20, b=20),
-            polar=dict(
-                bgcolor='rgba(0,0,0,0)',
-                radialaxis=dict(visible=True, gridcolor='#415a77'),
-                angularaxis=dict(gridcolor='#415a77')
-            )
-        )
+        fig_radar.update_layout(paper_bgcolor='#1b263b', font_color="white", height=350, margin=dict(l=80, r=80, t=20, b=20),
+            polar=dict(bgcolor='rgba(0,0,0,0)', radialaxis=dict(visible=True, gridcolor='#415a77'), angularaxis=dict(gridcolor='#415a77')))
         st.plotly_chart(fig_radar, use_container_width=True)
 
+    with tab_risk_class:
+        st.markdown("<h1 class='cyan-title'>🛡️ Risk Classification</h1>", unsafe_allow_html=True)
+        st.markdown('<p class="white-edu-text">Assets categorized based on price stability and 24h change percentage.</p>', unsafe_allow_html=True)
+        
+        # Quick classification breakdown
+        class_col1, class_col2, class_col3 = st.columns(3)
+        class_col1.error(f"🔴 **HIGH RISK:** {high_risk} assets")
+        class_col2.warning(f"🟡 **MEDIUM RISK:** {len(data) - high_risk - low_risk} assets")
+        class_col3.success(f"🟢 **LOW RISK:** {low_risk} assets")
+        
         st.markdown("""
-        <div class="insight-box">
-            <b>Quantitative Insight:</b> The 🧭 Volatility Radar provides a 360-degree view of risk. 
-            Assets closer to the edge represent <b>high-beta</b> instruments that require active hedging, 
-            while central assets indicate market stability.
+        <div class="insight-box" style="border-left-color: #06d6a0;">
+            <b>Algorithm Note:</b> Risk levels are dynamically assigned using volatility thresholds. 
+            Assets with >5% price deviation are flagged for immediate review.
         </div>
         """, unsafe_allow_html=True)
-    with tab_reports:
-        st.markdown("<h2 style='color:#4cc9f0;'>📑 Export & Generation</h2>", unsafe_allow_html=True)
-        st.markdown('<p class="white-edu-text">Generate comprehensive risk reports in PDF or CSV format for the selected assets.</p>', unsafe_allow_html=True)
-        st.button("📥 DOWNLOAD MARKET SUMMARY (PDF)")
-
-    with tab_settings:
-        st.markdown("<h2 style='color:#4cc9f0;'>⚙️ Market Settings</h2>", unsafe_allow_html=True)
-        st.markdown('<p class="white-edu-text">Adjust system parameters for risk calculation and display preferences.</p>', unsafe_allow_html=True)
-        st.selectbox("Default Currency", ["USD ($)", "EUR (€)", "INR (₹)"])
-        st.slider("Volatility Lookback Period (Days)", 7, 30, 7)
 
     with tab_contact:
         # --- Contact Header ---
@@ -338,33 +344,12 @@ def main():
 
         # --- Contact Info Cards ---
         cont_col1, cont_col2, cont_col3 = st.columns(3)
-        
         with cont_col1:
-            st.markdown("""
-            <div class="insight-box" style="height:200px; text-align:center; border-left:none; border-top:5px solid #4cc9f0;">
-                <b style="color:#4cc9f0; font-size:18px;">📧 Email Support</b><br><br>
-                <span style="color:white;">Direct technical queries to:</span><br>
-                <b style="color:#ffffff;">support@cryptorisk.com</b>
-            </div>
-            """, unsafe_allow_html=True)
-            
+            st.markdown("""<div class="insight-box" style="height:200px; text-align:center; border-left:none; border-top:5px solid #4cc9f0;"><b style="color:#4cc9f0; font-size:18px;">📧 Email Support</b><br><br><span style="color:white;">Direct technical queries to:</span><br><b style="color:#ffffff;">support@cryptorisk.com</b></div>""", unsafe_allow_html=True)
         with cont_col2:
-            st.markdown("""
-            <div class="insight-box" style="height:200px; text-align:center; border-left:none; border-top:5px solid #ffffff;">
-                <b style="color:#ffffff; font-size:18px;">📍 Location</b><br><br>
-                <span style="color:white;">Project Head Office:</span><br>
-                <b style="color:#ffffff;">Nagpur, Maharashtra, India</b>
-            </div>
-            """, unsafe_allow_html=True)
-            
+            st.markdown("""<div class="insight-box" style="height:200px; text-align:center; border-left:none; border-top:5px solid #ffffff;"><b style="color:#ffffff; font-size:18px;">📍 Location</b><br><br><span style="color:white;">Project Head Office:</span><br><b style="color:#ffffff;">Nagpur, Maharashtra, India</b></div>""", unsafe_allow_html=True)
         with cont_col3:
-            st.markdown("""
-            <div class="insight-box" style="height:200px; text-align:center; border-left:none; border-top:5px solid #4cc9f0;">
-                <b style="color:#4cc9f0; font-size:18px;">💻 GitHub</b><br><br>
-                <span style="color:white;">Access Source Code:</span><br>
-                <b style="color:#ffffff;">github.com/zishan-khan/crypto-risk</b>
-            </div>
-            """, unsafe_allow_html=True)
+            st.markdown("""<div class="insight-box" style="height:200px; text-align:center; border-left:none; border-top:5px solid #4cc9f0;"><b style="color:#4cc9f0; font-size:18px;">💻 GitHub</b><br><br><span style="color:white;">Access Source Code:</span><br><b style="color:#ffffff;">github.com/zishan-khan/crypto-risk</b></div>""", unsafe_allow_html=True)
 
         st.write("<br>", unsafe_allow_html=True)
 
@@ -373,10 +358,10 @@ def main():
         <div class="insight-box">
             <b style="color:#4cc9f0; font-size:20px;">DEVELOPER SUPPORT DETAILS</b><br><br>
             <ul class="white-bullets">
-                <li><b>Technical Support:</b> For issues regarding the Python backend, Flask/Dash server, or API connectivity[cite: 223, 259].</li>
-                <li><b>API Integration:</b> Help with CoinGecko or Binance data fetching and historical storage[cite: 223, 257].</li>
+                <li><b>Technical Support:</b> For issues regarding the Python backend, Flask/Dash server, or API connectivity.</li>
+                <li><b>API Integration:</b> Help with CoinGecko or Binance data fetching and historical storage.</li>
                 <li><b>System Overview:</b> This is an AI-driven tool designed to help traders, investors, and researchers identify risk levels through data visualization.</li>
-                <li><b>Deployment:</b> User guide and documentation are prepared for system deployment and final validation[cite: 198, 201].</li>
+                <li><b>Deployment:</b> User guide and documentation are prepared for system deployment and final validation.</li>
             </ul>
         </div>
         """, unsafe_allow_html=True)
