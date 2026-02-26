@@ -150,12 +150,12 @@ def main():
         sum_col4.markdown(f"<div class='kpi-card'><div class='kpi-label'>Risk Exposure</div><div class='kpi-value' style='color:#4cc9f0;'>{risk_exp:.1f}%</div></div>", unsafe_allow_html=True)
 
         st.write("")
-
-        # --- MOVE TEXT AND TABLE TO RIGHT SIDE ---
+        
+        # --- TABLE ON RIGHT SIDE ---
         t_col_empty, t_col_right = st.columns([1, 1])
         with t_col_right:
             st.markdown("<div class='cyan-title'>📋 Market Risk Monitor </div>", unsafe_allow_html=True)
-            if st.button("🔄 REFRESH", key="btn_refresh"):
+            if st.button("🔄 REFRESH", key="btn_refresh_acq"):
                 st.cache_data.clear()
                 st.rerun()
 
@@ -176,7 +176,7 @@ def main():
         with col_a:
             st.markdown("<div class='cyan-title'>📊 Demand & Price Trend</div>", unsafe_allow_html=True)
             coin_names = [c.get('name') for c in data]
-            selected_coin = st.selectbox("SELECT COIN FOR DEPTH ANALYSIS", coin_names)
+            selected_coin = st.selectbox("SELECT COIN FOR DEPTH ANALYSIS", coin_names, key="sel_acq")
             coin_obj = next((c for c in data if c.get('name') == selected_coin), None)
             
             if coin_obj and 'sparkline_in_7d' in coin_obj:
@@ -204,20 +204,23 @@ def main():
 
     with tab_about:
         st.markdown("<h2 style='color:#4cc9f0; text-align:center;'>🚀 New to Crypto Risk?</h2>", unsafe_allow_html=True)
-        st.markdown('<p class="white-edu-text">Welcome! To analyze the market like a pro, you need to understand three core pillars.</p>', unsafe_allow_html=True)
+        st.markdown('<p class="white-edu-text">Welcome! To analyze the market like a pro, you need to understand three core pillars. Use the interactive table and guides below to start your journey.</p>', unsafe_allow_html=True)
 
         info_col1, info_col2, info_col3 = st.columns(3)
         with info_col1: st.markdown('<div class="insight-box" style="height:220px;"><b style="color:#4cc9f0; font-size:18px;">💎 What is Crypto?</b><br><br>Digital currencies secured by cryptography operating on decentralized blockchains.</div>', unsafe_allow_html=True)
         with info_col2: st.markdown('<div class="insight-box" style="height:220px; border-left-color:#ffd166;"><b style="color:#ffd166; font-size:18px;">📉 What is Volatility?</b><br><br>A measure of price swings over time. High volatility equates to high potential reward but increased risk.</div>', unsafe_allow_html=True)
         with info_col3: st.markdown('<div class="insight-box" style="height:220px; border-left-color:#ef476f;"><b style="color:#ef476f; font-size:18px;">🛡️ What is Risk?</b><br><br>The probability of losing an investment, measured via statistical metrics like Sharpe and Beta.</div>', unsafe_allow_html=True)
 
+        st.write("---")
+        st.markdown("<h3 style='color:white;'>📊 Risk-Level Comparison Table</h3>", unsafe_allow_html=True)
+        about_table = f"""<div style="background:#1b263b; padding:20px; border-radius:12px; border:1px solid #415a77; width:100%;"><table style="width:100%; border-collapse:collapse; color:white; font-family:sans-serif;"><thead><tr style="background:#4cc9f0; color:#0d1b2a; text-align:left;"><th style="padding:15px;">CATEGORY</th><th style="padding:15px;">VOLATILITY</th><th style="padding:15px;">INVESTOR TYPE</th><th style="padding:15px;">TYPICAL ASSET</th></tr></thead><tbody><tr style="border-bottom: 1px solid #415a77;"><td style="padding:15px; color:#06d6a0; font-weight:bold;">Low Risk</td><td style="padding:15px;">Stable (0-2%)</td><td style="padding:15px;">Conservative</td><td style="padding:15px;">Stablecoins / BTC</td></tr><tr style="border-bottom: 1px solid #415a77;"><td style="padding:15px; color:#ffd166; font-weight:bold;">Medium Risk</td><td style="padding:15px;">Moderate (2-5%)</td><td style="padding:15px;">Growth-Oriented</td><td style="padding:15px;">ETH / Alts</td></tr><tr><td style="padding:15px; color:#ef476f; font-weight:bold;">High Risk</td><td style="padding:15px;">Extreme (5%+)</td><td style="padding:15px;">Speculative</td><td style="padding:15px;">Meme coins / tokens</td></tr></tbody></table></div>"""
+        st.markdown(about_table, unsafe_allow_html=True)
+
     with tab_data_proc:
         st.markdown("<h1 class='cyan-title'>📊 Data Processing & Risk Analytics</h1>", unsafe_allow_html=True)
-        
-        # 1. INTERACTIVE TOGGLE
-        lookback = st.select_slider("Select Calculation Period", options=["7 Days", "30 Days", "90 Days"], value="7 Days", key="risk_slider")
+        lookback = st.select_slider("Select Calculation Period", options=["7 Days", "30 Days", "90 Days"], value="7 Days", key="risk_slider_proc")
 
-        # --- MOVE TEXT AND BENCHMARKING TABLE TO RIGHT SIDE ---
+        # --- BENCHMARKING TABLE ON RIGHT SIDE ---
         b_col_empty, b_col_right = st.columns([1, 1])
         with b_col_right:
             st.markdown("<h3 style='color:white;'>📈 Benchmarking Metrics</h3>", unsafe_allow_html=True)
@@ -236,8 +239,6 @@ def main():
             components.html(risk_table_html, height=400)
 
         st.write("<br>", unsafe_allow_html=True)
-
-        # PREVIOUS TWO CHARTS (Side by Side)
         col_plot1, col_plot2 = st.columns(2)
         with col_plot1:
             st.markdown("<h3 style='color:white;'>🎯 Risk-Return Efficiency</h3>", unsafe_allow_html=True)
@@ -259,26 +260,25 @@ def main():
         st.button("📥 DOWNLOAD MARKET SUMMARY (PDF)")
 
     with tab_viz_dash:
-        with tab_viz_dash:
         st.markdown("<h1 class='cyan-title'>📊 Milestone 3: Analytical Dashboard</h1>", unsafe_allow_html=True)
         
-        # --- MILESTONE 3: INTERACTIVE FILTERS ---
+        # INTERACTIVE FILTERS
         filter_col1, filter_col2 = st.columns([1, 1])
         with filter_col1:
             selected_cryptos = st.multiselect(
                 "SELECT CRYPTOCURRENCIES TO COMPARE", 
                 options=[c['name'] for c in data], 
-                default=[data[0]['name'], data[1]['name']]
+                default=[data[0]['name'], data[1]['name']],
+                key="sel_viz"
             )
         with filter_col2:
             date_range = st.date_input(
                 "SELECT DATE RANGE", 
-                value=(datetime(2025, 1, 1), datetime.now())
+                value=(datetime(2025, 1, 1), datetime.now()),
+                key="date_viz"
             )
 
         st.write("<br>", unsafe_allow_html=True)
-
-        # --- MILESTONE 3: KPI METRICS ---
         m_col1, m_col2, m_col3 = st.columns(3)
         avg_vol = np.random.uniform(40, 60)
         avg_ret = np.random.uniform(2, 8)
@@ -289,8 +289,6 @@ def main():
         m_col3.markdown(f"<div class='kpi-card'><div class='kpi-label'>AVG SHARPE RATIO</div><div class='kpi-value' style='color:#4cc9f0;'>{avg_sharpe:.2f}</div></div>", unsafe_allow_html=True)
 
         st.write("<br>", unsafe_allow_html=True)
-
-        # --- MILESTONE 3: TIME-SERIES VISUALIZATION ---
         st.markdown("<h3 style='color:white;'>📈 Time-Series Analysis</h3>", unsafe_allow_html=True)
         t_col1, t_col2 = st.columns(2)
         
@@ -313,50 +311,23 @@ def main():
             fig_vol_trend.update_layout(paper_bgcolor='#1b263b', plot_bgcolor='rgba(0,0,0,0)', font_color="white", height=250, margin=dict(l=20,r=20,t=20,b=20), legend=dict(orientation="h"))
             st.plotly_chart(fig_vol_trend, use_container_width=True)
 
-        # --- MILESTONE 3: RISK-RETURN SCATTER PLOT & CLASSIFICATION TABLE ---
         st.write("<br>", unsafe_allow_html=True)
         st.markdown("<h3 style='color:white;'>⚖️ Risk-Return Strategic Mapping</h3>", unsafe_allow_html=True)
-        
         scat_col, table_col = st.columns([2, 1])
         
         with scat_col:
-            scatter_data = pd.DataFrame({
-                "Crypto": [c['name'] for c in data[:15]],
-                "Volatility": [abs(c['price_change_percentage_24h'] or 0) * 1.5 for c in data[:15]],
-                "Average Return": [c['price_change_percentage_24h'] or 0 for c in data[:15]]
-            })
+            scatter_data = pd.DataFrame({"Crypto": [c['name'] for c in data[:15]], "Volatility": [abs(c['price_change_percentage_24h'] or 0) * 1.5 for c in data[:15]], "Average Return": [c['price_change_percentage_24h'] or 0 for c in data[:15]]})
             fig_scatter = px.scatter(scatter_data, x="Volatility", y="Average Return", color="Crypto", text="Crypto", template="plotly_dark")
             fig_scatter.update_layout(paper_bgcolor='#1b263b', plot_bgcolor='rgba(0,0,0,0)', font_color="white", height=400, xaxis=dict(title="Volatility (Risk)"), yaxis=dict(title="Average Returns"))
             st.plotly_chart(fig_scatter, use_container_width=True)
 
         with table_col:
-            # Classification Table based on Document 
             st.markdown("<p style='color:#778da9; margin-bottom:10px;'>Asset Interpretation Guide</p>", unsafe_allow_html=True)
-            class_html = """
-            <div style="background:#1b263b; padding:15px; border-radius:12px; border:1px solid #415a77; font-family:sans-serif; color:white;">
-                <table style="width:100%; border-collapse:collapse; text-align:left; font-size:13px;">
-                    <thead style="border-bottom:2px solid #4cc9f0;">
-                        <tr><th style="padding:8px;">POSITION</th><th style="padding:8px;">MEANING</th></tr>
-                    </thead>
-                    <tbody>
-                        <tr style="border-bottom:1px solid #2b3a4f;"><td style="padding:10px; color:#06d6a0; font-weight:bold;">Top-Left</td><td>Best Investment</td></tr>
-                        <tr style="border-bottom:1px solid #2b3a4f;"><td style="padding:10px; color:#ef476f; font-weight:bold;">Bottom-Right</td><td>Worst Asset</td></tr>
-                        <tr style="border-bottom:1px solid #2b3a4f;"><td style="padding:10px; color:#ffd166; font-weight:bold;">Top-Right</td><td>Speculative</td></tr>
-                        <tr><td style="padding:10px; color:#4cc9f0; font-weight:bold;">Bottom-Left</td><td>Stable Asset</td></tr>
-                    </tbody>
-                </table>
-            </div>
-            """
+            class_html = """<div style="background:#1b263b; padding:15px; border-radius:12px; border:1px solid #415a77; font-family:sans-serif; color:white;"><table style="width:100%; border-collapse:collapse; text-align:left; font-size:13px;"><thead style="border-bottom:2px solid #4cc9f0;"><tr><th style="padding:8px;">POSITION</th><th style="padding:8px;">MEANING</th></tr></thead><tbody><tr style="border-bottom:1px solid #2b3a4f;"><td style="padding:10px; color:#06d6a0; font-weight:bold;">Top-Left</td><td>Best Investment</td></tr><tr style="border-bottom:1px solid #2b3a4f;"><td style="padding:10px; color:#ef476f; font-weight:bold;">Bottom-Right</td><td>Worst Asset</td></tr><tr style="border-bottom:1px solid #2b3a4f;"><td style="padding:10px; color:#ffd166; font-weight:bold;">Top-Right</td><td>Speculative</td></tr><tr><td style="padding:10px; color:#4cc9f0; font-weight:bold;">Bottom-Left</td><td>Stable Asset</td></tr></tbody></table></div>"""
             st.markdown(class_html, unsafe_allow_html=True)
-            st.write("")
-            st.info("💡 Insight: Use this map to diversify your portfolio by balancing High-Return assets with Stable ones.")
+            st.info("💡 Insight: diversify your portfolio by balancing High-Return assets with Stable ones.")
 
-        st.markdown("""
-        <div class="insight-box">
-            <b>Milestone 3 Goal:</b> Visualize risk/volatility behavior[cite: 43]. 
-            Price tells us the growth, while volatility identifies the inherent risk of the asset[cite: 80].
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown(f"""<div class="insight-box"><b>Milestone 3 Goal:</b> Visualize risk/volatility behavior[cite: 43]. Price tells growth, while volatility identifies the risk[cite: 80].</div>""", unsafe_allow_html=True)
 
     with tab_risk_class:
         st.markdown("<h1 class='cyan-title'>🛡️ Risk Classification</h1>", unsafe_allow_html=True)
@@ -367,12 +338,9 @@ def main():
     with tab_contact:
         st.markdown("<h2 style='color:#4cc9f0; text-align:center;'>📞 Connect with the Developer</h2>", unsafe_allow_html=True)
         cont_col1, cont_col2, cont_col3 = st.columns(3)
-        with cont_col1:
-            st.markdown("""<div class="insight-box" style="height:200px; text-align:center; border-left:none; border-top:5px solid #4cc9f0;"><b style="color:#4cc9f0; font-size:18px;">📧 Email Support</b><br><br><span style="color:white;">Direct technical queries to:</span><br><b style="color:#ffffff;">support@cryptorisk.com</b></div>""", unsafe_allow_html=True)
-        with cont_col2:
-            st.markdown("""<div class="insight-box" style="height:200px; text-align:center; border-left:none; border-top:5px solid #ffffff;"><b style="color:#ffffff; font-size:18px;">📍 Location</b><br><br><span style="color:white;">Project Head Office:</span><br><b style="color:#ffffff;">Nagpur, Maharashtra, India</b></div>""", unsafe_allow_html=True)
-        with cont_col3:
-            st.markdown("""<div class="insight-box" style="height:200px; text-align:center; border-left:none; border-top:5px solid #4cc9f0;"><b style="color:#4cc9f0; font-size:18px;">💻 GitHub</b><br><br><span style="color:white;">Access Source Code:</span><br><b style="color:#ffffff;">github.com/zishan-khan/crypto-risk</b></div>""", unsafe_allow_html=True)
+        with cont_col1: st.markdown("""<div class="insight-box" style="height:200px; text-align:center; border-left:none; border-top:5px solid #4cc9f0;"><b style="color:#4cc9f0; font-size:18px;">📧 Email Support</b><br><br><span style="color:white;">Direct technical queries to:</span><br><b style="color:#ffffff;">support@cryptorisk.com</b></div>""", unsafe_allow_html=True)
+        with cont_col2: st.markdown("""<div class="insight-box" style="height:200px; text-align:center; border-left:none; border-top:5px solid #ffffff;"><b style="color:#ffffff; font-size:18px;">📍 Location</b><br><br><span style="color:white;">Project Head Office:</span><br><b style="color:#ffffff;">Nagpur, India</b></div>""", unsafe_allow_html=True)
+        with cont_col3: st.markdown("""<div class="insight-box" style="height:200px; text-align:center; border-left:none; border-top:5px solid #4cc9f0;"><b style="color:#4cc9f0; font-size:18px;">💻 GitHub</b><br><br><span style="color:white;">Source Code:</span><br><b style="color:#ffffff;">github.com/zishan-khan</b></div>""", unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()
