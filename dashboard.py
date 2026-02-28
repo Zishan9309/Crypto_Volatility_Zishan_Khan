@@ -89,6 +89,12 @@ def main():
             width: 100% !important;
         }
 
+        /* Targeted fix for widget labels */
+        [data-testid="stWidgetLabel"] p {
+            color: white !important;
+            font-weight: 600 !important;
+        }
+
         .white-edu-text { color: #ffffff !important; font-size: 16px; line-height: 1.6; }
         .white-bullets li { color: #ffffff !important; margin-bottom: 12px; }
     </style>
