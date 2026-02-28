@@ -64,7 +64,7 @@ def main():
         .kpi-label { color: #778da9; font-size: 12px; font-weight: 600; }
         .kpi-value { color: white; font-size: 24px; font-weight: 800; }
 
-        /* SOLID CYAN BUTTONS */
+        /* SOLID CYAN BUTTONS - FIXED TO REMOVE UNDERLINE */
         div.stButton > button {
             background-color: #4cc9f0 !important;
             color: #ffffff !important;
@@ -75,11 +75,15 @@ def main():
             transition: 0.3s;
             box-shadow: 0px 4px 6px rgba(0,0,0,0.2);
             width: 100%;
+            text-decoration: none !important; /* Removes underline */
+            outline: none !important;         /* Removes focus outline */
         }
         
-        div.stButton > button:hover {
+        div.stButton > button:hover, div.stButton > button:active, div.stButton > button:focus {
             background-color: #ffffff !important;
             color: #4cc9f0 !important;
+            text-decoration: none !important; /* Ensures no underline on hover/click */
+            box-shadow: none !important;
         }
 
         .insight-box {
@@ -179,7 +183,7 @@ def main():
             
         st.write("---")
 
-        # CHARTS SECTION
+        # CHARTS SECTION (Original Logic Maintained)
         col_a, col_b = st.columns([1.2, 1])
         with col_a:
             st.markdown("<div class='cyan-title'>📊 Demand & Price Trend</div>", unsafe_allow_html=True)
@@ -223,16 +227,14 @@ def main():
         st.markdown(about_table, unsafe_allow_html=True)
 
     with tab_data_proc:
-        # Calls the function from data_processing.py
         dp.render_data_processing(data)
 
     with tab_reports:
         st.markdown("<h2 style='color:#4cc9f0;'>📑 Export & Generation</h2>", unsafe_allow_html=True)
-        st.markdown('<p class="white-edu-text">Generate comprehensive risk reports in CSV format for the selected assets.</p>', unsafe_allow_html=True)
+        st.markdown('<p class="white-edu-text">Generate comprehensive risk reports for the selected assets.</p>', unsafe_allow_html=True)
         st.button("📥 DOWNLOAD MARKET SUMMARY (CSV)")
 
     with tab_viz_dash:
-        # Calls the function from viz_dashboard.py
         vz.render_viz_dashboard(data, high_risk, total_coins)
 
     with tab_risk_class:
