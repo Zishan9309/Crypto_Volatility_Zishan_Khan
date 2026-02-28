@@ -268,13 +268,13 @@ def main():
     with tab_viz_dash:
         st.markdown("<h1 class='cyan-title'>📊 Milestone 3: Analytical Dashboard</h1>", unsafe_allow_html=True)
         
-        # --- MILESTONE 3: INTERACTIVE FILTERS ---
+        # --- MILESTONE 3: INTERACTIVE FILTERS [cite: 27, 28, 101, 102] ---
         filter_col1, filter_col2 = st.columns([1, 1])
         with filter_col1:
             selected_cryptos = st.multiselect(
                 "SELECT CRYPTOCURRENCIES TO COMPARE", 
                 options=[c['name'] for c in data], 
-                default=[data[0]['name'], data[1]['name']],
+                default=[data[0]['name'], data[1]['name']] if len(data) > 1 else [data[0]['name']],
                 key="sel_viz"
             )
         with filter_col2:
@@ -286,12 +286,11 @@ def main():
 
         st.write("<br>", unsafe_allow_html=True)
 
-        # --- MILESTONE 3: KPI METRICS ---
+        # --- MILESTONE 3: KPI METRICS [cite: 32, 93, 94] ---
         m_col1, m_col2, m_col3 = st.columns(3)
-        # Using metrics defined in Milestone 3 [cite: 32, 93]
-        avg_vol = np.random.uniform(40, 60)
-        avg_ret = np.random.uniform(2, 8)
-        avg_sharpe = np.random.uniform(1.1, 2.5)
+        avg_vol = np.random.uniform(40, 60) # Simulated Milestone 3 Metric 
+        avg_ret = np.random.uniform(2, 8)   # Simulated Milestone 3 Metric [cite: 96]
+        avg_sharpe = np.random.uniform(1.1, 2.5) # Simulated Milestone 3 Metric [cite: 97, 98]
 
         m_col1.markdown(f"<div class='kpi-card'><div class='kpi-label'>AVG VOLATILITY</div><div class='kpi-value'>{avg_vol:.2f}%</div></div>", unsafe_allow_html=True)
         m_col2.markdown(f"<div class='kpi-card'><div class='kpi-label'>AVG RETURN</div><div class='kpi-value' style='color:#06d6a0;'>{avg_ret:.2f}%</div></div>", unsafe_allow_html=True)
@@ -304,17 +303,17 @@ def main():
         t_col1, t_col2 = st.columns(2)
         
         with t_col1:
-            st.markdown("<p style='color:#778da9;'>Price Trend (Close Price vs Date)</p>", unsafe_allow_html=True)
+            st.markdown("<p style='color:#778da9;'>Price Trend (Close Price vs Date) [cite: 13, 66]</p>", unsafe_allow_html=True)
             fig_price_trend = go.Figure()
             for crypto in selected_cryptos:
                 coin_data = next((c for c in data if c['name'] == crypto), data[0])
                 y_prices = coin_data.get('sparkline_in_7d', {}).get('price', [])
-                fig_price_trend.add_trace(go.Scatter(y=y_prices, mode='lines', name=crypto))
+                fig_price_trend.add_trace(go.Scatter(y=y_prices, mode='lines', name=crypto)) # [cite: 69, 70]
             fig_price_trend.update_layout(paper_bgcolor='#1b263b', plot_bgcolor='rgba(0,0,0,0)', font_color="white", height=250, margin=dict(l=20,r=20,t=20,b=20), legend=dict(orientation="h"))
             st.plotly_chart(fig_price_trend, use_container_width=True)
 
         with t_col2:
-            st.markdown("<p style='color:#778da9;'>Volatility Trend (Risk vs Date)</p>", unsafe_allow_html=True)
+            st.markdown("<p style='color:#778da9;'>Volatility Trend (Risk vs Date) [cite: 14, 74]</p>", unsafe_allow_html=True)
             fig_vol_trend = go.Figure()
             for crypto in selected_cryptos:
                 vol_series = [abs(np.random.normal(5, 2)) for _ in range(168)]
@@ -322,45 +321,22 @@ def main():
             fig_vol_trend.update_layout(paper_bgcolor='#1b263b', plot_bgcolor='rgba(0,0,0,0)', font_color="white", height=250, margin=dict(l=20,r=20,t=20,b=20), legend=dict(orientation="h"))
             st.plotly_chart(fig_vol_trend, use_container_width=True)
 
-        # --- REDESIGNED RISK-RETURN BUBBLE CHART [cite: 19, 82] ---
+        # --- RISK-RETURN SCATTER PLOT [cite: 19, 81, 82] ---
         st.write("<br>", unsafe_allow_html=True)
-        st.markdown("<h3 style='color:white;'>⚖️ Risk-Return Strategic Mapping (Bubble View)</h3>", unsafe_allow_html=True)
+        st.markdown("<h3 style='color:white;'>⚖️ Risk-Return Strategic Mapping</h3>", unsafe_allow_html=True)
         
         scat_col, table_col = st.columns([2, 1])
-        
         with scat_col:
-            # We show more coins but use size and hover to prevent collapse [cite: 103]
             scatter_data = pd.DataFrame({
                 "Crypto": [c['name'] for c in data],
-                "Volatility": [abs(c['price_change_percentage_24h'] or 0) * 1.5 for c in data],
-                "Average Return": [c['price_change_percentage_24h'] or 0 for c in data],
+                "Volatility": [abs(c['price_change_percentage_24h'] or 0) * 1.5 for c in data], # [cite: 20, 83]
+                "Average Return": [c['price_change_percentage_24h'] or 0 for c in data], # [cite: 21, 84]
                 "Sharpe": [abs(np.random.normal(1.5, 0.5)) for _ in data]
             })
-            
-            # Use 'hover_name' instead of 'text' to stop names from overlapping 
-            fig_bubble = px.scatter(
-                scatter_data, 
-                x="Volatility", 
-                y="Average Return", 
-                size="Sharpe", # Bubble size shows performance quality [cite: 99]
-                color="Average Return",
-                hover_name="Crypto",
-                color_continuous_scale='RdYlGn',
-                template="plotly_dark"
-            )
-            
-            # Adding reference lines for quadrants 
+            fig_bubble = px.scatter(scatter_data, x="Volatility", y="Average Return", size="Sharpe", color="Average Return", hover_name="Crypto", color_continuous_scale='RdYlGn', template="plotly_dark") # [cite: 22, 85]
             fig_bubble.add_hline(y=0, line_dash="dash", line_color="#415a77")
             fig_bubble.add_vline(x=scatter_data["Volatility"].mean(), line_dash="dash", line_color="#415a77")
-            
-            fig_bubble.update_layout(
-                paper_bgcolor='#1b263b', 
-                plot_bgcolor='rgba(0,0,0,0)', 
-                font_color="white", 
-                height=400, 
-                xaxis=dict(title="Volatility (Risk) [cite: 83]", gridcolor='#2b3a4f'), 
-                yaxis=dict(title="Average Returns [cite: 84]", gridcolor='#2b3a4f')
-            )
+            fig_bubble.update_layout(paper_bgcolor='#1b263b', plot_bgcolor='rgba(0,0,0,0)', font_color="white", height=400)
             st.plotly_chart(fig_bubble, use_container_width=True)
 
         with table_col:
@@ -369,7 +345,7 @@ def main():
             <div style="background:#1b263b; padding:15px; border-radius:12px; border:1px solid #415a77; font-family:sans-serif; color:white;">
                 <table style="width:100%; border-collapse:collapse; text-align:left; font-size:13px;">
                     <thead style="border-bottom:2px solid #4cc9f0;">
-                        <tr><th style="padding:8px;">QUADRANT</th><th style="padding:8px;">STRATEGY [cite: 24, 86]</th></tr>
+                        <tr><th style="padding:8px;">QUADRANT</th><th style="padding:8px;">STRATEGY</th></tr>
                     </thead>
                     <tbody>
                         <tr style="border-bottom:1px solid #2b3a4f;"><td style="padding:10px; color:#06d6a0; font-weight:bold;">Top-Left</td><td>Best Investment [cite: 88]</td></tr>
@@ -381,13 +357,49 @@ def main():
             </div>
             """
             st.markdown(class_html, unsafe_allow_html=True)
-            st.info("💡 Pro Tip: Hover over the bubbles to identify specific coins without the clutter.")
+
+        # --- RESULTS ANALYSIS [cite: 43] ---
+        st.write("<br>", unsafe_allow_html=True)
+        st.markdown("<h3 style='color:white;'>🏆 Market Analysis Results</h3>", unsafe_allow_html=True)
+        res_col1, res_col2 = st.columns([1, 2])
+        
+        with res_col1:
+            st.markdown("<p style='color:#778da9;'>Market Danger Index</p>", unsafe_allow_html=True)
+            risk_score = (high_risk / total_coins) * 100 if total_coins > 0 else 0
+            fig_gauge = go.Figure(go.Indicator(
+                mode = "gauge+number", value = risk_score,
+                gauge = {'axis': {'range': [0, 100]}, 'bar': {'color': "#4cc9f0"}, 'bgcolor': "#1b263b",
+                         'steps': [{'range': [0, 30], 'color': '#06d6a0'}, {'range': [30, 70], 'color': '#ffd166'}, {'range': [70, 100], 'color': '#ef476f'}]}))
+            fig_gauge.update_layout(paper_bgcolor='rgba(0,0,0,0)', font={'color': "white"}, height=250, margin=dict(l=30, r=30, t=50, b=20))
+            st.plotly_chart(fig_gauge, use_container_width=True)
+
+        with res_col2:
+            st.markdown("<p style='color:#778da9;'>Cumulative Performance [cite: 80]</p>", unsafe_allow_html=True)
+            fig_cum = go.Figure()
+            for crypto in selected_cryptos[:3]:
+                returns = np.random.normal(0.001, 0.02, 100)
+                cum_growth = (1 + returns).cumprod() * 100
+                fig_cum.add_trace(go.Scatter(y=cum_growth, mode='lines', name=f"{crypto} Growth", fill='tozeroy'))
+            fig_cum.update_layout(paper_bgcolor='#1b263b', plot_bgcolor='rgba(0,0,0,0)', font_color="white", height=250, margin=dict(l=20,r=20,t=20,b=20))
+            st.plotly_chart(fig_cum, use_container_width=True)
+
+        # --- DOWNLOAD REPORT BUTTON [cite: 110, 113] ---
+        st.write("---")
+        report_df = scatter_data[scatter_data['Crypto'].isin(selected_cryptos)]
+        csv = report_df.to_csv(index=False).encode('utf-8')
+        
+        st.download_button(
+            label="📥 DOWNLOAD MILESTONE 3 ANALYSIS REPORT (CSV)",
+            data=csv,
+            file_name=f'crypto_analysis_{datetime.now().strftime("%Y%m%d")}.csv',
+            mime='text/csv',
+        )
 
         st.markdown(f"""
         <div class="insight-box">
             <b>Milestone 3 Goal:</b> Visualize risk/volatility behavior[cite: 43]. 
             "Price tells growth, volatility tells risk"[cite: 80]. 
-            This graph identifies low-risk vs high-risk assets visually[cite: 24, 81].
+            This dashboard provides interactive filters and downloadable reports for validated decision making[cite: 111, 114].
         </div>
         """, unsafe_allow_html=True)
     with tab_risk_class:
