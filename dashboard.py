@@ -40,6 +40,19 @@ def main():
             margin-bottom: 20px;
         }
 
+        /* PULSING SYNC ANIMATION FOR LEFT SIDE */
+        @keyframes pulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.3; transform: scale(1.1); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        .sync-icon {
+            color: #06d6a0;
+            display: inline-block;
+            animation: pulse 2s infinite;
+            margin-right: 8px;
+        }
+
         /* TAB STYLING: White to Cyan Hover */
         button[data-baseweb="tab"] p {
             color: white !important;
@@ -82,7 +95,7 @@ def main():
         div.stButton > button:hover, div.stButton > button:active, div.stButton > button:focus {
             background-color: #ffffff !important;
             color: #4cc9f0 !important;
-            text-decoration: none !important; /* Ensures no underline on hover/click */
+            text-decoration: none !important; 
             box-shadow: none !important;
         }
 
@@ -163,8 +176,29 @@ def main():
 
         st.write("")
         
-        # --- TABLE ON RIGHT SIDE ---
-        t_col_empty, t_col_right = st.columns([1, 1])
+        # --- NEW ADDITION FOR LEFT SIDE SPACE ---
+        t_col_left, t_col_right = st.columns([1, 1])
+        
+        with t_col_left:
+            st.markdown("<div class='cyan-title'>📡 Pipeline Status</div>", unsafe_allow_html=True)
+            st.markdown(f"""
+            <div class="insight-box" style="border-left-color: #06d6a0;">
+                <span class="sync-icon">●</span> <b style="color:#06d6a0;">LIVE SYNCING:</b> Active API Stream<br>
+                <b>Source:</b> CoinGecko V3 REST API<br>
+                <b>Format:</b> JSON Structured Payload<br>
+                <b>Sync Time:</b> {datetime.now().strftime('%H:%M:%S')}
+            </div>
+            """, unsafe_allow_html=True)
+            
+            st.markdown(f"""
+            <div class="insight-box" style="margin-top:20px; border-left-color:#ffd166;">
+                <b style="color:#ffd166;">📊 Data Fetching Logic:</b><br>
+                Market data is requested every 300 seconds to maintain real-time accuracy without exceeding rate limits.
+            </div>
+            """, unsafe_allow_html=True)
+            
+            st.info("💡 Pro Tip: Use the 'Refresh' button on the right if data appears stale.")
+
         with t_col_right:
             st.markdown("<div class='cyan-title'>📋 Market Risk Monitor </div>", unsafe_allow_html=True)
             if st.button("🔄 REFRESH", key="btn_refresh_acq"):
