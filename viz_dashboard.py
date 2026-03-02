@@ -105,7 +105,7 @@ def render_viz_dashboard(data, high_risk, total_coins):
     with res_col2:
         st.markdown("<p style='color:#778da9;'>Cumulative Performance Comparison (Indexed)</p>", unsafe_allow_html=True)
         fig_cum = go.Figure()
-        for crypto in selected_cryptos[:3]:
+        for crypto in selected_cryptos[:3]: 
             returns = np.random.normal(0.001, 0.02, 100)
             cum_growth = (1 + returns).cumprod() * 100
             fig_cum.add_trace(go.Scatter(y=cum_growth, mode='lines', name=f"{crypto} Growth", fill='tozeroy'))
@@ -121,57 +121,48 @@ def render_viz_dashboard(data, high_risk, total_coins):
         )
         st.plotly_chart(fig_cum, use_container_width=True)
 
-    # ---------------- NEW: INDIVIDUAL ASSET FULL-SIZE CHART ----------------
     st.write("---")
-    st.markdown("<h3 style='color:white;'>🔍 Individual Market Share & Depth Analysis</h3>", unsafe_allow_html=True)
-    
-    # Dropdown for selecting specific currency
-    col_sel_left, col_sel_right = st.columns([1, 2])
-    with col_sel_left:
-        selected_single = st.selectbox(
-            "SELECT SPECIFIC CURRENCY FOR FULL ANALYSIS", 
-            options=[c['name'] for c in data],
-            key="single_asset_select"
-        )
-        
-        # Get details for the selected coin
-        coin_obj = next((c for c in data if c['name'] == selected_single), data[0])
-        st.markdown(f"""
-            <div class="insight-box" style="border-left-color: #4cc9f0;">
-                <b style="color:#4cc9f0; font-size:16px;">{selected_single} Stats:</b><br>
-                Price: ${coin_obj.get('current_price', 0):,}<br>
-                High 24h: ${coin_obj.get('high_24h', 0):,}<br>
-                Low 24h: ${coin_obj.get('low_24h', 0):,}<br>
-                Market Cap Rank: #{coin_obj.get('market_cap_rank', 'N/A')}
-            </div>
-        """, unsafe_allow_html=True)
 
-    with col_sel_right:
-        # Full-sized Area Chart
-        fig_full = go.Figure()
-        prices = coin_obj.get('sparkline_in_7d', {}).get('price', [])
-        
-        if prices:
-            fig_full.add_trace(go.Scatter(
-                y=prices, 
-                mode='lines', 
-                name=selected_single,
-                fill='tozeroy',
-                line=dict(color='#4cc9f0', width=4),
-                fillcolor='rgba(76, 201, 240, 0.2)'
-            ))
-        
-        fig_full.update_layout(
-            paper_bgcolor='#1b263b', 
-            plot_bgcolor='rgba(0,0,0,0)', 
-            font_color="white", 
-            height=400,
-            margin=dict(l=40, r=20, t=20, b=40),
-            xaxis=dict(title="7-Day Trading Intervals (Hours)", gridcolor='#2b3a4f', showline=True),
-            yaxis=dict(title="Market Price (USD)", gridcolor='#2b3a4f', showline=True),
-            hovermode="x unified"
-        )
-        st.plotly_chart(fig_full, use_container_width=True)
+    # --- NEW ADDITION: FULL SIZE CANDLESTICK MARKET CHART ---
+    st.markdown("<h3 style='color:white;'>🕯️ Deep Dive: Asset Candlestick Analysis</h3>", unsafe_allow_html=True)
+    
+    # Single dropdown for specific analysis
+    candle_coin = st.selectbox("SELECT ASSET FOR CANDLESTICK ANALYSIS", options=[c['name'] for c in data], key="candle_sel")
+    
+    # Generating dummy Candle Data (Open, High, Low, Close)
+    # In a real app, you would fetch OHLC data here
+    base_price = next((c['current_price'] for c in data if c['name'] == candle_coin), 1000)
+    dates = pd.date_range(end=datetime.now(), periods=30)
+    
+    ohlc_data = pd.DataFrame({
+        'Date': dates,
+        'Open': base_price * (1 + np.random.normal(0, 0.02, 30)),
+        'High': base_price * (1 + abs(np.random.normal(0.03, 0.01, 30))),
+        'Low': base_price * (1 - abs(np.random.normal(0.03, 0.01, 30))),
+        'Close': base_price * (1 + np.random.normal(0, 0.02, 30))
+    })
+
+    fig_candle = go.Figure(data=[go.Candlestick(
+        x=ohlc_data['Date'],
+        open=ohlc_data['Open'],
+        high=ohlc_data['High'],
+        low=ohlc_data['Low'],
+        close=ohlc_data['Close'],
+        increasing_line_color='#06d6a0', 
+        decreasing_line_color='#ef476f'
+    )])
+
+    fig_candle.update_layout(
+        paper_bgcolor='#1b263b',
+        plot_bgcolor='rgba(0,0,0,0)',
+        font_color="white",
+        height=500,
+        margin=dict(l=20, r=20, t=20, b=20),
+        xaxis=dict(title="Date Range", gridcolor='#2b3a4f', rangeslider_visible=False),
+        yaxis=dict(title="Market Price (USD)", gridcolor='#2b3a4f')
+    )
+    
+    st.plotly_chart(fig_candle, use_container_width=True)
 
     st.write("---")
     
