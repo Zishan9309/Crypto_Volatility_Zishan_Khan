@@ -176,28 +176,35 @@ def main():
 
         st.write("")
         
-        # --- NEW ADDITION FOR LEFT SIDE SPACE ---
+        # --- NEW ATTRACTIVE LEFT SIDE CONTENT ---
         t_col_left, t_col_right = st.columns([1, 1])
         
         with t_col_left:
-            st.markdown("<div class='cyan-title'>📡 Pipeline Status</div>", unsafe_allow_html=True)
+            st.markdown("<div class='cyan-title'>🧠 Market Intelligence</div>", unsafe_allow_html=True)
+            
+            # Market Sentiment Widget
+            sentiment_color = "#06d6a0" if risk_exp < 30 else "#ef476f"
+            sentiment_text = "BULLISH / STABLE" if risk_exp < 30 else "VOLATILE / FEAR"
+            
             st.markdown(f"""
-            <div class="insight-box" style="border-left-color: #06d6a0;">
-                <span class="sync-icon">●</span> <b style="color:#06d6a0;">LIVE SYNCING:</b> Active API Stream<br>
-                <b>Source:</b> CoinGecko V3 REST API<br>
-                <b>Format:</b> JSON Structured Payload<br>
-                <b>Sync Time:</b> {datetime.now().strftime('%H:%M:%S')}
+            <div class="insight-box" style="border-left-color: {sentiment_color}; background: #16213e;">
+                <b style="color:{sentiment_color}; font-size:18px;">🎭 Market Sentiment: {sentiment_text}</b><br>
+                <span style="font-size:14px; color:#778da9;">Global volatility index calculated from top 25 assets.</span>
             </div>
             """, unsafe_allow_html=True)
             
+            # Asset Spotlight
+            top_coin = data[0]
             st.markdown(f"""
-            <div class="insight-box" style="margin-top:20px; border-left-color:#ffd166;">
-                <b style="color:#ffd166;">📊 Data Fetching Logic:</b><br>
-                Market data is requested every 300 seconds to maintain real-time accuracy without exceeding rate limits.
+            <div class="insight-box" style="margin-top:20px; border-left-color:#4cc9f0;">
+                <b style="color:#4cc9f0; font-size:18px;">⭐ Asset Spotlight: {top_coin['name']}</b><br>
+                <b>Current Price:</b> ${top_coin['current_price']:,}<br>
+                <b>24h Movement:</b> {top_coin['price_change_percentage_24h']:.2f}%<br>
+                <span style="color:#06d6a0;">Dominant Market Leader detected.</span>
             </div>
             """, unsafe_allow_html=True)
             
-            st.info("💡 Pro Tip: Use the 'Refresh' button on the right if data appears stale.")
+            st.info("💡 Insight: Use the 'Refresh' button on the right to sync latest API streams.")
 
         with t_col_right:
             st.markdown("<div class='cyan-title'>📋 Market Risk Monitor </div>", unsafe_allow_html=True)
