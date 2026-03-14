@@ -10,6 +10,7 @@ from datetime import datetime
 # --- IMPORT MODULAR FILES ---
 import data_processing as dp
 import viz_dashboard as vz
+import risk_class as rc
 
 def main():
     # ---------------- UI STYLING & FULL SCREEN FIX (EXACT CSS) ----------------
@@ -279,10 +280,8 @@ def main():
         vz.render_viz_dashboard(data, high_risk, total_coins)
 
     with tab_risk_class:
-        st.markdown("<h1 class='cyan-title'>🛡️ Risk Classification</h1>", unsafe_allow_html=True)
-        class_col1, class_col2, class_col3 = st.columns(3)
-        class_col1.error(f"🔴 **HIGH RISK:** {high_risk} assets")
-        class_col3.success(f"🟢 **LOW RISK:** {low_risk} assets")
+        # Pass the 'data' variable to the rendering function in risk_class.py
+        rc.render_risk_classification(data)
 
     with tab_contact:
         st.markdown("<h2 style='color:#4cc9f0; text-align:center;'>📞 Connect with the Developer</h2>", unsafe_allow_html=True)
