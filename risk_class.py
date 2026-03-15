@@ -52,7 +52,7 @@ def render_risk_classification(data):
     """, unsafe_allow_html=True)
 
     # --- HEADER ---
-    st.markdown("<h1 style='color:white; text-align:center;'>📊 Milestone 4: Risk Segmentation</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='color:white; text-align:center;'>📊 Risk Segmentation</h1>", unsafe_allow_html=True)
     st.write("---")
 
     # --- INTERACTIVE THRESHOLD SLIDER ---
