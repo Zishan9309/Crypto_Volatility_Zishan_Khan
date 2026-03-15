@@ -23,7 +23,7 @@ def render_risk_classification(data):
             box-shadow: 0 8px 20px rgba(0,0,0,0.4);
         }
         
-        /* Proper Color Gradients */
+        /* Proper Color Gradients for Clusters */
         .high-risk-block { background: linear-gradient(135deg, rgba(208, 49, 45, 0.9), rgba(153, 15, 2, 0.9)); border-left: 4px solid #ff4b2b; }
         .med-risk-block { background: linear-gradient(135deg, rgba(240, 165, 0, 0.9), rgba(207, 117, 0, 0.9)); border-left: 4px solid #ffd166; }
         .low-risk-block { background: linear-gradient(135deg, rgba(11, 132, 87, 0.9), rgba(5, 94, 61, 0.9)); border-left: 4px solid #06d6a0; }
@@ -39,6 +39,15 @@ def render_risk_classification(data):
             border: 1px solid #415a77;
             text-align: center;
         }
+
+        /* Advisor Intelligence Card Styling */
+        .advisor-card {
+            background: rgba(27, 38, 59, 0.8);
+            border-radius: 20px;
+            padding: 30px;
+            color: white;
+            transition: 0.5s;
+        }
     </style>
     """, unsafe_allow_html=True)
 
@@ -46,7 +55,7 @@ def render_risk_classification(data):
     st.markdown("<h1 style='color:white; text-align:center;'>📊 Milestone 4: Risk Segmentation</h1>", unsafe_allow_html=True)
     st.write("---")
 
-    # --- NEW INTERACTIVE THRESHOLD SLIDER ---
+    # --- INTERACTIVE THRESHOLD SLIDER ---
     with st.expander("🛠️ CONFIGURE RISK THRESHOLDS"):
         high_cutoff = st.slider("High Risk Definition (%)", 3.0, 10.0, 5.0)
         med_cutoff = st.slider("Medium Risk Definition (%)", 1.0, high_cutoff, 2.5)
@@ -61,14 +70,13 @@ def render_risk_classification(data):
 
     with col_donut:
         st.markdown("<h4 style='color:white;'>🍩 Asset Risk Distribution</h4>", unsafe_allow_html=True)
-        # Using a Donut Chart for professional risk exposure display
         fig = go.Figure(data=[go.Pie(
             labels=['High Risk', 'Medium Risk', 'Low Risk'],
             values=[len(high), len(med), len(low)],
             hole=.6,
             marker_colors=['#ef476f', '#ffd166', '#06d6a0'],
             textinfo='percent+label',
-            pull=[0.1, 0, 0] # Explode the high risk section
+            pull=[0.1, 0, 0] 
         )])
         fig.update_layout(
             paper_bgcolor='rgba(0,0,0,0)', 
@@ -132,80 +140,53 @@ def render_risk_classification(data):
             </div>
             """, unsafe_allow_html=True)
 
-    # --- BOTTOM SECTION: SMART RISK ADVISORY ---
+    # --- BOTTOM SECTION: SMART AI PORTFOLIO ADVISOR ---
     st.write("---")
-    st.markdown("<h3 style='color:white;'>🔍 AI Portfolio Advisor</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color:white;'>🤖 AI Strategic Portfolio Advisor</h3>", unsafe_allow_html=True)
     
     sel_coin = st.selectbox("Select Asset for personalized risk strategy:", options=[c['name'] for c in data])
     asset = next((c for c in data if c['name'] == sel_coin), None)
     
     if asset:
         vol = abs(asset.get('price_change_percentage_24h', 0))
-        advice = "🚨 High Danger! Use 1x leverage only." if vol >= high_cutoff else ("⚖️ Moderate Risk. Suitable for swing trading." if vol >= med_cutoff else "🛡️ Secure. Good for long-term holding.")
         
-        st.markdown(f"""
-        <div style="background:#16213e; padding:25px; border-radius:15px; border: 1px solid #4cc9f0; color:white;">
-            <h2 style="margin:0; color:#4cc9f0;">{sel_coin} Analysis</h2>
-            <p style="font-size:20px; margin:15px 0;">{advice}</p>
-            <span style="color:#778da9;">Price: ${asset.get('current_price'):,} | 24h Low: ${asset.get('low_24h'):,}</span>
-        </div>
-        """, unsafe_allow_html=True)
+        # Advisor Logic & Theming
+        if vol >= high_cutoff:
+            status, color, shadow, advice = "CRITICAL RISK", "#ef476f", "rgba(239, 71, 111, 0.4)", "🚨 High Danger! Use 1x leverage only. Extreme volatility detected. Avoid long-term entry here."
+            signals = ["🛑 Reduce Exposure", "📉 De-risk Portfolio", "⚠️ High Slippage"]
+        elif vol >= med_cutoff:
+            status, color, shadow, advice = "MODERATE RISK", "#ffd166", "rgba(255, 209, 102, 0.4)", "⚖️ Moderate Risk. Suitable for swing trading with tight stop-losses. Monitor support levels."
+            signals = ["⚖️ Balanced Entry", "📈 Trailing Stop", "🔍 Monitor Support"]
+        else:
+            status, color, shadow, advice = "SECURE / STABLE", "#06d6a0", "rgba(6, 214, 160, 0.4)", "🛡️ Secure. Good for long-term holding. Low volatility baseline ideal for DCA strategies."
+            signals = ["🛡️ Accumulation Zone", "💎 HODL Candidate", "✅ Value Asset"]
 
-    # --- NEW FEATURE: MULTI-DIMENSIONAL RISK RADAR ---
-    st.write("---")
-    st.markdown("<h3 style='color:white;'>📡 Multi-Dimensional Risk Intelligence</h3>", unsafe_allow_html=True)
-    
-    radar_col1, radar_col2 = st.columns([2, 1])
-    
-    with radar_col1:
-        # Asset for Radar comparison
-        radar_coin = st.selectbox("Select Asset to view Risk DNA:", options=[c['name'] for c in data], key="radar_sel")
-        coin_info = next((c for c in data if c['name'] == radar_coin), data[0])
-        
-        # Normalized metrics for Radar (0-100 scale)
-        categories = ['Volatility', 'Price Change', 'Market Cap Rank', 'Liquidity', 'Trend Strength']
-        
-        # Simulated logic for Radar values based on actual data
-        vol_score = min(abs(coin_info.get('price_change_percentage_24h', 0)) * 10, 100)
-        rank_score = max(0, 100 - (coin_info.get('market_cap_rank', 100) / 2))
-        change_score = min(abs(coin_info.get('price_change_percentage_24h', 0)) * 5, 100)
-        
-        fig_radar = go.Figure()
-        fig_radar.add_trace(go.Scatterpolar(
-            r=[vol_score, change_score, rank_score, 80, 60],
-            theta=categories,
-            fill='toself',
-            name=radar_coin,
-            line_color='#4cc9f0',
-            fillcolor='rgba(76, 201, 240, 0.3)'
-        ))
-        
-        fig_radar.update_layout(
-            polar=dict(
-                bgcolor="#1b263b",
-                radialaxis=dict(visible=True, range=[0, 100], gridcolor="#415a77", tickfont=dict(color="white")),
-                angularaxis=dict(gridcolor="#415a77", tickfont=dict(color="white"))
-            ),
-            showlegend=False,
-            paper_bgcolor='rgba(0,0,0,0)',
-            height=400,
-            margin=dict(t=30, b=30, l=30, r=30)
-        )
-        st.plotly_chart(fig_radar, use_container_width=True)
-
-    with radar_col2:
+        # Strategic Advisor Card
         st.markdown(f"""
-        <div style="background:#1b263b; padding:20px; border-radius:15px; border-top:5px solid #ef476f; color:white; height:400px;">
-            <b style="color:#ef476f; font-size:18px;">🧬 Risk DNA Profile</b><br><br>
-            <p style="font-size:14px; color:#778da9;">The Radar Chart visualizes the statistical signature of <b>{radar_coin}</b>.</p>
-            <ul style="font-size:13px; padding-left:15px;">
-                <li><b>Volatility:</b> High area coverage indicates speculative behavior.</li>
-                <li><b>Market Rank:</b> Proximity to center indicates a Small-Cap (Higher Risk).</li>
-                <li><b>Liquidity:</b> Fixed at 80% based on exchange availability.</li>
-            </ul>
-            <div style="background:rgba(239, 71, 111, 0.1); padding:10px; border-radius:8px; margin-top:20px; border:1px solid #ef476f;">
-                <small style="color:#ef476f;">SYSTEM ALERT</small><br>
-                <b>{ "Critical Volatility" if vol_score > 50 else "Stable Profile" }</b>
+        <div class="advisor-card" style="border: 2px solid {color}; box-shadow: 0 10px 30px {shadow};">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <div>
+                    <span style="color: {color}; font-weight: 800; font-size: 14px; letter-spacing: 1px;">STRATEGIC VERDICT</span>
+                    <h2 style="margin: 0; color: white;">{sel_coin} <small style="font-size: 14px; color: #778da9;">({asset['symbol'].upper()})</small></h2>
+                </div>
+                <div style="background: {color}; color: #0d1b2a; padding: 8px 20px; border-radius: 50px; font-weight: 900;">
+                    {status}
+                </div>
+            </div>
+            <div style="display: flex; gap: 30px; margin-bottom: 20px;">
+                <div style="flex: 2;">
+                    <p style="font-size: 18px; line-height: 1.6;">{advice}</p>
+                </div>
+                <div style="flex: 1; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 15px;">
+                    <p style="margin: 0 0 10px 0; font-weight: bold; color: {color};">SIGNALS:</p>
+                    {"".join([f'<div style="margin-bottom: 5px; font-size: 14px;">{s}</div>' for s in signals])}
+                </div>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
+                <div><small style="color: #778da9;">Volatility</small><br><b style="color: {color};">{vol:.2f}%</b></div>
+                <div><small style="color: #778da9;">Current Price</small><br><b>${asset.get('current_price', 0):,}</b></div>
+                <div><small style="color: #778da9;">24h High</small><br><b style="color: #06d6a0;">${asset.get('high_24h', 0):,}</b></div>
+                <div><small style="color: #778da9;">24h Low</small><br><b style="color: #ef476f;">${asset.get('low_24h', 0):,}</b></div>
             </div>
         </div>
         """, unsafe_allow_html=True)
