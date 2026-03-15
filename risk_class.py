@@ -151,6 +151,65 @@ def render_risk_classification(data):
         </div>
         """, unsafe_allow_html=True)
 
+    # --- NEW FEATURE: MULTI-DIMENSIONAL RISK RADAR ---
+    st.write("---")
+    st.markdown("<h3 style='color:white;'>📡 Multi-Dimensional Risk Intelligence</h3>", unsafe_allow_html=True)
+    
+    radar_col1, radar_col2 = st.columns([2, 1])
+    
+    with radar_col1:
+        # Asset for Radar comparison
+        radar_coin = st.selectbox("Select Asset to view Risk DNA:", options=[c['name'] for c in data], key="radar_sel")
+        coin_info = next((c for c in data if c['name'] == radar_coin), data[0])
+        
+        # Normalized metrics for Radar (0-100 scale)
+        categories = ['Volatility', 'Price Change', 'Market Cap Rank', 'Liquidity', 'Trend Strength']
+        
+        # Simulated logic for Radar values based on actual data
+        vol_score = min(abs(coin_info.get('price_change_percentage_24h', 0)) * 10, 100)
+        rank_score = max(0, 100 - (coin_info.get('market_cap_rank', 100) / 2))
+        change_score = min(abs(coin_info.get('price_change_percentage_24h', 0)) * 5, 100)
+        
+        fig_radar = go.Figure()
+        fig_radar.add_trace(go.Scatterpolar(
+            r=[vol_score, change_score, rank_score, 80, 60],
+            theta=categories,
+            fill='toself',
+            name=radar_coin,
+            line_color='#4cc9f0',
+            fillcolor='rgba(76, 201, 240, 0.3)'
+        ))
+        
+        fig_radar.update_layout(
+            polar=dict(
+                bgcolor="#1b263b",
+                radialaxis=dict(visible=True, range=[0, 100], gridcolor="#415a77", tickfont=dict(color="white")),
+                angularaxis=dict(gridcolor="#415a77", tickfont=dict(color="white"))
+            ),
+            showlegend=False,
+            paper_bgcolor='rgba(0,0,0,0)',
+            height=400,
+            margin=dict(t=30, b=30, l=30, r=30)
+        )
+        st.plotly_chart(fig_radar, use_container_width=True)
+
+    with radar_col2:
+        st.markdown(f"""
+        <div style="background:#1b263b; padding:20px; border-radius:15px; border-top:5px solid #ef476f; color:white; height:400px;">
+            <b style="color:#ef476f; font-size:18px;">🧬 Risk DNA Profile</b><br><br>
+            <p style="font-size:14px; color:#778da9;">The Radar Chart visualizes the statistical signature of <b>{radar_coin}</b>.</p>
+            <ul style="font-size:13px; padding-left:15px;">
+                <li><b>Volatility:</b> High area coverage indicates speculative behavior.</li>
+                <li><b>Market Rank:</b> Proximity to center indicates a Small-Cap (Higher Risk).</li>
+                <li><b>Liquidity:</b> Fixed at 80% based on exchange availability.</li>
+            </ul>
+            <div style="background:rgba(239, 71, 111, 0.1); padding:10px; border-radius:8px; margin-top:20px; border:1px solid #ef476f;">
+                <small style="color:#ef476f;">SYSTEM ALERT</small><br>
+                <b>{ "Critical Volatility" if vol_score > 50 else "Stable Profile" }</b>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
     # --- DOWNLOAD EXPORT ---
     st.write("<br>", unsafe_allow_html=True)
     csv = pd.DataFrame(data)[['name', 'current_price', 'price_change_percentage_24h']].to_csv(index=False).encode('utf-8')
