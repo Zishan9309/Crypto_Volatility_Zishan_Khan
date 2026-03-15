@@ -144,8 +144,8 @@ def main():
     data = fetch_real_data()
 
     # ---------------- NAVBAR SECTION ----------------
-    tab_data_acq, tab_about, tab_data_proc, tab_reports, tab_viz_dash, tab_risk_class, tab_contact = st.tabs([
-        "📡 DATA ACQUISITION", "📖 ABOUT", "⚙️ DATA PROCESSING", "📑 REPORTS", "📊 VIZ DASHBOARD", "🛡️ RISK CLASSIFICATION", "📞 CONTACT"
+    tab_data_acq, tab_about, tab_data_proc, tab_viz_dash, tab_risk_class, tab_contact = st.tabs([
+        "📡 DATA ACQUISITION", "📖 ABOUT", "⚙️ DATA PROCESSING", "📊 VIZ DASHBOARD", "🛡️ RISK CLASSIFICATION", "📞 CONTACT"
     ])
 
     with tab_data_acq:
@@ -271,10 +271,6 @@ def main():
     with tab_data_proc:
         dp.render_data_processing(data)
 
-    with tab_reports:
-        st.markdown("<h2 style='color:#4cc9f0;'>📑 Export & Generation</h2>", unsafe_allow_html=True)
-        st.markdown('<p class="white-edu-text">Generate comprehensive risk reports for the selected assets.</p>', unsafe_allow_html=True)
-        st.button("📥 DOWNLOAD MARKET SUMMARY (CSV)")
 
     with tab_viz_dash:
         vz.render_viz_dashboard(data, high_risk, total_coins)
