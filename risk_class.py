@@ -4,8 +4,8 @@ import json
 
 def render_risk_classification(data):
     """
-    Renders the Risk Classification tab with the exact UI from the uploaded image.
-    `data` — list of dicts from CoinGecko /coins/markets endpoint.
+    Renders the Risk Classification tab with a professional UI.
+    Thresholds are fixed at 5.0% (Critical) and 2.5% (Moderate) for live data processing.
     """
 
     if not data:
@@ -48,15 +48,6 @@ def render_risk_classification(data):
     h1{{color:var(--blue);text-align:center;font-size:28px;font-weight:900;letter-spacing:2px;margin-bottom:4px;}}
     .subtitle{{text-align:center;color:var(--muted);font-size:11px;letter-spacing:3px;margin-bottom:20px;}}
     hr{{border:none;border-top:1px solid var(--light);margin:16px 0;opacity:0.3;}}
-
-    /* EXPANDER SECTION */
-    .expander{{background:var(--mid);border:1px solid var(--light);border-radius:12px;margin-bottom:18px;overflow:hidden;}}
-    .expander-header{{padding:12px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:700;color:var(--blue);letter-spacing:1px;}}
-    .expander-body{{padding:0 18px;max-height:0;overflow:hidden;transition:max-height .3s ease,padding .3s ease;}}
-    .expander-body.open{{max-height:300px;padding:14px 18px;}}
-    .slider-row{{display:flex;flex-direction:column;gap:15px;}}
-    .slider-label{{font-size:12px;color:var(--muted);margin-bottom:6px;}}
-    input[type=range]{{width:100%;accent-color:var(--blue);cursor:pointer;}}
 
     /* TOP SUMMARY ROW */
     .top-row{{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:18px;}}
@@ -103,22 +94,6 @@ def render_risk_classification(data):
     <h1>📊 RISK CLASSIFICATION</h1>
     <div class="subtitle">LIVE ASSET MONITORING · PORTFOLIO INTELLIGENCE</div>
 
-    <div class="expander">
-      <div class="expander-header" onclick="toggleExp()">🛠️ CONFIGURE RISK THRESHOLDS <span id="expArrow">▼</span></div>
-      <div class="expander-body" id="expBody">
-        <div class="slider-row">
-          <div>
-            <div class="slider-label">High Risk Definition: <b id="highVal">5.0</b>%</div>
-            <input type="range" id="highSlider" min="3" max="10" step="0.5" value="5" oninput="onSlider()"/>
-          </div>
-          <div>
-            <div class="slider-label">Medium Risk Definition: <b id="medVal">2.5</b>%</div>
-            <input type="range" id="medSlider" min="1" max="4.5" step="0.5" value="2.5" oninput="onSlider()"/>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <div class="top-row">
       <div class="chart-box">
         <h4>🍩 Asset Risk Distribution</h4>
@@ -150,23 +125,12 @@ def render_risk_classification(data):
 
     <script>
     const COINS = {coins_json};
-    let highCut = 5.0, medCut = 2.5, donutChart = null;
+    // Fixed Thresholds for Live Data Processing
+    const highCut = 5.0; 
+    const medCut = 2.5;
+    let donutChart = null;
 
     const abs = v => Math.abs(v || 0);
-
-    function toggleExp() {{
-      const b = document.getElementById('expBody');
-      b.classList.toggle('open');
-      document.getElementById('expArrow').textContent = b.classList.contains('open') ? '▲' : '▼';
-    }}
-
-    function onSlider() {{
-      highCut = parseFloat(document.getElementById('highSlider').value);
-      medCut = parseFloat(document.getElementById('medSlider').value);
-      document.getElementById('highVal').textContent = highCut.toFixed(1);
-      document.getElementById('medVal').textContent = medCut.toFixed(1);
-      renderAll();
-    }}
 
     function renderDonut(h, m, l) {{
       const ctx = document.getElementById('donutChart').getContext('2d');
@@ -193,27 +157,27 @@ def render_risk_classification(data):
       document.getElementById('verdictStatus').style.color = avg > 4 ? '#ef476f' : '#06d6a0';
       document.getElementById('verdictPct').textContent = avg.toFixed(2) + '%';
 
-      document.getElementById('highHead').textContent = `🔴 CRITICAL (${{high.length}})`;
-      document.getElementById('medHead').textContent = `🟡 WARNING (${{med.length}})`;
-      document.getElementById('lowHead').textContent = `🟢 SECURE (${{low.length}})`;
+      document.getElementById('highHead').textContent = `🔴 CRITICAL ($\{{high.length}})`;
+      document.getElementById('medHead').textContent = `🟡 WARNING ($\{{med.length}})`;
+      document.getElementById('lowHead').textContent = `🟢 SECURE ($\{{low.length}})`;
 
       const genCards = (arr, cls) => arr.slice(0,4).map(c => `
-        <div class="risk-card ${{cls}}">
-          <div class="card-title">Rank #${{c.market_cap_rank}}</div>
-          <div class="card-name">${{c.name}}</div>
-          <div class="card-val">${{abs(c.price_change_percentage_24h).toFixed(2)}}% Vol</div>
+        <div class="risk-card $\{{cls}}">
+          <div class="card-title">Rank #$\{{c.market_cap_rank}}</div>
+          <div class="card-name">$\{{c.name}}</div>
+          <div class="card-val">$\{{abs(c.price_change_percentage_24h).toFixed(2)}}% Vol</div>
         </div>`).join('');
 
-      document.getElementById('highCards').innerHTML = genCards(high, 'high-risk-block');
-      document.getElementById('medCards').innerHTML = genCards(med, 'med-risk-block');
-      document.getElementById('lowCards').innerHTML = genCards(low, 'low-risk-block');
+      document.getElementById('hCards').innerHTML = genCards(high, 'high-risk-block');
+      document.getElementById('mCards').innerHTML = genCards(med, 'med-risk-block');
+      document.getElementById('lCards').innerHTML = genCards(low, 'low-risk-block');
 
       document.getElementById('heatmapGrid').innerHTML = COINS.map(c => {{
         const v = abs(c.price_change_percentage_24h);
         const col = v > highCut ? '#ef476f' : v > medCut ? '#ffd166' : '#06d6a0';
-        return `<div class="heatmap-cell" style="background:rgba(255,255,255,0.05); border:1px solid ${{col}}44;">
-          <div class="hm-sym" style="color:${{col}};">${{c.symbol}}</div>
-          <div class="hm-val">${{v.toFixed(1)}}%</div>
+        return `<div class="heatmap-cell" style="background:rgba(255,255,255,0.05); border:1px solid $\{{col}}44;">
+          <div class="hm-sym" style="color:$\{{col}};">$\{{c.symbol}}</div>
+          <div class="hm-val">$\{{v.toFixed(1)}}%</div>
         </div>`;
       }}).join('');
 
@@ -228,22 +192,22 @@ def render_risk_classification(data):
                 {{s:'SECURE', c:'#06d6a0', a:'Ideal for long-term HODL.'}};
       
       document.getElementById('advisorCard').innerHTML = `
-        <div class="advisor-wrap" style="border:2px solid ${{res.c}};">
+        <div class="advisor-wrap" style="border:2px solid $\{{res.c}};">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-            <div><div style="color:${{res.c}}; font-size:12px; font-weight:800;">VERDICT</div><div style="font-size:22px; font-weight:900;">${{asset.name}}</div></div>
-            <div class="advisor-badge" style="background:${{res.c}};">${{res.s}}</div>
+            <div><div style="color:$\{{res.c}}; font-size:12px; font-weight:800;">VERDICT</div><div style="font-size:22px; font-weight:900;">$\{{asset.name}}</div></div>
+            <div class="advisor-badge" style="background:$\{{res.c}};">$\{{res.s}}</div>
           </div>
-          <p style="font-size:15px; margin-bottom:15px;">${{res.a}}</p>
+          <p style="font-size:15px; margin-bottom:15px;">$\{{res.a}}</p>
           <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px; border-top:1px solid #333; padding-top:15px;">
-            <div><small style="color:var(--muted);">Vol</small><br><span style="color:${{res.c}};">${{v.toFixed(2)}}%</span></div>
-            <div><small style="color:var(--muted);">Price</small><br><span>$${{asset.current_price.toLocaleString()}}</span></div>
-            <div><small style="color:var(--muted);">24h High</small><br><span style="color:#06d6a0;">$${{asset.high_24h.toLocaleString()}}</span></div>
+            <div><small style="color:var(--muted);">Vol</small><br><span style="color:$\{{res.c}};">$\{{v.toFixed(2)}}%</span></div>
+            <div><small style="color:var(--muted);">Price</small><br><span>$\${{asset.current_price.toLocaleString()}}</span></div>
+            <div><small style="color:var(--muted);">24h High</small><br><span style="color:#06d6a0;">$\${{asset.high_24h.toLocaleString()}}</span></div>
           </div>
         </div>`;
     }}
 
     function exportCSV() {{
-      let csv = "Name,Price,Volatility\\n" + COINS.map(c => `${{c.name}},${{c.current_price}},${{c.price_change_percentage_24h}}`).join("\\n");
+      let csv = "Name,Price,Volatility\\n" + COINS.map(c => `$\{{c.name}},$\{{c.current_price}},$\{{c.price_change_percentage_24h}}`).join("\\n");
       const blob = new Blob([csv], {{ type: 'text/csv' }});
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -252,7 +216,7 @@ def render_risk_classification(data):
       a.click();
     }}
 
-    document.getElementById('coinSelect').innerHTML = COINS.map(c => `<option value="${{c.name}}">${{c.name}}</option>`).join('');
+    document.getElementById('coinSelect').innerHTML = COINS.map(c => `<option value="$\{{c.name}}">$\{{c.name}}</option>`).join('');
     renderAll();
     </script>
     </body>
