@@ -2,20 +2,17 @@ import streamlit as st
 import streamlit.components.v1 as components
 import json
 
-
 def render_risk_classification(data):
     """
     Renders the Risk Classification tab.
-    `data`  — list of dicts from CoinGecko /coins/markets endpoint.
-              Required fields: name, symbol, market_cap_rank,
-              current_price, high_24h, low_24h, price_change_percentage_24h
+    `data` — list of dicts from CoinGecko /coins/markets endpoint.
     """
 
     if not data:
         st.warning("⚠️ No data available. Please refresh the API on the Data Acquisition tab.")
         return
 
-    # ── Sanitise: replace None with 0 so JS doesn't break ──────────────────
+    # ── Sanitise: ensure data is JSON serializable for the JS engine ───────
     clean = []
     for c in data:
         clean.append({
@@ -30,7 +27,7 @@ def render_risk_classification(data):
 
     coins_json = json.dumps(clean)
 
-    # ── Full HTML — exact replica of the uploaded dashboard ─────────────────
+    # ── Full HTML — EXACT Replica of the Uploaded Dashboard ────────────────
     html = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -40,7 +37,7 @@ def render_risk_classification(data):
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <style>
 *{{box-sizing:border-box;margin:0;padding:0;}}
-body{{font-family:'Space Grotesk',sans-serif;background:#0d1b2a;color:#fff;min-height:100vh;padding:20px;}}
+body{{font-family:'Space Grotesk',sans-serif;background:#0d1b2a;color:#fff;min-height:100vh;padding:20px;overflow-x:hidden;}}
 :root{{
   --red:#ef476f;--red-bg:rgba(239,71,111,0.18);--red-border:rgba(239,71,111,0.5);
   --yellow:#ffd166;--yellow-bg:rgba(255,209,102,0.18);--yellow-border:rgba(255,209,102,0.5);
@@ -128,7 +125,6 @@ select:focus{{border-color:var(--blue);}}
 <div class="subtitle">LIVE ASSET MONITORING · PORTFOLIO INTELLIGENCE</div>
 <hr/>
 
-<!-- CONFIGURE THRESHOLDS -->
 <div class="expander" id="exp">
   <div class="expander-header" onclick="toggleExp()">
     🛠️ CONFIGURE RISK THRESHOLDS <span id="expArrow">▼</span>
@@ -147,7 +143,6 @@ select:focus{{border-color:var(--blue);}}
   </div>
 </div>
 
-<!-- TOP ROW -->
 <div class="top-row">
   <div class="chart-box">
     <h4>🍩 Asset Risk Distribution</h4>
@@ -161,7 +156,6 @@ select:focus{{border-color:var(--blue);}}
   </div>
 </div>
 
-<!-- CLASSIFIED CLUSTERS -->
 <div class="cluster-title">🗂️ Classified Asset Clusters</div>
 <div class="clusters">
   <div>
@@ -180,7 +174,6 @@ select:focus{{border-color:var(--blue);}}
 
 <hr/>
 
-<!-- VOLATILITY HEATMAP -->
 <div class="section-title">🔥 Volatility Heatmap</div>
 <div class="heatmap-wrap">
   <div class="heatmap-grid" id="heatmapGrid"></div>
@@ -193,7 +186,6 @@ select:focus{{border-color:var(--blue);}}
 
 <hr/>
 
-<!-- AI ADVISOR -->
 <div class="section-title">🤖 AI Strategic Portfolio Advisor</div>
 <select id="coinSelect" onchange="renderAdvisor()"></select>
 <div id="advisorCard"></div>
@@ -202,12 +194,8 @@ select:focus{{border-color:var(--blue);}}
 <button class="export-btn" onclick="exportCSV()">📥 EXPORT FINAL RISK CLASSIFICATION</button>
 
 <script>
-// ── LIVE DATA from CoinGecko via Python ────────────────────────────────────
 const COINS = {coins_json};
-
-let highCut = 5.0, medCut = 2.5;
-let donutChart = null;
-
+let highCut = 5.0, medCut = 2.5, donutChart = null;
 const abs = v => Math.abs(v || 0);
 
 function classify(data){{
@@ -219,50 +207,48 @@ function classify(data){{
 }}
 
 function toggleExp(){{
-  const b = document.getElementById('expBody');
-  const a = document.getElementById('expArrow');
-  b.classList.toggle('open');
-  a.textContent = b.classList.contains('open') ? '▲' : '▼';
+  const b=document.getElementById('expBody'), a=document.getElementById('expArrow');
+  b.classList.toggle('open'); a.textContent=b.classList.contains('open')?'▲':'▼';
 }}
 
 function onSlider(){{
-  highCut = parseFloat(document.getElementById('highSlider').value);
-  medCut  = parseFloat(document.getElementById('medSlider').value);
-  if (medCut >= highCut) {{ medCut = highCut - 0.5; document.getElementById('medSlider').value = medCut; }}
-  document.getElementById('highVal').textContent = highCut.toFixed(1);
-  document.getElementById('medVal').textContent  = medCut.toFixed(1);
+  highCut=parseFloat(document.getElementById('highSlider').value);
+  medCut=parseFloat(document.getElementById('medSlider').value);
+  if(medCut>=highCut){{ medCut=highCut-0.5; document.getElementById('medSlider').value=medCut; }}
+  document.getElementById('highVal').textContent=highCut.toFixed(1);
+  document.getElementById('medVal').textContent=medCut.toFixed(1);
   renderAll();
 }}
 
-function renderDonut(h, m, l){{
-  const ctx = document.getElementById('donutChart').getContext('2d');
-  if (donutChart) donutChart.destroy();
-  donutChart = new Chart(ctx, {{
-    type: 'doughnut',
-    data: {{
-      labels: ['High Risk', 'Medium Risk', 'Low Risk'],
-      datasets: [{{ data: [h, m, l], backgroundColor: ['#ef476f', '#ffd166', '#06d6a0'], borderWidth: 0, hoverOffset: 8 }}]
+function renderDonut(h,m,l){{
+  const ctx=document.getElementById('donutChart').getContext('2d');
+  if(donutChart) donutChart.destroy();
+  donutChart=new Chart(ctx,{{
+    type:'doughnut',
+    data:{{
+      labels:['High Risk','Medium Risk','Low Risk'],
+      datasets:[{{data:[h,m,l],backgroundColor:['#ef476f','#ffd166','#06d6a0'],borderWidth:0,hoverOffset:8}}]
     }},
-    options: {{
-      cutout: '60%',
-      plugins: {{
-        legend: {{ labels: {{ color: '#fff', font: {{ family: 'Space Grotesk', weight: '700' }}, padding: 14 }} }},
-        tooltip: {{ callbacks: {{ label: ctx => `${{ctx.label}}: ${{ctx.raw}}` }} }}
+    options:{{
+      cutout:'60%',
+      plugins:{{
+        legend:{{labels:{{color:'#fff',font:{{family:'Space Grotesk',weight:'700'}},padding:14}}}},
+        tooltip:{{callbacks:{{label:ctx=>`${{ctx.label}}: ${{ctx.raw}}`}}}}
       }},
-      animation: {{ animateRotate: true, duration: 600 }}
+      animation:{{animateRotate:true,duration:600}}
     }}
   }});
 }}
 
 function renderVerdict(data){{
-  const avg = data.reduce((s, c) => s + abs(c.price_change_percentage_24h), 0) / data.length;
-  const volatile = avg > 4;
-  document.getElementById('verdictStatus').textContent = volatile ? 'VOLATILE' : 'STABLE';
-  document.getElementById('verdictStatus').style.color = volatile ? '#ef476f' : '#06d6a0';
-  document.getElementById('verdictPct').textContent = avg.toFixed(2) + '%';
+  const avg=data.reduce((s,c)=>s+abs(c.price_change_percentage_24h),0)/data.length;
+  const volatile=avg>4;
+  document.getElementById('verdictStatus').textContent=volatile?'VOLATILE':'STABLE';
+  document.getElementById('verdictStatus').style.color=volatile?'#ef476f':'#06d6a0';
+  document.getElementById('verdictPct').textContent=avg.toFixed(2)+'%';
 }}
 
-function cardHTML(coin, cls){{
+function cardHTML(coin,cls){{
   return `<div class="risk-card ${{cls}}">
     <div class="card-title">Rank #${{coin.market_cap_rank}}</div>
     <div class="card-name">${{coin.name}}</div>
@@ -270,47 +256,32 @@ function cardHTML(coin, cls){{
   </div>`;
 }}
 
-function renderCards({{high, med, low}}){{
-  document.getElementById('highHead').textContent = `🔴 CRITICAL ASSETS (${{high.length}})`;
-  document.getElementById('medHead').textContent  = `🟡 WARNING ZONE (${{med.length}})`;
-  document.getElementById('lowHead').textContent  = `🟢 SECURE ASSETS (${{low.length}})`;
-  document.getElementById('highCards').innerHTML  = high.slice(0, 5).map(c => cardHTML(c, 'high-risk-block')).join('');
-  document.getElementById('medCards').innerHTML   = med.slice(0, 5).map(c => cardHTML(c, 'med-risk-block')).join('');
-  document.getElementById('lowCards').innerHTML   = low.slice(0, 5).map(c => cardHTML(c, 'low-risk-block')).join('');
+function renderCards({{high,med,low}}){{
+  document.getElementById('highHead').textContent=`🔴 CRITICAL ASSETS (${{high.length}})`;
+  document.getElementById('medHead').textContent=`🟡 WARNING ZONE (${{med.length}})`;
+  document.getElementById('lowHead').textContent=`🟢 SECURE ASSETS (${{low.length}})`;
+  document.getElementById('highCards').innerHTML=high.slice(0,5).map(c=>cardHTML(c,'high-risk-block')).join('');
+  document.getElementById('medCards').innerHTML=med.slice(0,5).map(c=>cardHTML(c,'med-risk-block')).join('');
+  document.getElementById('lowCards').innerHTML=low.slice(0,5).map(c=>cardHTML(c,'low-risk-block')).join('');
 }}
 
 function heatColor(vol){{
-  const t = Math.min(vol / 10, 1);
-  if (t < 0.5) {{
-    const u = t * 2;
-    const r = Math.round(6   + (255 - 6)   * u);
-    const g = Math.round(214 + (209 - 214) * u);
-    const b = Math.round(160 + (102 - 160) * u);
+  const t=Math.min(vol/10,1);
+  if(t<0.5){{
+    const u=t*2, r=Math.round(6+(255-6)*u), g=Math.round(214+(209-214)*u), b=Math.round(160+(102-160)*u);
     return `rgb(${{r}},${{g}},${{b}})`;
   }} else {{
-    const u = (t - 0.5) * 2;
-    const r = Math.round(255 + (239 - 255) * u);
-    const g = Math.round(209 + (71  - 209) * u);
-    const b = Math.round(102 + (111 - 102) * u);
+    const u=(t-0.5)*2, r=Math.round(255+(239-255)*u), g=Math.round(209+(71-209)*u), b=Math.round(102+(111-102)*u);
     return `rgb(${{Math.min(255,r)}},${{Math.max(0,g)}},${{Math.max(0,b)}})`;
   }}
 }}
 
-function hexToRgb(rgb){{
-  const m = rgb.match(/\d+/g);
-  return m ? m.join(',') : '255,255,255';
-}}
-
 function renderHeatmap(data){{
-  const grid = document.getElementById('heatmapGrid');
-  grid.innerHTML = data.map(c => {{
-    const vol   = abs(c.price_change_percentage_24h);
-    const col   = heatColor(vol);
-    const dir   = c.price_change_percentage_24h >= 0 ? '▲' : '▼';
-    const alpha = 0.15 + 0.45 * (vol / 10);
-    return `<div class="heatmap-cell"
-      style="background:rgba(${{hexToRgb(col)}},${{alpha.toFixed(2)}});border:1px solid ${{col}}40;"
-      title="${{c.name}}: ${{vol.toFixed(2)}}%">
+  const grid=document.getElementById('heatmapGrid');
+  grid.innerHTML=data.map(c=>{{
+    const vol=abs(c.price_change_percentage_24h), col=heatColor(vol), dir=c.price_change_percentage_24h>=0?'▲':'▼', alpha=0.15+0.45*(vol/10);
+    const rgbArr=col.match(/\\d+/g);
+    return `<div class="heatmap-cell" style="background:rgba(${{rgbArr.join(',')}},${{alpha.toFixed(2)}});border:1px solid ${{col}}40;" title="${{c.name}}: ${{vol.toFixed(2)}}%">
       <div class="hm-sym" style="color:${{col}};">${{c.symbol.toUpperCase()}}</div>
       <div class="hm-val" style="color:${{col}};">${{dir}}${{vol.toFixed(1)}}%</div>
       <div class="hm-name">${{c.name}}</div>
@@ -319,40 +290,32 @@ function renderHeatmap(data){{
 }}
 
 function renderAdvisor(){{
-  const name  = document.getElementById('coinSelect').value;
-  const asset = COINS.find(c => c.name === name);
-  if (!asset) return;
-  const vol = abs(asset.price_change_percentage_24h);
-  let status, color, shadow, advice, signals;
-  if (vol >= highCut) {{
-    status = "CRITICAL RISK"; color = "#ef476f"; shadow = "rgba(239,71,111,0.4)";
-    advice  = "🚨 High Danger! Use 1x leverage only. Extreme volatility detected. Avoid long-term entry here.";
-    signals = ["🛑 Reduce Exposure", "📉 De-risk Portfolio", "⚠️ High Slippage"];
-  }} else if (vol >= medCut) {{
-    status = "MODERATE RISK"; color = "#ffd166"; shadow = "rgba(255,209,102,0.4)";
-    advice  = "⚖️ Moderate Risk. Suitable for swing trading with tight stop-losses. Monitor support levels.";
-    signals = ["⚖️ Balanced Entry", "📈 Trailing Stop", "🔍 Monitor Support"];
+  const name=document.getElementById('coinSelect').value, asset=COINS.find(c=>c.name===name);
+  if(!asset) return;
+  const vol=abs(asset.price_change_percentage_24h);
+  let status,color,shadow,advice,signals;
+  if(vol>=highCut){{
+    status="CRITICAL RISK"; color="#ef476f"; shadow="rgba(239,71,111,0.4)";
+    advice="🚨 High Danger! Use 1x leverage only. Extreme volatility detected. Avoid long-term entry here.";
+    signals=["🛑 Reduce Exposure","📉 De-risk Portfolio","⚠️ High Slippage"];
+  }} else if(vol>=medCut){{
+    status="MODERATE RISK"; color="#ffd166"; shadow="rgba(255,209,102,0.4)";
+    advice="⚖️ Moderate Risk. Suitable for swing trading with tight stop-losses. Monitor support levels.";
+    signals=["⚖️ Balanced Entry","📈 Trailing Stop","🔍 Monitor Support"];
   }} else {{
-    status = "SECURE / STABLE"; color = "#06d6a0"; shadow = "rgba(6,214,160,0.4)";
-    advice  = "🛡️ Secure. Good for long-term holding. Low volatility baseline ideal for DCA strategies.";
-    signals = ["🛡️ Accumulation Zone", "💎 HODL Candidate", "✅ Value Asset"];
+    status="SECURE / STABLE"; color="#06d6a0"; shadow="rgba(6,214,160,0.4)";
+    advice="🛡️ Secure. Good for long-term holding. Low volatility baseline ideal for DCA strategies.";
+    signals=["🛡️ Accumulation Zone","💎 HODL Candidate","✅ Value Asset"];
   }}
-  const fmt = v => v >= 1 ? `$${{v.toLocaleString()}}` : v >= 0.001 ? `$${{v.toFixed(4)}}` : `$${{v.toExponential(2)}}`;
-  document.getElementById('advisorCard').innerHTML = `
-  <div class="advisor-wrap" style="border:2px solid ${{color}};box-shadow:0 10px 30px ${{shadow}};">
+  const fmt=v=>v>=1?`$${{v.toLocaleString()}}`:v>=0.001?`$${{v.toFixed(4)}}`:`$${{v.toExponential(2)}}`;
+  document.getElementById('advisorCard').innerHTML=`<div class="advisor-wrap" style="border:2px solid ${{color}};box-shadow:0 10px 30px ${{shadow}};">
     <div class="advisor-top">
-      <div>
-        <div style="color:${{color}};font-weight:800;font-size:12px;letter-spacing:1px;">STRATEGIC VERDICT</div>
-        <div class="advisor-name">${{asset.name}} <span class="advisor-sym">(${{asset.symbol.toUpperCase()}})</span></div>
-      </div>
+      <div><div style="color:${{color}};font-weight:800;font-size:12px;letter-spacing:1px;">STRATEGIC VERDICT</div><div class="advisor-name">${{asset.name}} <span class="advisor-sym">(${{asset.symbol.toUpperCase()}})</span></div></div>
       <div class="advisor-badge" style="background:${{color}};">${{status}}</div>
     </div>
     <div class="advisor-body">
       <div class="advisor-text">${{advice}}</div>
-      <div class="signals-box">
-        <div class="signals-title" style="color:${{color}};">SIGNALS:</div>
-        ${{signals.map(s => `<div class="signal-item">${{s}}</div>`).join('')}}
-      </div>
+      <div class="signals-box"><div class="signals-title" style="color:${{color}};">SIGNALS:</div>${{signals.map(s=>`<div class="signal-item">${{s}}</div>`).join('')}}</div>
     </div>
     <div class="advisor-stats">
       <div><div class="stat-label">Volatility</div><div class="stat-val" style="color:${{color}};">${{vol.toFixed(2)}}%</div></div>
@@ -363,37 +326,24 @@ function renderAdvisor(){{
   </div>`;
 }}
 
-function populateSelect(){{
-  document.getElementById('coinSelect').innerHTML =
-    COINS.map(c => `<option value="${{c.name}}">${{c.name}}</option>`).join('');
-}}
+function populateSelect(){{ document.getElementById('coinSelect').innerHTML=COINS.map(c=>`<option value="${{c.name}}">${{c.name}}</option>`).join(''); }}
 
 function exportCSV(){{
-  const rows = [
-    ['name', 'current_price', 'price_change_percentage_24h'],
-    ...COINS.map(c => [c.name, c.current_price, c.price_change_percentage_24h])
-  ];
-  const csv = rows.map(r => r.join(',')).join('\\n');
-  const a = document.createElement('a');
-  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
-  a.download = 'risk_report.csv';
-  a.click();
+  const rows=[['name','current_price','price_change_percentage_24h'],...COINS.map(c=>[c.name,c.current_price,c.price_change_percentage_24h])];
+  const csv=rows.map(r=>r.join(',')).join('\\n');
+  const a=document.createElement('a'); a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download='risk_report.csv'; a.click();
 }}
 
 function renderAll(){{
-  const {{high, med, low}} = classify(COINS);
-  renderDonut(high.length, med.length, low.length);
-  renderVerdict(COINS);
-  renderCards({{high, med, low}});
-  renderHeatmap(COINS);
-  renderAdvisor();
+  const {{high,med,low}}=classify(COINS);
+  renderDonut(high.length,med.length,low.length); renderVerdict(COINS); renderCards({{high,med,low}}); renderHeatmap(COINS); renderAdvisor();
 }}
 
-populateSelect();
-renderAll();
+populateSelect(); renderAll();
 </script>
 </body>
 </html>"""
 
-    # ── Inject into Streamlit tab via components.html ────────────────────────
-    components.html(html, height=2200, scrolling=True)
+    # ── Inject into Streamlit via components.html ──────────────────────────
+    components.html(html, height=2000, scrolling=True)
