@@ -1,11 +1,12 @@
 import streamlit as st
 import streamlit.components.v1 as components
 import json
+import pandas as pd
 
 def render_risk_classification(data):
     """
-    Renders the Risk Classification tab.
-    Matches the dashboard.py style and fixes the 'Real Value' filtering problem.
+    Renders the Risk Classification tab with the exact UI from the uploaded image.
+    Uses the user's provided working Python logic inside an interactive HTML component.
     """
 
     if not data:
@@ -13,7 +14,6 @@ def render_risk_classification(data):
         return
 
     # ── Sanitise Data for JavaScript ──────────────────────────────────────────
-    # We ensure numbers are floats and strings are escaped to prevent JS errors
     clean = []
     for c in data:
         clean.append({
@@ -28,7 +28,7 @@ def render_risk_classification(data):
 
     coins_json = json.dumps(clean)
 
-    # ── Full HTML/CSS/JS Logic ────────────────────────────────────────────────
+    # ── Full HTML/CSS/JS Replica ──────────────────────────────────────────────
     html = f"""
     <!DOCTYPE html>
     <html lang="en">
@@ -88,10 +88,10 @@ def render_risk_classification(data):
     <div class="expander">
       <div class="expander-header" onclick="toggleExp()">🛠️ CONFIGURE RISK THRESHOLDS <span id="expArrow">▼</span></div>
       <div class="expander-body" id="expBody">
-          <div class="slider-label"><span>High Risk Definition (Critical)</span><b id="highVal">5.0%</b></div>
+          <div class="slider-label"><span>High Risk Cutoff (Critical)</span><b id="highVal">5.0%</b></div>
           <input type="range" id="highSlider" min="3" max="10" step="0.5" value="5" oninput="updateLogic()"/>
           
-          <div class="slider-label"><span>Medium Risk Definition (Warning)</span><b id="medVal">2.5%</b></div>
+          <div class="slider-label"><span>Medium Risk Cutoff (Warning)</span><b id="medVal">2.5%</b></div>
           <input type="range" id="medSlider" min="1" max="4.5" step="0.5" value="2.5" oninput="updateLogic()"/>
       </div>
     </div>
@@ -126,7 +126,7 @@ def render_risk_classification(data):
     <div style="font-weight:800;margin-bottom:10px;font-size:15px;color:var(--blue);">🔥 Volatility Heatmap</div>
     <div class="heatmap-grid" id="hmGrid"></div>
 
-    <div style="font-weight:800;margin:25px 0 10px 0;font-size:15px;color:var(--blue);">🤖 AI Portfolio Intelligence</div>
+    <div style="font-weight:800;margin:25px 0 10px 0;font-size:15px;color:var(--blue);">🤖 AI Strategic Advisor</div>
     <select id="coinSelect" onchange="renderAdvisor()"></select>
     <div id="advisorCard"></div>
 
@@ -144,7 +144,6 @@ def render_risk_classification(data):
         hCut = parseFloat(document.getElementById('highSlider').value);
         mCut = parseFloat(document.getElementById('medSlider').value);
         
-        // Logical safety: Med cannot be higher than High
         if(mCut >= hCut) {{
             mCut = hCut - 0.5;
             document.getElementById('medSlider').value = mCut;
@@ -156,22 +155,20 @@ def render_risk_classification(data):
     }}
 
     function renderAll() {{
-        // CORRECTED FILTERING LOGIC
+        // Filter based on user provided working Python logic
         const hArr = DATA.filter(c => Math.abs(c.price_change_percentage_24h) >= hCut);
         const mArr = DATA.filter(c => Math.abs(c.price_change_percentage_24h) >= mCut && Math.abs(c.price_change_percentage_24h) < hCut);
         const lArr = DATA.filter(c => Math.abs(c.price_change_percentage_24h) < mCut);
 
-        // Update Headers
         document.getElementById('hHead').textContent = `🔴 CRITICAL ($\{{hArr.length}})`;
         document.getElementById('mHead').textContent = `🟡 WARNING ($\{{mArr.length}})`;
         document.getElementById('lHead').textContent = `🟢 SECURE ($\{{lArr.length}})`;
 
-        // Render Cards (Showing real values from API)
-        const genCards = (arr, cls) => arr.slice(0, 5).map(c => `
+        const genCards = (arr, cls) => arr.slice(0, 4).map(c => `
             <div class="risk-card $\{{cls}}">
                 <div style="font-size:10px;opacity:0.7;font-weight:bold;">RANK #$\{{c.market_cap_rank}}</div>
                 <div class="card-name">$\{{c.name}}</div>
-                <div class="card-val">$\{{Math.abs(c.price_change_percentage_24h).toFixed(2)}}% 24H Delta</div>
+                <div class="card-val">$\{{Math.abs(c.price_change_percentage_24h).toFixed(2)}}% Volatility</div>
             </div>
         `).join('');
 
@@ -179,23 +176,20 @@ def render_risk_classification(data):
         document.getElementById('mCards').innerHTML = genCards(mArr, 'med-risk-block');
         document.getElementById('lCards').innerHTML = genCards(lArr, 'low-risk-block');
 
-        // Update Market Health Verdict
         const avg = DATA.reduce((sum, c) => sum + Math.abs(c.price_change_percentage_24h), 0) / DATA.length;
         document.getElementById('vStatus').textContent = avg > 4 ? 'VOLATILE' : 'STABLE';
         document.getElementById('vStatus').style.color = avg > 4 ? '#ef476f' : '#06d6a0';
         document.getElementById('vAvg').textContent = avg.toFixed(2) + "%";
 
-        // Update Heatmap
         document.getElementById('hmGrid').innerHTML = DATA.slice(0, 15).map(c => {{
             const val = Math.abs(c.price_change_percentage_24h);
             const color = val >= hCut ? '#ef476f' : val >= mCut ? '#ffd166' : '#06d6a0';
-            return `<div class="heatmap-cell" style="border-color:$\{{color}}22; border-bottom: 3px solid $\{{color}};">
+            return `<div class="heatmap-cell" style="border-bottom: 3px solid $\{{color}};">
                 <div style="color:$\{{color}};font-weight:900;font-size:12px;">$\{{c.symbol}}</div>
                 <div style="font-weight:800;font-size:14px;margin-top:2px;">$\{{val.toFixed(1)}}%</div>
             </div>`;
         }}).join('');
 
-        // Update Donut Chart
         const ctx = document.getElementById('donutChart').getContext('2d');
         if(myChart) myChart.destroy();
         myChart = new Chart(ctx, {{
@@ -210,7 +204,6 @@ def render_risk_classification(data):
             }},
             options: {{ cutout: '75%', plugins: {{ legend: {{ display: false }} }} }}
         }});
-        
         renderAdvisor();
     }}
 
@@ -218,31 +211,19 @@ def render_risk_classification(data):
         const coinName = document.getElementById('coinSelect').value;
         const c = DATA.find(x => x.name === coinName) || DATA[0];
         const val = Math.abs(c.price_change_percentage_24h);
-        
         let color = val >= hCut ? '#ef476f' : val >= mCut ? '#ffd166' : '#06d6a0';
-        let advice = val >= hCut ? "🚨 HIGH RISK: Avoid leverage. Market showing extreme volatility." : 
-                     val >= mCut ? "⚠️ MODERATE: Suitable for swing trades with tight stop-losses." : 
-                     "🛡️ SECURE: Strong stability detected. Ideal for long-term hold.";
-
         document.getElementById('advisorCard').innerHTML = `
             <div class="advisor-wrap" style="border-color: $\{{color}};">
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-                    <h2 style="margin:0;">$\{{c.name}}</h2>
-                    <span style="background:$\{{color}};color:#0d1b2a;padding:4px 12px;border-radius:20px;font-weight:900;font-size:12px;">
-                        $\{{val >= hCut ? 'CRITICAL' : val >= mCut ? 'WARNING' : 'SECURE'}}
-                    </span>
-                </div>
-                <p style="font-size:16px;font-weight:600;margin-bottom:15px;">$\{{advice}}</p>
+                <h2 style="margin:0;">$\{{c.name}} Analysis</h2>
+                <p style="font-size:16px;font-weight:600;margin:10px 0;">Strategy: $\{{val >= hCut ? 'Critical Risk. Avoid Leverage.' : val >= mCut ? 'Moderate Risk. Use Stop Loss.' : 'Stable Asset. Ideal for HODL.'}}</p>
                 <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;text-align:center;border-top:1px solid #415a77;padding-top:15px;">
-                    <div><small style="color:var(--muted);">Current Price</small><br><b>$ $\{{c.current_price.toLocaleString()}}</b></div>
+                    <div><small style="color:var(--muted);">Price</small><br><b>$ $\{{c.current_price.toLocaleString()}}</b></div>
                     <div><small style="color:var(--muted);">24H High</small><br><b style="color:var(--green);">$ $\{{c.high_24h.toLocaleString()}}</b></div>
                     <div><small style="color:var(--muted);">24H Low</small><br><b style="color:var(--red);">$ $\{{c.low_24h.toLocaleString()}}</b></div>
                 </div>
-            </div>
-        `;
+            </div>`;
     }
 
-    // Initialize
     document.getElementById('coinSelect').innerHTML = DATA.map(c => `<option value="$\{{c.name}}">$\{{c.name}}</option>`).join('');
     renderAll();
     </script>
@@ -251,3 +232,8 @@ def render_risk_classification(data):
     """
 
     components.html(html, height=1400, scrolling=True)
+
+    # Sidebar Export functionality (Native Streamlit)
+    st.write("---")
+    csv = pd.DataFrame(data)[['name', 'current_price', 'price_change_percentage_24h']].to_csv(index=False).encode('utf-8')
+    st.download_button(label="📥 EXPORT FINAL RISK CLASSIFICATION", data=csv, file_name="risk_report.csv", use_container_width=True)
