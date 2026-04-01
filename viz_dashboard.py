@@ -6,7 +6,7 @@ import numpy as np
 from datetime import datetime
 
 def render_viz_dashboard(data, high_risk, total_coins):
-    st.markdown("<h1 class='cyan-title'>📊 Milestone 3: Analytical Dashboard</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 class='cyan-title'>📊 Vizualization Dashboard</h1>", unsafe_allow_html=True)
     
     # --- MILESTONE 3: INTERACTIVE FILTERS ---
     filter_col1, filter_col2 = st.columns([1, 1])
