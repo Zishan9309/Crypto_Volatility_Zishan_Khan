@@ -1,210 +1,197 @@
 import streamlit as st
-import streamlit.components.v1 as components
-import json
 import pandas as pd
+import numpy as np
+import plotly.graph_objects as go
 
 def render_risk_classification(data):
-    """
-    Renders the Risk Classification tab.
-    Fixed Syntax Errors for Streamlit Cloud Deployment.
-    """
-
-    if not data:
-        st.warning("⚠️ No data available. Please refresh the API on the Data Acquisition tab.")
-        return
-
-    # ── Sanitise Data for JavaScript Engine ───────────────────────────────────
-    clean_data = []
-    for c in data:
-        clean_data.append({
-            "name": str(c.get("name", "Unknown")),
-            "symbol": str(c.get("symbol") or "").upper(),
-            "market_cap_rank": int(c.get("market_cap_rank") or 0),
-            "current_price": float(c.get("current_price") or 0),
-            "high_24h": float(c.get("high_24h") or 0),
-            "low_24h": float(c.get("low_24h") or 0),
-            "price_change_percentage_24h": float(c.get("price_change_percentage_24h") or 0),
-        })
-
-    coins_json = json.dumps(clean_data)
-
-    # ── Full UI & Logic Replica (Fixed CSS Brackets for Python f-string) ──────
-    html_code = f"""
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-    <meta charset="UTF-8"/>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet"/>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+    # ---------------- REFINED NEON GLASS-UI STYLING ----------------
+    st.markdown("""
     <style>
-        *{{box-sizing:border-box;margin:0;padding:0;}}
-        body{{font-family:'Space Grotesk',sans-serif;background:#0d1b2a;color:#fff;min-height:100vh;padding:10px;overflow-x:hidden;}}
+        /* Medium-Sized Blocks with Glassmorphism */
+        .risk-card {
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            color: white;
+            text-align: left;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+        .risk-card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+        }
         
-        :root{{
-          --red:#ef476f; --yellow:#ffd166; --green:#06d6a0; --blue:#4cc9f0;
-          --mid:#1b263b; --light:#415a77; --muted:#778da9;
-        }}
+        /* Proper Color Gradients for Clusters */
+        .high-risk-block { background: linear-gradient(135deg, rgba(208, 49, 45, 0.9), rgba(153, 15, 2, 0.9)); border-left: 4px solid #ff4b2b; }
+        .med-risk-block { background: linear-gradient(135deg, rgba(240, 165, 0, 0.9), rgba(207, 117, 0, 0.9)); border-left: 4px solid #ffd166; }
+        .low-risk-block { background: linear-gradient(135deg, rgba(11, 132, 87, 0.9), rgba(5, 94, 61, 0.9)); border-left: 4px solid #06d6a0; }
 
-        h1{{color:var(--blue);text-align:center;font-size:26px;font-weight:900;letter-spacing:2px;margin-bottom:5px;}}
-        .subtitle{{text-align:center;color:var(--muted);font-size:11px;letter-spacing:3px;margin-bottom:20px;text-transform:uppercase;}}
-        hr{{border:none;border-top:1px solid var(--light);margin:15px 0;opacity:0.3;}}
-
-        .expander{{background:var(--mid);border:1px solid var(--light);border-radius:12px;margin-bottom:18px;overflow:hidden;}}
-        .expander-header{{padding:12px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:700;color:var(--blue);}}
-        .expander-body{{padding:0 18px;max-height:0;overflow:hidden;transition:max-height .3s ease;}}
-        .expander-body.open{{max-height:300px;padding:15px 18px;}}
-        .slider-label{{font-size:12px;color:var(--muted);margin-bottom:8px;display:flex;justify-content:space-between;}}
-        input[type=range]{{width:100%;accent-color:var(--blue);margin-bottom:15px;cursor:pointer;}}
-
-        .top-row{{display:grid;grid-template-columns:1.5fr 1fr;gap:15px;margin-bottom:20px;}}
-        .chart-box{{background:var(--mid);border:1px solid var(--light);border-radius:16px;padding:15px;}}
-        .verdict-container{{background:var(--mid);border:1px solid var(--light);border-radius:16px;padding:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;}}
+        .card-title { font-size: 14px; font-weight: 800; text-transform: uppercase; color: rgba(255,255,255,0.7); margin-bottom: 2px; }
+        .card-name { font-size: 18px; font-weight: 900; margin-bottom: 5px; }
+        .card-val { font-size: 16px; font-weight: 700; color: #ffffff; }
         
-        .clusters{{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin-bottom:20px;}}
-        .risk-card{{padding:14px;border-radius:12px;margin-bottom:10px;color:#fff;border:1px solid rgba(255,255,255,0.08);backdrop-filter:blur(5px);}}
-        .high-risk-block{{background:linear-gradient(135deg,rgba(208,49,45,.9),rgba(153,15,2,.9));border-left:4px solid #ff4b2b;}}
-        .med-risk-block{{background:linear-gradient(135deg,rgba(240,165,0,.9),rgba(207,117,0,.9));border-left:4px solid #ffd166;}}
-        .low-risk-block{{background:linear-gradient(135deg,rgba(11,132,87,.9),rgba(5,94,61,.9));border-left:4px solid #06d6a0;}}
+        .verdict-container {
+            background: #1b263b;
+            padding: 20px;
+            border-radius: 20px;
+            border: 1px solid #415a77;
+            text-align: center;
+        }
 
-        .card-name{{font-size:16px;font-weight:900;}}
-        .card-val{{font-size:13px;font-weight:700;opacity:0.9;}}
-
-        .heatmap-grid{{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;}}
-        .heatmap-cell{{background:rgba(255,255,255,0.03);border-radius:10px;padding:12px;text-align:center;border:1px solid var(--light);}}
-
-        .advisor-wrap{{background:rgba(27,38,59,.9);border-radius:20px;padding:25px;border:2px solid var(--blue);transition: 0.3s;}}
-        select{{background:var(--mid);border:1px solid var(--light);color:#fff;padding:12px;border-radius:10px;width:100%;margin-bottom:15px;font-family:inherit;}}
+        /* Advisor Intelligence Card Styling */
+        .advisor-card {
+            background: rgba(27, 38, 59, 0.8);
+            border-radius: 20px;
+            padding: 30px;
+            color: white;
+            transition: 0.5s;
+        }
     </style>
-    </head>
-    <body>
+    """, unsafe_allow_html=True)
 
-    <h1>📊 RISK SEGMENTATION</h1>
-    <div class="subtitle">Real-Time Data Logic Engine · Milestone 4</div>
-
-    <div class="expander">
-      <div class="expander-header" onclick="toggleExp()">🛠️ CONFIGURE RISK THRESHOLDS <span id="expArrow">▼</span></div>
-      <div class="expander-body" id="expBody">
-          <div class="slider-label"><span>High Risk Cutoff</span><b id="highVal">5.0%</b></div>
-          <input type="range" id="highSlider" min="3" max="10" step="0.5" value="5" oninput="updateLogic()"/>
-          <div class="slider-label"><span>Medium Risk Cutoff</span><b id="medVal">2.5%</b></div>
-          <input type="range" id="medSlider" min="1" max="4.5" step="0.5" value="2.5" oninput="updateLogic()"/>
-      </div>
-    </div>
-
-    <div class="top-row">
-      <div class="chart-box">
-        <canvas id="donutChart"></canvas>
-      </div>
-      <div class="verdict-container">
-        <div id="vStatus" style="font-size:32px;font-weight:900;margin:5px 0;">STABLE</div>
-        <div id="vAvg" style="font-size:22px;font-weight:800;color:var(--blue);">0.00%</div>
-      </div>
-    </div>
-
-    <div class="clusters">
-      <div><div id="hHead" style="color:var(--red);font-weight:800;font-size:13px;margin-bottom:10px;">🔴 CRITICAL (0)</div><div id="hCards"></div></div>
-      <div><div id="mHead" style="color:var(--yellow);font-weight:800;font-size:13px;margin-bottom:10px;">🟡 WARNING (0)</div><div id="mCards"></div></div>
-      <div><div id="lHead" style="color:var(--green);font-weight:800;font-size:13px;margin-bottom:10px;">🟢 SECURE (0)</div><div id="lCards"></div></div>
-    </div>
-
-    <div class="heatmap-grid" id="hmGrid"></div>
-
-    <select id="coinSelect" onchange="renderAdvisor()"></select>
-    <div id="advisorCard"></div>
-
-    <script>
-    const DATA = {coins_json};
-    let hCut = 5.0, mCut = 2.5, myChart = null;
-
-    function toggleExp() {{
-        const b = document.getElementById('expBody');
-        b.classList.toggle('open');
-        document.getElementById('expArrow').textContent = b.classList.contains('open') ? '▲' : '▼';
-    }}
-
-    function updateLogic() {{
-        hCut = parseFloat(document.getElementById('highSlider').value);
-        mCut = parseFloat(document.getElementById('medSlider').value);
-        if(mCut >= hCut) {{ mCut = hCut - 0.5; document.getElementById('medSlider').value = mCut; }}
-        document.getElementById('highVal').textContent = hCut.toFixed(1) + "%";
-        document.getElementById('medVal').textContent = mCut.toFixed(1) + "%";
-        renderAll();
-    }}
-
-    function renderAll() {{
-        const hArr = DATA.filter(c => Math.abs(c.price_change_percentage_24h) >= hCut);
-        const mArr = DATA.filter(c => Math.abs(c.price_change_percentage_24h) >= mCut && Math.abs(c.price_change_percentage_24h) < hCut);
-        const lArr = DATA.filter(c => Math.abs(c.price_change_percentage_24h) < mCut);
-
-        document.getElementById('hHead').textContent = "🔴 CRITICAL (" + hArr.length + ")";
-        document.getElementById('mHead').textContent = "🟡 WARNING (" + mArr.length + ")";
-        document.getElementById('lHead').textContent = "🟢 SECURE (" + lArr.length + ")";
-
-        const genCards = (arr, cls) => arr.slice(0, 4).map(c => `
-            <div class="risk-card ${{cls}}">
-                <div class="card-name">${{c.name}}</div>
-                <div class="card-val">${{Math.abs(c.price_change_percentage_24h).toFixed(2)}}% 24H Vol</div>
-            </div>
-        `).join('');
-
-        document.getElementById('hCards').innerHTML = genCards(hArr, 'high-risk-block');
-        document.getElementById('mCards').innerHTML = genCards(mArr, 'med-risk-block');
-        document.getElementById('lCards').innerHTML = genCards(lArr, 'low-risk-block');
-
-        const avg = DATA.reduce((sum, c) => sum + Math.abs(c.price_change_percentage_24h), 0) / DATA.length;
-        document.getElementById('vStatus').textContent = avg > 4 ? 'VOLATILE' : 'STABLE';
-        document.getElementById('vStatus').style.color = avg > 4 ? '#ef476f' : '#06d6a0';
-        document.getElementById('vAvg').textContent = avg.toFixed(2) + "%";
-
-        document.getElementById('hmGrid').innerHTML = DATA.slice(0, 10).map(c => {{
-            const val = Math.abs(c.price_change_percentage_24h);
-            const color = val >= hCut ? '#ef476f' : val >= mCut ? '#ffd166' : '#06d6a0';
-            return `<div class="heatmap-cell" style="border-bottom: 3px solid ${{color}};">
-                <div style="color:${{color}};font-weight:900;">${{c.symbol}}</div>
-                <div>${{val.toFixed(1)}}%</div>
-            </div>`;
-        }}).join('');
-
-        const ctx = document.getElementById('donutChart').getContext('2d');
-        if(myChart) myChart.destroy();
-        myChart = new Chart(ctx, {{
-            type: 'doughnut',
-            data: {{
-                labels: ['High', 'Med', 'Low'],
-                datasets: [{{ data: [hArr.length, mArr.length, lArr.length], backgroundColor: ['#ef476f', '#ffd166', '#06d6a0'], borderWidth: 0 }}]
-            }},
-            options: {{ cutout: '75%', plugins: {{ legend: {{ display: false }} }} }}
-        }});
-        renderAdvisor();
-    }}
-
-    function renderAdvisor() {{
-        const coinName = document.getElementById('coinSelect').value;
-        const c = DATA.find(x => x.name === coinName) || DATA[0];
-        const val = Math.abs(c.price_change_percentage_24h);
-        let color = val >= hCut ? '#ef476f' : val >= mCut ? '#ffd166' : '#06d6a0';
-        document.getElementById('advisorCard').innerHTML = `
-            <div class="advisor-wrap" style="border-color: ${{color}};">
-                <h2 style="margin:0;color:white;">${{c.name}}</h2>
-                <p style="margin:10px 0;color:${{color}};">$\{{val >= hCut ? '🚨 CRITICAL' : val >= mCut ? '⚖️ MODERATE' : '🛡️ SECURE'}}</p>
-                <div style="display:grid;grid-template-columns:repeat(3,1fr);text-align:center;color:white;">
-                    <div><small>Price</small><br><b>$ ${{c.current_price.toLocaleString()}}</b></div>
-                    <div><small>24H High</small><br><b style="color:var(--green);">$ ${{c.high_24h.toLocaleString()}}</b></div>
-                    <div><small>24H Low</small><br><b style="color:var(--red);">$ ${{c.low_24h.toLocaleString()}}</b></div>
-                </div>
-            </div>`;
-    }
-
-    document.getElementById('coinSelect').innerHTML = DATA.map(c => `<option value="${{c.name}}">${{c.name}}</option>`).join('');
-    renderAll();
-    </script>
-    </body>
-    </html>
-    """
-
-    components.html(html_code, height=1450, scrolling=True)
-
-    # Sidebar Export functionality
+    # --- HEADER ---
+    st.markdown("<h1 style='color:#4cc9f0; text-align:center;'>📊 RISK CLASSIFICATION</h1>", unsafe_allow_html=True)
     st.write("---")
+
+    # --- INTERACTIVE THRESHOLD SLIDER ---
+    with st.expander("🛠️ CONFIGURE RISK THRESHOLDS"):
+        high_cutoff = st.slider("High Risk Definition (%)", 3.0, 10.0, 5.0)
+        med_cutoff = st.slider("Medium Risk Definition (%)", 1.0, high_cutoff, 2.5)
+
+    # Classification Logic
+    high = [c for c in data if abs(c.get('price_change_percentage_24h', 0) or 0) >= high_cutoff]
+    med = [c for c in data if med_cutoff <= abs(c.get('price_change_percentage_24h', 0) or 0) < high_cutoff]
+    low = [c for c in data if abs(c.get('price_change_percentage_24h', 0) or 0) < med_cutoff]
+
+    # --- TOP SECTION: DONUT DISTRIBUTION & VERDICT ---
+    col_donut, col_verdict = st.columns([2, 1])
+
+    with col_donut:
+        st.markdown("<h4 style='color:white;'>🍩 Asset Risk Distribution</h4>", unsafe_allow_html=True)
+        fig = go.Figure(data=[go.Pie(
+            labels=['High Risk', 'Medium Risk', 'Low Risk'],
+            values=[len(high), len(med), len(low)],
+            hole=.6,
+            marker_colors=['#ef476f', '#ffd166', '#06d6a0'],
+            textinfo='percent+label',
+            pull=[0.1, 0, 0] 
+        )])
+        fig.update_layout(
+            paper_bgcolor='rgba(0,0,0,0)', 
+            plot_bgcolor='rgba(0,0,0,0)', 
+            height=300, 
+            font_color="white", 
+            margin=dict(t=0, b=0, l=0, r=0),
+            showlegend=False
+        )
+        st.plotly_chart(fig, use_container_width=True)
+
+    with col_verdict:
+        avg_v = sum(abs(c.get('price_change_percentage_24h', 0) or 0) for c in data) / len(data) if data else 0
+        v_status = "VOLATILE" if avg_v > 4 else "STABLE"
+        v_color = "#ef476f" if avg_v > 4 else "#06d6a0"
+        
+        st.markdown(f"""
+        <div class="verdict-container">
+            <div style="color:#778da9; font-size:12px; font-weight:700;">MARKET HEALTH</div>
+            <div style="color:{v_color}; font-size:32px; font-weight:900; margin:10px 0;">{v_status}</div>
+            <div style="font-size:24px; font-weight:800; color:white;">{avg_v:.2f}%</div>
+            <div style="color:#4cc9f0; font-size:11px;">AVG HOURLY DELTA</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    # --- MIDDLE SECTION: MEDIUM-SIZED CLASSIFIED BLOCKS ---
+    st.markdown("<h3 style='color:white;'>🗂️ Classified Asset Clusters</h3>", unsafe_allow_html=True)
+    
+    c1, c2, c3 = st.columns(3)
+
+    with c1:
+        st.markdown(f"<p style='color:#ef476f; font-weight:bold;'>🔴 CRITICAL ASSETS ({len(high)})</p>", unsafe_allow_html=True)
+        for coin in high[:5]:
+            st.markdown(f"""
+            <div class="risk-card high-risk-block">
+                <div class="card-title">Rank #{coin.get('market_cap_rank')}</div>
+                <div class="card-name">{coin['name']}</div>
+                <div class="card-val">{abs(coin['price_change_percentage_24h']):.2f}% Volatility</div>
+            </div>
+            """, unsafe_allow_html=True)
+
+    with c2:
+        st.markdown(f"<p style='color:#ffd166; font-weight:bold;'>🟡 WARNING ZONE ({len(med)})</p>", unsafe_allow_html=True)
+        for coin in med[:5]:
+            st.markdown(f"""
+            <div class="risk-card med-risk-block">
+                <div class="card-title">Rank #{coin.get('market_cap_rank')}</div>
+                <div class="card-name">{coin['name']}</div>
+                <div class="card-val">{abs(coin['price_change_percentage_24h']):.2f}% Volatility</div>
+            </div>
+            """, unsafe_allow_html=True)
+
+    with c3:
+        st.markdown(f"<p style='color:#06d6a0; font-weight:bold;'>🟢 SECURE ASSETS ({len(low)})</p>", unsafe_allow_html=True)
+        for coin in low[:5]:
+            st.markdown(f"""
+            <div class="risk-card low-risk-block">
+                <div class="card-title">Rank #{coin.get('market_cap_rank')}</div>
+                <div class="card-name">{coin['name']}</div>
+                <div class="card-val">{abs(coin['price_change_percentage_24h']):.2f}% Volatility</div>
+            </div>
+            """, unsafe_allow_html=True)
+
+    # --- BOTTOM SECTION: SMART AI PORTFOLIO ADVISOR ---
+    st.write("---")
+    st.markdown("<h3 style='color:white;'>🤖 AI Strategic Portfolio Advisor</h3>", unsafe_allow_html=True)
+    
+    sel_coin = st.selectbox("Select Asset for personalized risk strategy:", options=[c['name'] for c in data])
+    asset = next((c for c in data if c['name'] == sel_coin), None)
+    
+    if asset:
+        vol = abs(asset.get('price_change_percentage_24h', 0))
+        
+        # Advisor Logic & Theming
+        if vol >= high_cutoff:
+            status, color, shadow, advice = "CRITICAL RISK", "#ef476f", "rgba(239, 71, 111, 0.4)", "🚨 High Danger! Use 1x leverage only. Extreme volatility detected. Avoid long-term entry here."
+            signals = ["🛑 Reduce Exposure", "📉 De-risk Portfolio", "⚠️ High Slippage"]
+        elif vol >= med_cutoff:
+            status, color, shadow, advice = "MODERATE RISK", "#ffd166", "rgba(255, 209, 102, 0.4)", "⚖️ Moderate Risk. Suitable for swing trading with tight stop-losses. Monitor support levels."
+            signals = ["⚖️ Balanced Entry", "📈 Trailing Stop", "🔍 Monitor Support"]
+        else:
+            status, color, shadow, advice = "SECURE / STABLE", "#06d6a0", "rgba(6, 214, 160, 0.4)", "🛡️ Secure. Good for long-term holding. Low volatility baseline ideal for DCA strategies."
+            signals = ["🛡️ Accumulation Zone", "💎 HODL Candidate", "✅ Value Asset"]
+
+        # Strategic Advisor Card
+        st.markdown(f"""
+        <div class="advisor-card" style="border: 2px solid {color}; box-shadow: 0 10px 30px {shadow};">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <div>
+                    <span style="color: {color}; font-weight: 800; font-size: 14px; letter-spacing: 1px;">STRATEGIC VERDICT</span>
+                    <h2 style="margin: 0; color: white;">{sel_coin} <small style="font-size: 14px; color: #778da9;">({asset['symbol'].upper()})</small></h2>
+                </div>
+                <div style="background: {color}; color: #0d1b2a; padding: 8px 20px; border-radius: 50px; font-weight: 900;">
+                    {status}
+                </div>
+            </div>
+            <div style="display: flex; gap: 30px; margin-bottom: 20px;">
+                <div style="flex: 2;">
+                    <p style="font-size: 18px; line-height: 1.6;">{advice}</p>
+                </div>
+                <div style="flex: 1; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 15px;">
+                    <p style="margin: 0 0 10px 0; font-weight: bold; color: {color};">SIGNALS:</p>
+                    {"".join([f'<div style="margin-bottom: 5px; font-size: 14px;">{s}</div>' for s in signals])}
+                </div>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
+                <div><small style="color: #778da9;">Volatility</small><br><b style="color: {color};">{vol:.2f}%</b></div>
+                <div><small style="color: #778da9;">Current Price</small><br><b>${asset.get('current_price', 0):,}</b></div>
+                <div><small style="color: #778da9;">24h High</small><br><b style="color: #06d6a0;">${asset.get('high_24h', 0):,}</b></div>
+                <div><small style="color: #778da9;">24h Low</small><br><b style="color: #ef476f;">${asset.get('low_24h', 0):,}</b></div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    # --- DOWNLOAD EXPORT ---
+    st.write("<br>", unsafe_allow_html=True)
     csv = pd.DataFrame(data)[['name', 'current_price', 'price_change_percentage_24h']].to_csv(index=False).encode('utf-8')
     st.download_button(label="📥 EXPORT FINAL RISK CLASSIFICATION", data=csv, file_name="risk_report.csv", use_container_width=True)
