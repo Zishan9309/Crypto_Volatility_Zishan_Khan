@@ -5,18 +5,18 @@ import pandas as pd
 
 def render_risk_classification(data):
     """
-    Renders the Risk Classification tab with the exact UI from the uploaded image.
-    Uses the user's provided working Python logic inside an interactive HTML component.
+    Renders the Risk Classification tab.
+    Combines your working Python logic with the exact UI from the image.
     """
 
     if not data:
         st.warning("⚠️ No data available. Please refresh the API on the Data Acquisition tab.")
         return
 
-    # ── Sanitise Data for JavaScript ──────────────────────────────────────────
-    clean = []
+    # ── Sanitise Data for JavaScript Engine ───────────────────────────────────
+    clean_data = []
     for c in data:
-        clean.append({
+        clean_data.append({
             "name": c.get("name", "Unknown"),
             "symbol": (c.get("symbol") or "").upper(),
             "market_cap_rank": c.get("market_cap_rank") or 0,
@@ -26,10 +26,10 @@ def render_risk_classification(data):
             "price_change_percentage_24h": float(c.get("price_change_percentage_24h") or 0),
         })
 
-    coins_json = json.dumps(clean)
+    coins_json = json.dumps(clean_data)
 
-    # ── Full HTML/CSS/JS Replica ──────────────────────────────────────────────
-    html = f"""
+    # ── Full UI & Logic Replica ───────────────────────────────────────────────
+    html_code = f"""
     <!DOCTYPE html>
     <html lang="en">
     <head>
@@ -75,7 +75,7 @@ def render_risk_classification(data):
         .heatmap-grid{{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;}}
         .heatmap-cell{{background:rgba(255,255,255,0.03);border-radius:10px;padding:12px;text-align:center;border:1px solid var(--light);}}
 
-        /* ADVISOR */
+        /* ADVISOR CARD */
         .advisor-wrap{{background:rgba(27,38,59,.9);border-radius:20px;padding:25px;border:2px solid var(--blue);transition: 0.3s;}}
         select{{background:var(--mid);border:1px solid var(--light);color:#fff;padding:12px;border-radius:10px;width:100%;margin-bottom:15px;font-family:inherit;}}
     </style>
@@ -126,7 +126,7 @@ def render_risk_classification(data):
     <div style="font-weight:800;margin-bottom:10px;font-size:15px;color:var(--blue);">🔥 Volatility Heatmap</div>
     <div class="heatmap-grid" id="hmGrid"></div>
 
-    <div style="font-weight:800;margin:25px 0 10px 0;font-size:15px;color:var(--blue);">🤖 AI Strategic Advisor</div>
+    <div style="font-weight:800;margin:25px 0 10px 0;font-size:15px;color:var(--blue);">🤖 AI Portfolio Intelligence</div>
     <select id="coinSelect" onchange="renderAdvisor()"></select>
     <div id="advisorCard"></div>
 
@@ -155,7 +155,7 @@ def render_risk_classification(data):
     }}
 
     function renderAll() {{
-        // Filter based on user provided working Python logic
+        // Filter based on the logic: Absolute change vs Cutoffs
         const hArr = DATA.filter(c => Math.abs(c.price_change_percentage_24h) >= hCut);
         const mArr = DATA.filter(c => Math.abs(c.price_change_percentage_24h) >= mCut && Math.abs(c.price_change_percentage_24h) < hCut);
         const lArr = DATA.filter(c => Math.abs(c.price_change_percentage_24h) < mCut);
@@ -164,11 +164,11 @@ def render_risk_classification(data):
         document.getElementById('mHead').textContent = `🟡 WARNING ($\{{mArr.length}})`;
         document.getElementById('lHead').textContent = `🟢 SECURE ($\{{lArr.length}})`;
 
-        const genCards = (arr, cls) => arr.slice(0, 4).map(c => `
+        const genCards = (arr, cls) => arr.slice(0, 5).map(c => `
             <div class="risk-card $\{{cls}}">
                 <div style="font-size:10px;opacity:0.7;font-weight:bold;">RANK #$\{{c.market_cap_rank}}</div>
                 <div class="card-name">$\{{c.name}}</div>
-                <div class="card-val">$\{{Math.abs(c.price_change_percentage_24h).toFixed(2)}}% Volatility</div>
+                <div class="card-val">$\{{Math.abs(c.price_change_percentage_24h).toFixed(2)}}% 24H Vol</div>
             </div>
         `).join('');
 
@@ -214,9 +214,11 @@ def render_risk_classification(data):
         let color = val >= hCut ? '#ef476f' : val >= mCut ? '#ffd166' : '#06d6a0';
         document.getElementById('advisorCard').innerHTML = `
             <div class="advisor-wrap" style="border-color: $\{{color}};">
-                <h2 style="margin:0;">$\{{c.name}} Analysis</h2>
-                <p style="font-size:16px;font-weight:600;margin:10px 0;">Strategy: $\{{val >= hCut ? 'Critical Risk. Avoid Leverage.' : val >= mCut ? 'Moderate Risk. Use Stop Loss.' : 'Stable Asset. Ideal for HODL.'}}</p>
-                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;text-align:center;border-top:1px solid #415a77;padding-top:15px;">
+                <h2 style="margin:0;color:white;">$\{{c.name}} Analysis</h2>
+                <p style="font-size:16px;font-weight:600;margin:10px 0;color:$\{{color}};">
+                   $\{{val >= hCut ? '🚨 CRITICAL RISK: Minimize exposure.' : val >= mCut ? '⚖️ MODERATE: Tighten stop-losses.' : '🛡️ SECURE: Strong HODL potential.'}}
+                </p>
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;text-align:center;border-top:1px solid #415a77;padding-top:15px;color:white;">
                     <div><small style="color:var(--muted);">Price</small><br><b>$ $\{{c.current_price.toLocaleString()}}</b></div>
                     <div><small style="color:var(--muted);">24H High</small><br><b style="color:var(--green);">$ $\{{c.high_24h.toLocaleString()}}</b></div>
                     <div><small style="color:var(--muted);">24H Low</small><br><b style="color:var(--red);">$ $\{{c.low_24h.toLocaleString()}}</b></div>
@@ -231,9 +233,9 @@ def render_risk_classification(data):
     </html>
     """
 
-    components.html(html, height=1400, scrolling=True)
+    components.html(html_code, height=1450, scrolling=True)
 
-    # Sidebar Export functionality (Native Streamlit)
+    # Sidebar Export functionality
     st.write("---")
     csv = pd.DataFrame(data)[['name', 'current_price', 'price_change_percentage_24h']].to_csv(index=False).encode('utf-8')
     st.download_button(label="📥 EXPORT FINAL RISK CLASSIFICATION", data=csv, file_name="risk_report.csv", use_container_width=True)
