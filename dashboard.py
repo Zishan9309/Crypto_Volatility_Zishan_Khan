@@ -145,7 +145,7 @@ def main():
 
     # ---------------- NAVBAR SECTION ----------------
     tab_data_acq, tab_about, tab_data_proc, tab_viz_dash, tab_risk_class, tab_contact = st.tabs([
-        "📡 DATA ACQUISITION", "📖 ABOUT", "⚙️ DATA PROCESSING", "📊 VIZ DASHBOARD", "🛡️ RISK CLASSIFICATION", "📞 CONTACT"
+        "DATA ACQUISITION", "ABOUT", "DATA PROCESSING", "VIZUALIZATION", "RISK CLASSIFICATION", "CONTACT"
     ])
 
     with tab_data_acq:
