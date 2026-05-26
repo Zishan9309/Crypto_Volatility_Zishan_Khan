@@ -262,13 +262,20 @@ def render_risk_classification(data):
     components.html(html, height=1800, scrolling=True)
 
 
-# ── CORRECTED AND ALIGNED CHATBOT MODULE ──────────────────────────────────
+# ── LIVE WORKING CHATBOT SYSTEM APPENDED AT THE BOTTOM ──────────────────
 
 def render_crypto_chatbot():
     """
-    Renders a chatbot widget in the bottom-right corner.
+    Renders a live, interactive chat bubble widget directly on the viewport canvas.
     """
     chatbot_html = """
-    <script src="//code.tidio.co/demo_widget_id.js" async></script>
+    <script type="text/javascript">
+    window.$crisp=[];window.CRISP_WEBSITE_ID="b3b6416a-733c-473c-bf5c-2041b3dfbf5a";
+    (function(){ d=document;s=d.createElement("script");s.src="https://client.crisp.chat/l.js";
+    s.async=1;d.getElementsByTagName("head")[0].appendChild(s); })();
+    </script>
     """
-    components.html(chatbot_html, height=0)
+    # Using a 100-pixel anchor container down below to ensure browser visibility limits are avoided
+    components.html(chatbot_html, height=100)
+
+render_crypto_chatbot()
