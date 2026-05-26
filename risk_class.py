@@ -343,7 +343,7 @@ def render_crypto_chatbot():
 
     st.markdown('<h3 class="grok-header">🤖 Live Crypto Analytics Assistant (Groq Cloud Engine)</h3>', unsafe_allow_html=True)
 
-    # आपकी Groq API KEY यहाँ सेट है
+    # आपकी Groq API KEY
     GROQ_API_KEY = "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"
 
     if "chat_history" not in st.session_state:
@@ -369,14 +369,20 @@ def render_crypto_chatbot():
                 "Content-Type": "application/json"
             }
             
-            # यहाँ हमने Groq Cloud का URL और मॉडल (llama3-8b) अपडेट किया है
+            # ── 400 ERROR FIX: हमने यहाँ सबसे सुरक्षित और एक्टिव मॉडल डाला है ──
             payload = {
-                "model": "llama3-8b-8192",
+                "model": "llama-3.3-70b-versatile",
                 "messages": [
-                    {"role": "system", "content": "You are an elite cryptocurrency risk analyst assistant. Provide sharp financial insights, mathematical volatility calculations, and concise tracking suggestions data in clear format."},
-                    *st.session_state.chat_history
+                    {
+                        "role": "system", 
+                        "content": "You are an elite cryptocurrency risk analyst assistant. Provide sharp financial insights, mathematical volatility calculations, and concise tracking suggestions data in clean format."
+                    }
                 ]
             }
+            
+            # हिस्ट्री को सही तरीके से अपेंड करना ताकि स्ट्रक्चर न टूटे
+            for msg in st.session_state.chat_history:
+                payload["messages"].append({"role": msg["role"], "content": msg["content"]})
 
             try:
                 response = requests.post(
@@ -391,7 +397,9 @@ def render_crypto_chatbot():
                     response_placeholder.markdown(f'<span style="color:#ffffff;">{ai_response}</span>', unsafe_allow_html=True)
                     st.session_state.chat_history.append({"role": "assistant", "content": ai_response})
                 else:
-                    error_msg = f"❌ API Error: Connection failed (Status {response.status_code}). Setup/Key mismatch."
+                    # यदि 400 एरर दोबारा आए तो सर्वर का सटीक रिपॉन्स देखने के लिए बैकअप एरर ट्रैकिंग
+                    raw_error = response.text
+                    error_msg = f"❌ API Error: Connection failed (Status {response.status_code}). Detail: {raw_error}"
                     response_placeholder.markdown(f'<span style="color:#ef476f;">{error_msg}</span>', unsafe_allow_html=True)
             
             except Exception as e:
