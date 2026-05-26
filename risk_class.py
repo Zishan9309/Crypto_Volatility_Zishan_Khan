@@ -354,7 +354,7 @@ def render_crypto_chatbot():
 
     st.markdown('<h3 class="grok-header">🤖 Live Crypto Analytics Assistant (Grok Engine)</h3>', unsafe_allow_html=True)
 
-    GROK_API_KEY = "xai-your-grok-api-key-here"
+    GROK_API_KEY = "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"
 
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = [
