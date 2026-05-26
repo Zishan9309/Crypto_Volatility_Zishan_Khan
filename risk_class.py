@@ -262,33 +262,38 @@ def render_risk_classification(data):
 
     components.html(html, height=1800, scrolling=True)
 
+    # ── NESTED LOGICAL INVOCATION FOR TAB ISOLATION ─────────────────────────
+    # By placing this call *inside* the function scope, it executes only when 
+    # this specific view template is drawn by Streamlit's structural engine.
+    render_crypto_chatbot()
 
-# ── EXTENDED NATIVE GROK CHATBOT ENGINE APPENDED AT THE BOTTOM ───────────
+
+# ── NATIVE GROK CHATBOT ENGINE ───────────────────────────────────────────
 
 def render_crypto_chatbot():
     """
     Appends a live processing chatbot framework utilizing the xAI Grok API Endpoint.
+    This runs cleanly at the bottom without floating global constraints.
     """
     st.markdown("---")
     st.subheader("🤖 Live Crypto Analytics Assistant (Grok Engine)")
 
-    # Hardcoded Grok API key environment setup
+    # Hardcoded Grok API key setup
     GROK_API_KEY = "xai-your-grok-api-key-here"
 
-    # Initialize conversational context
+    # Initialize conversational context localized to Streamlit runtime
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = [
-            {"role": "assistant", "content": "Hello! I am your Grok-powered assistant. Ask me anything about current crypto risk mappings, market stability, or volatility spikes."}
+            {"role": "assistant", "content": "Hello! I am your Grok-powered assistant. Ask me anything about current risk profiles or volatility clusters."}
         ]
 
-    # Render previous messages from conversational memory
+    # Render localized message stream
     for message in st.session_state.chat_history:
         with st.chat_message(message["role"]):
             st.write(message["content"])
 
-    # Handle incoming user query strings
-    if user_query := st.chat_input("Ask Grok about asset volatility or market indicators..."):
-        # Append user message context
+    # Process user query inputs cleanly within standard Streamlit layout bounds
+    if user_query := st.chat_input("Ask Grok about asset volatility or market indicators...", key="grok_tab_chat_input"):
         st.session_state.chat_history.append({"role": "user", "content": user_query})
         with st.chat_message("user"):
             st.write(user_query)
@@ -306,7 +311,7 @@ def render_crypto_chatbot():
             payload = {
                 "model": "grok-beta",
                 "messages": [
-                    {"role": "system", "content": "You are an elite cryptocurrency analyst assistant. Provide sharp financial insight, risk metrics analysis, and concise mathematical tracking strategy data."},
+                    {"role": "system", "content": "You are an elite cryptocurrency risk analyst assistant. Provide sharp financial insights, mathematical volatility calculations, and concise tracking suggestions data."},
                     *st.session_state.chat_history
                 ],
                 "stream": False
@@ -323,14 +328,10 @@ def render_crypto_chatbot():
                     result = response.json()
                     ai_response = result["choices"][0]["message"]["content"]
                     response_placeholder.markdown(ai_response)
-                    # Persist response to runtime session state
                     st.session_state.chat_history.append({"role": "assistant", "content": ai_response})
                 else:
-                    error_msg = f"❌ API Error: Unable to complete message routing (Status {response.status_code}). Check your Grok billing or key configuration details."
+                    error_msg = f"❌ API Error: Connection failed (Status {response.status_code}). Please verify your xAI billing configuration settings."
                     response_placeholder.markdown(error_msg)
             
             except Exception as e:
-                response_placeholder.markdown(f"⚠️ Internal network connection timed out: {str(e)}")
-
-# Invoke chatbot sequence
-render_crypto_chatbot()
+                response_placeholder.markdown(f"⚠️ Internal network timeout: {str(e)}")
