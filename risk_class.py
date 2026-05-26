@@ -266,14 +266,13 @@ def render_risk_classification(data):
     render_crypto_chatbot()
 
 
-# ── NATIVE GROK CHATBOT ENGINE WITH INTEGRATED UI/UX COLOR MATCH ───────────
+# ── NATIVE GROK CHATBOT ENGINE WITH FIXED TEXTBOX CSS ──────────────────────
 
 def render_crypto_chatbot():
     """
     Appends a styled Grok-AI engine chat container matching the exact dark-blue 
-    and cyan color hierarchy of the main dashboard.
+    and cyan color hierarchy. Fixes unwanted box shadows / black blocks on inputs.
     """
-    # 1. Inject custom CSS to override Streamlit text and container visibility
     st.markdown(
         """
         <style>
@@ -285,7 +284,7 @@ def render_crypto_chatbot():
             letter-spacing: 1px;
             margin-top: 20px;
         }
-        /* Style Streamlit Chat Messages Content Text and Background to prevent whiteouts */
+        /* Style Streamlit Chat Messages Content Text and Background */
         [data-testid="stChatMessage"] {
             background-color: #1b263b !important;
             border: 1px solid rgba(65, 90, 119, 0.4) !important;
@@ -297,11 +296,18 @@ def render_crypto_chatbot():
         [data-testid="stChatMessage"] p, [data-testid="stChatMessage"] span {
             color: #ffffff !important;
         }
-        /* Chat Input Field Styling adjustment to prevent mismatch colors */
+        
+        /* ── CRITICAL FIX FOR THE TEXT INPUT BLACK BOX EFFECT ── */
+        [data-testid="stChatInput"] {
+            background-color: transparent !important;
+        }
         [data-testid="stChatInput"] textarea {
             color: #ffffff !important;
-            background-color: #0d1b2a !important;
+            background-color: #0d1b2a !important; /* Matches main app body dark color */
             border: 1px solid #415a77 !important;
+            box-shadow: none !important;            /* Removes browser shadow overlay */
+            outline: none !important;               /* Fixes focus line artifacts */
+            background-clip: padding-box !important;/* Prevents webkit black bleeding */
         }
         </style>
         """,
@@ -312,24 +318,20 @@ def render_crypto_chatbot():
 
     GROK_API_KEY = "xai-your-grok-api-key-here"
 
-    # Initialize session history tracking state variables
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = [
             {"role": "assistant", "content": "Hello! I am your Grok-powered assistant. Ask me anything about current crypto risk mappings, market stability, or volatility spikes."}
         ]
 
-    # Render previous messages from conversational memory loop
     for message in st.session_state.chat_history:
         with st.chat_message(message["role"]):
             st.markdown(f'<span style="color:#ffffff;">{message["content"]}</span>', unsafe_allow_html=True)
 
-    # Process realtime chat queries
     if user_query := st.chat_input("Ask Grok about asset volatility or market indicators...", key="grok_tab_chat_input"):
         st.session_state.chat_history.append({"role": "user", "content": user_query})
         with st.chat_message("user"):
             st.markdown(f'<span style="color:#ffffff;">{user_query}</span>', unsafe_allow_html=True)
 
-        # Generate a live container block to print the stream output
         with st.chat_message("assistant"):
             response_placeholder = st.empty()
             response_placeholder.markdown("<em style='color:#778da9;'>Grok is analyzing market conditions...</em>", unsafe_allow_html=True)
