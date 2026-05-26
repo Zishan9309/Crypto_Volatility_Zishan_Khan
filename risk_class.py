@@ -262,46 +262,77 @@ def render_risk_classification(data):
 
     components.html(html, height=1800, scrolling=True)
 
-    # ── NESTED LOGICAL INVOCATION FOR TAB ISOLATION ─────────────────────────
-    # By placing this call *inside* the function scope, it executes only when 
-    # this specific view template is drawn by Streamlit's structural engine.
+    # ── TAB ISOLATED CHATBOT EXECUTION ─────────────────────────────────────
     render_crypto_chatbot()
 
 
-# ── NATIVE GROK CHATBOT ENGINE ───────────────────────────────────────────
+# ── NATIVE GROK CHATBOT ENGINE WITH INTEGRATED UI/UX COLOR MATCH ───────────
 
 def render_crypto_chatbot():
     """
-    Appends a live processing chatbot framework utilizing the xAI Grok API Endpoint.
-    This runs cleanly at the bottom without floating global constraints.
+    Appends a styled Grok-AI engine chat container matching the exact dark-blue 
+    and cyan color hierarchy of the main dashboard.
     """
-    st.markdown("---")
-    st.subheader("🤖 Live Crypto Analytics Assistant (Grok Engine)")
+    # 1. Inject custom CSS to override Streamlit text and container visibility
+    st.markdown(
+        """
+        <style>
+        /* Force Subheader to have the exact Cyan/Blue tint color */
+        .grok-header {
+            color: #4cc9f0 !important;
+            font-family: 'Space Grotesk', sans-serif !important;
+            font-weight: 800 !important;
+            letter-spacing: 1px;
+            margin-top: 20px;
+        }
+        /* Style Streamlit Chat Messages Content Text and Background to prevent whiteouts */
+        [data-testid="stChatMessage"] {
+            background-color: #1b263b !important;
+            border: 1px solid rgba(65, 90, 119, 0.4) !important;
+            border-radius: 12px !important;
+            color: #ffffff !important;
+            font-family: 'Space Grotesk', sans-serif !important;
+        }
+        /* Ensure specific targeted Markdown user/assistant text changes to pure white */
+        [data-testid="stChatMessage"] p, [data-testid="stChatMessage"] span {
+            color: #ffffff !important;
+        }
+        /* Chat Input Field Styling adjustment to prevent mismatch colors */
+        [data-testid="stChatInput"] textarea {
+            color: #ffffff !important;
+            background-color: #0d1b2a !important;
+            border: 1px solid #415a77 !important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
 
-    # Hardcoded Grok API key setup
+    st.markdown('<h3 class="grok-header">🤖 Live Crypto Analytics Assistant (Grok Engine)</h3>', unsafe_allow_html=True)
+
     GROK_API_KEY = "xai-your-grok-api-key-here"
 
-    # Initialize conversational context localized to Streamlit runtime
+    # Initialize session history tracking state variables
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = [
-            {"role": "assistant", "content": "Hello! I am your Grok-powered assistant. Ask me anything about current risk profiles or volatility clusters."}
+            {"role": "assistant", "content": "Hello! I am your Grok-powered assistant. Ask me anything about current crypto risk mappings, market stability, or volatility spikes."}
         ]
 
-    # Render localized message stream
+    # Render previous messages from conversational memory loop
     for message in st.session_state.chat_history:
         with st.chat_message(message["role"]):
-            st.write(message["content"])
+            st.markdown(f'<span style="color:#ffffff;">{message["content"]}</span>', unsafe_allow_html=True)
 
-    # Process user query inputs cleanly within standard Streamlit layout bounds
+    # Process realtime chat queries
     if user_query := st.chat_input("Ask Grok about asset volatility or market indicators...", key="grok_tab_chat_input"):
         st.session_state.chat_history.append({"role": "user", "content": user_query})
         with st.chat_message("user"):
-            st.write(user_query)
+            st.markdown(f'<span style="color:#ffffff;">{user_query}</span>', unsafe_allow_html=True)
 
-        # Generate a live connection to the Grok REST API
+        # Generate a live container block to print the stream output
         with st.chat_message("assistant"):
             response_placeholder = st.empty()
-            response_placeholder.markdown("*Grok is analyzing market conditions...*")
+            response_placeholder.markdown("<em style='color:#778da9;'>Grok is analyzing market conditions...</em>", unsafe_allow_html=True)
 
             headers = {
                 "Authorization": f"Bearer {GROK_API_KEY}",
@@ -311,7 +342,7 @@ def render_crypto_chatbot():
             payload = {
                 "model": "grok-beta",
                 "messages": [
-                    {"role": "system", "content": "You are an elite cryptocurrency risk analyst assistant. Provide sharp financial insights, mathematical volatility calculations, and concise tracking suggestions data."},
+                    {"role": "system", "content": "You are an elite cryptocurrency risk analyst assistant. Provide sharp financial insights, mathematical volatility calculations, and concise tracking suggestions data in clear format."},
                     *st.session_state.chat_history
                 ],
                 "stream": False
@@ -327,11 +358,11 @@ def render_crypto_chatbot():
                 if response.status_code == 200:
                     result = response.json()
                     ai_response = result["choices"][0]["message"]["content"]
-                    response_placeholder.markdown(ai_response)
+                    response_placeholder.markdown(f'<span style="color:#ffffff;">{ai_response}</span>', unsafe_allow_html=True)
                     st.session_state.chat_history.append({"role": "assistant", "content": ai_response})
                 else:
-                    error_msg = f"❌ API Error: Connection failed (Status {response.status_code}). Please verify your xAI billing configuration settings."
-                    response_placeholder.markdown(error_msg)
+                    error_msg = f"❌ API Error: Connection failed (Status {response.status_code})."
+                    response_placeholder.markdown(f'<span style="color:#ef476f;">{error_msg}</span>', unsafe_allow_html=True)
             
             except Exception as e:
-                response_placeholder.markdown(f"⚠️ Internal network timeout: {str(e)}")
+                response_placeholder.markdown(f"⚠️ Connection timeout error: {str(e)}")
