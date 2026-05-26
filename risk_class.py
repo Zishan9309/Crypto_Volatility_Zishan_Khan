@@ -298,31 +298,54 @@ def render_crypto_chatbot():
         }
         
         /* ── CRITICAL FIX FOR THE TEXT INPUT BLACK BOX EFFECT ── */
-        /* पूरे चैट इनपुट कंटेनर को पारदर्शी (Transparent) बनाएं */
+        /* इनपुट बॉक्स का बैकग्राउंड आपके प्रोजेक्ट के डार्क थीम जैसा रहेगा */
         [data-testid="stChatInput"], 
         [data-testid="stChatInput"] > div,
         .stChatInputContainer {
-            background-color: #0d1b2a !important; /* आपके प्रोजेक्ट का मुख्य डार्क रंग */
+            background-color: #0d1b2a !important;
             background: #0d1b2a !important;
             border: 1px solid #415a77 !important;
             border-radius: 12px !important;
             box-shadow: none !important;
         }
-        
-        /* टेक्स्ट एरिया के अंदर के ब्लैक बॉक्स और टेक्स्ट विजिबिलिटी को फिक्स करें */
+
+        /* टेक्स्ट एरिया के अंदर टाइप होने वाले टेक्स्ट का रंग BLACK सेट करें */
         [data-testid="stChatInput"] textarea {
-            color: #ffffff !important;            /* टाइप करते समय टेक्स्ट का रंग सफ़ेद दिखेगा */
-            -webkit-text-fill-color: #ffffff !important; /* सफारी/क्रोम फिक्स */
-            background-color: transparent !important; /* अंदर का ब्लैक बॉक्स हटेगा */
-            background: transparent !important;
+            color: #000000 !important;                   /* टेक्स्ट का रंग ब्लैक */
+            -webkit-text-fill-color: #000000 !important;        /* सफारी/क्रोम फिक्स */
+            background-color: #ffffff !important;        /* टेक्स्ट साफ़ दिखने के लिए बैकग्राउंड सफ़ेद */
+            background: #ffffff !important;
+            border-radius: 8px !important;
+            padding: 8px !important;
             box-shadow: none !important;
             outline: none !important;
         }
 
-        /* इनपुट बॉक्स के प्लेसहोल्डर (Hint text) का रंग सेट करें */
+        /* इनपुट बॉक्स के प्लेसहोल्डर (Hint text) का रंग */
         [data-testid="stChatInput"] textarea::placeholder {
             color: #778da9 !important;
             opacity: 1 !important;
+        }
+
+        /* सेंड/एंटर एरो बटन का रंग CYAN करें (जब बटन एक्टिव न हो या एरर न हो) */
+        [data-testid="stChatInput"] button {
+            color: #4cc9f0 !important;                   /* बटन का आइकॉन कलर */
+            background-color: transparent !important;    /* बैकग्राउंड ट्रांसपेरेंट */
+        }
+
+        /* जब बटन एक्टिव (Hover या Clicked) हो, तब भी उसका रंग CYAN रहे */
+        [data-testid="stChatInput"] button:hover, 
+        [data-testid="stChatInput"] button:active,
+        [data-testid="stChatInput"] button:focus {
+            color: #4cc9f0 !important;
+            border-color: #4cc9f0 !important;
+            box-shadow: 0 0 10px rgba(76, 201, 240, 0.4) !important;
+        }
+
+        /* बटन का डिफ़ॉल्ट रेड या कोई अन्य एरर/सेंड स्टेट ओवरराइड करने के लिए */
+        [data-testid="stChatInput"] button svg {
+            fill: #4cc9f0 !important;                    /* SVG एरो आइकॉन का रंग */
+            stroke: #4cc9f0 !important;
         }
         </style>
         """,
