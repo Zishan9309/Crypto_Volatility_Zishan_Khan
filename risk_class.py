@@ -271,7 +271,8 @@ def render_risk_classification(data):
 def render_crypto_chatbot():
     """
     Appends a styled Groq-AI engine chat container matching the exact dark-blue 
-    and cyan color hierarchy. Fixes unwanted box shadows / black blocks on inputs.
+    and cyan color hierarchy. Fixes unwanted box shadows, black blocks, and forces
+    ALL text formats (bold, lists, etc.) to be pure white.
     """
     st.markdown(
         """
@@ -284,7 +285,8 @@ def render_crypto_chatbot():
             letter-spacing: 1px;
             margin-top: 20px;
         }
-        /* Style Streamlit Chat Messages Content Text and Background */
+        
+        /* ── CHAT MESSAGES TEXT AND BACKGROUND COLOR FIX ── */
         [data-testid="stChatMessage"] {
             background-color: #1b263b !important;
             border: 1px solid rgba(65, 90, 119, 0.4) !important;
@@ -292,12 +294,20 @@ def render_crypto_chatbot():
             color: #ffffff !important;
             font-family: 'Space Grotesk', sans-serif !important;
         }
-        /* Ensure specific targeted Markdown user/assistant text changes to pure white */
-        [data-testid="stChatMessage"] p, [data-testid="stChatMessage"] span {
+        
+        /* ── CRITICAL FIX: FORCING ALL MARKDOWN ELEMENTS TO WHITE ── */
+        /* इसके अंदर के पैराग्राफ, स्पैन, बोल्ड (strong), लिस्ट आइटम्स (li) सबको वाइट करेगा */
+        [data-testid="stChatMessage"] p, 
+        [data-testid="stChatMessage"] span,
+        [data-testid="stChatMessage"] strong,
+        [data-testid="stChatMessage"] li,
+        [data-testid="stChatMessage"] ul,
+        [data-testid="stChatMessage"] ol {
             color: #ffffff !important;
+            -webkit-text-fill-color: #ffffff !important; /* ब्राउज़र ओवरराइड फिक्स */
         }
         
-        /* ── CRITICAL FIX FOR THE TEXT INPUT BLACK BOX EFFECT ── */
+        /* ── TEXT INPUT FIELD STYLING ── */
         [data-testid="stChatInput"], 
         [data-testid="stChatInput"] > div,
         .stChatInputContainer {
@@ -369,18 +379,16 @@ def render_crypto_chatbot():
                 "Content-Type": "application/json"
             }
             
-            # ── 400 ERROR FIX: हमने यहाँ सबसे सुरक्षित और एक्टिव मॉडल डाला है ──
             payload = {
                 "model": "llama-3.3-70b-versatile",
                 "messages": [
                     {
                         "role": "system", 
-                        "content": "You are an elite cryptocurrency risk analyst assistant. Provide sharp financial insights, mathematical volatility calculations, and concise tracking suggestions data in clean format."
+                        "content": "You are an elite cryptocurrency risk analyst assistant. Provide sharp financial insights, mathematical volatility calculations, and concise tracking suggestions data in clear format."
                     }
                 ]
             }
             
-            # हिस्ट्री को सही तरीके से अपेंड करना ताकि स्ट्रक्चर न टूटे
             for msg in st.session_state.chat_history:
                 payload["messages"].append({"role": msg["role"], "content": msg["content"]})
 
@@ -397,7 +405,6 @@ def render_crypto_chatbot():
                     response_placeholder.markdown(f'<span style="color:#ffffff;">{ai_response}</span>', unsafe_allow_html=True)
                     st.session_state.chat_history.append({"role": "assistant", "content": ai_response})
                 else:
-                    # यदि 400 एरर दोबारा आए तो सर्वर का सटीक रिपॉन्स देखने के लिए बैकअप एरर ट्रैकिंग
                     raw_error = response.text
                     error_msg = f"❌ API Error: Connection failed (Status {response.status_code}). Detail: {raw_error}"
                     response_placeholder.markdown(f'<span style="color:#ef476f;">{error_msg}</span>', unsafe_allow_html=True)
