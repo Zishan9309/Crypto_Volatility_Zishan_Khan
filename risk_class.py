@@ -270,7 +270,7 @@ def render_risk_classification(data):
 
 def render_crypto_chatbot():
     """
-    Appends a styled Grok-AI engine chat container matching the exact dark-blue 
+    Appends a styled Groq-AI engine chat container matching the exact dark-blue 
     and cyan color hierarchy. Fixes unwanted box shadows / black blocks on inputs.
     """
     st.markdown(
@@ -298,7 +298,6 @@ def render_crypto_chatbot():
         }
         
         /* ── CRITICAL FIX FOR THE TEXT INPUT BLACK BOX EFFECT ── */
-        /* इनपुट बॉक्स का बैकग्राउंड आपके प्रोजेक्ट के डार्क थीम जैसा रहेगा */
         [data-testid="stChatInput"], 
         [data-testid="stChatInput"] > div,
         .stChatInputContainer {
@@ -308,32 +307,24 @@ def render_crypto_chatbot():
             border-radius: 12px !important;
             box-shadow: none !important;
         }
-
-        /* टेक्स्ट एरिया के अंदर टाइप होने वाले टेक्स्ट का रंग BLACK सेट करें */
         [data-testid="stChatInput"] textarea {
-            color: #000000 !important;                   /* टेक्स्ट का रंग ब्लैक */
-            -webkit-text-fill-color: #000000 !important;        /* सफारी/क्रोम फिक्स */
-            background-color: #ffffff !important;        /* टेक्स्ट साफ़ दिखने के लिए बैकग्राउंड सफ़ेद */
+            color: #000000 !important;
+            -webkit-text-fill-color: #000000 !important;
+            background-color: #ffffff !important;
             background: #ffffff !important;
             border-radius: 8px !important;
             padding: 8px !important;
             box-shadow: none !important;
             outline: none !important;
         }
-
-        /* इनपुट बॉक्स के प्लेसहोल्डर (Hint text) का रंग */
         [data-testid="stChatInput"] textarea::placeholder {
             color: #778da9 !important;
             opacity: 1 !important;
         }
-
-        /* सेंड/एंटर एरो बटन का रंग CYAN करें (जब बटन एक्टिव न हो या एरर न हो) */
         [data-testid="stChatInput"] button {
-            color: #4cc9f0 !important;                   /* बटन का आइकॉन कलर */
-            background-color: transparent !important;    /* बैकग्राउंड ट्रांसपेरेंट */
+            color: #4cc9f0 !important;
+            background-color: transparent !important;
         }
-
-        /* जब बटन एक्टिव (Hover या Clicked) हो, तब भी उसका रंग CYAN रहे */
         [data-testid="stChatInput"] button:hover, 
         [data-testid="stChatInput"] button:active,
         [data-testid="stChatInput"] button:focus {
@@ -341,10 +332,8 @@ def render_crypto_chatbot():
             border-color: #4cc9f0 !important;
             box-shadow: 0 0 10px rgba(76, 201, 240, 0.4) !important;
         }
-
-        /* बटन का डिफ़ॉल्ट रेड या कोई अन्य एरर/सेंड स्टेट ओवरराइड करने के लिए */
         [data-testid="stChatInput"] button svg {
-            fill: #4cc9f0 !important;                    /* SVG एरो आइकॉन का रंग */
+            fill: #4cc9f0 !important;
             stroke: #4cc9f0 !important;
         }
         </style>
@@ -352,45 +341,46 @@ def render_crypto_chatbot():
         unsafe_allow_html=True
     )
 
-    st.markdown('<h3 class="grok-header">🤖 Live Crypto Analytics Assistant (Grok Engine)</h3>', unsafe_allow_html=True)
+    st.markdown('<h3 class="grok-header">🤖 Live Crypto Analytics Assistant (Groq Cloud Engine)</h3>', unsafe_allow_html=True)
 
-    GROK_API_KEY = "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"
+    # आपकी Groq API KEY यहाँ सेट है
+    GROQ_API_KEY = "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"
 
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = [
-            {"role": "assistant", "content": "Hello! I am your Grok-powered assistant. Ask me anything about current crypto risk mappings, market stability, or volatility spikes."}
+            {"role": "assistant", "content": "Hello! I am your Groq-powered assistant. Ask me anything about current crypto risk mappings, market stability, or volatility spikes."}
         ]
 
     for message in st.session_state.chat_history:
         with st.chat_message(message["role"]):
             st.markdown(f'<span style="color:#ffffff;">{message["content"]}</span>', unsafe_allow_html=True)
 
-    if user_query := st.chat_input("Ask Grok about asset volatility or market indicators...", key="grok_tab_chat_input"):
+    if user_query := st.chat_input("Ask about asset volatility or market indicators...", key="grok_tab_chat_input"):
         st.session_state.chat_history.append({"role": "user", "content": user_query})
         with st.chat_message("user"):
             st.markdown(f'<span style="color:#ffffff;">{user_query}</span>', unsafe_allow_html=True)
 
         with st.chat_message("assistant"):
             response_placeholder = st.empty()
-            response_placeholder.markdown("<em style='color:#778da9;'>Grok is analyzing market conditions...</em>", unsafe_allow_html=True)
+            response_placeholder.markdown("<em style='color:#778da9;'>Analyzing market conditions...</em>", unsafe_allow_html=True)
 
             headers = {
-                "Authorization": f"Bearer {GROK_API_KEY}",
+                "Authorization": f"Bearer {GROQ_API_KEY}",
                 "Content-Type": "application/json"
             }
             
+            # यहाँ हमने Groq Cloud का URL और मॉडल (llama3-8b) अपडेट किया है
             payload = {
-                "model": "grok-beta",
+                "model": "llama3-8b-8192",
                 "messages": [
                     {"role": "system", "content": "You are an elite cryptocurrency risk analyst assistant. Provide sharp financial insights, mathematical volatility calculations, and concise tracking suggestions data in clear format."},
                     *st.session_state.chat_history
-                ],
-                "stream": False
+                ]
             }
 
             try:
                 response = requests.post(
-                    "https://api.x.ai/v1/chat/completions",
+                    "https://api.groq.com/openai/v1/chat/completions",
                     headers=headers,
                     json=payload
                 )
@@ -401,7 +391,7 @@ def render_crypto_chatbot():
                     response_placeholder.markdown(f'<span style="color:#ffffff;">{ai_response}</span>', unsafe_allow_html=True)
                     st.session_state.chat_history.append({"role": "assistant", "content": ai_response})
                 else:
-                    error_msg = f"❌ API Error: Connection failed (Status {response.status_code})."
+                    error_msg = f"❌ API Error: Connection failed (Status {response.status_code}). Setup/Key mismatch."
                     response_placeholder.markdown(f'<span style="color:#ef476f;">{error_msg}</span>', unsafe_allow_html=True)
             
             except Exception as e:
