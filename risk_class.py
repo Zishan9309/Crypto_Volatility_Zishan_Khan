@@ -1,6 +1,7 @@
 import streamlit as st
 import streamlit.components.v1 as components
 import json
+import requests
 
 def render_risk_classification(data):
     """
@@ -262,20 +263,74 @@ def render_risk_classification(data):
     components.html(html, height=1800, scrolling=True)
 
 
-# ── LIVE WORKING CHATBOT SYSTEM APPENDED AT THE BOTTOM ──────────────────
+# ── EXTENDED NATIVE GROK CHATBOT ENGINE APPENDED AT THE BOTTOM ───────────
 
 def render_crypto_chatbot():
     """
-    Renders a live, interactive chat bubble widget directly on the viewport canvas.
+    Appends a live processing chatbot framework utilizing the xAI Grok API Endpoint.
     """
-    chatbot_html = """
-    <script type="text/javascript">
-    window.$crisp=[];window.CRISP_WEBSITE_ID="b3b6416a-733c-473c-bf5c-2041b3dfbf5a";
-    (function(){ d=document;s=d.createElement("script");s.src="https://client.crisp.chat/l.js";
-    s.async=1;d.getElementsByTagName("head")[0].appendChild(s); })();
-    </script>
-    """
-    # Using a 100-pixel anchor container down below to ensure browser visibility limits are avoided
-    components.html(chatbot_html, height=100)
+    st.markdown("---")
+    st.subheader("🤖 Live Crypto Analytics Assistant (Grok Engine)")
 
+    # Hardcoded Grok API key environment setup
+    GROK_API_KEY = "xai-your-grok-api-key-here"
+
+    # Initialize conversational context
+    if "chat_history" not in st.session_state:
+        st.session_state.chat_history = [
+            {"role": "assistant", "content": "Hello! I am your Grok-powered assistant. Ask me anything about current crypto risk mappings, market stability, or volatility spikes."}
+        ]
+
+    # Render previous messages from conversational memory
+    for message in st.session_state.chat_history:
+        with st.chat_message(message["role"]):
+            st.write(message["content"])
+
+    # Handle incoming user query strings
+    if user_query := st.chat_input("Ask Grok about asset volatility or market indicators..."):
+        # Append user message context
+        st.session_state.chat_history.append({"role": "user", "content": user_query})
+        with st.chat_message("user"):
+            st.write(user_query)
+
+        # Generate a live connection to the Grok REST API
+        with st.chat_message("assistant"):
+            response_placeholder = st.empty()
+            response_placeholder.markdown("*Grok is analyzing market conditions...*")
+
+            headers = {
+                "Authorization": f"Bearer {GROK_API_KEY}",
+                "Content-Type": "application/json"
+            }
+            
+            payload = {
+                "model": "grok-beta",
+                "messages": [
+                    {"role": "system", "content": "You are an elite cryptocurrency analyst assistant. Provide sharp financial insight, risk metrics analysis, and concise mathematical tracking strategy data."},
+                    *st.session_state.chat_history
+                ],
+                "stream": False
+            }
+
+            try:
+                response = requests.post(
+                    "https://api.x.ai/v1/chat/completions",
+                    headers=headers,
+                    json=payload
+                )
+                
+                if response.status_code == 200:
+                    result = response.json()
+                    ai_response = result["choices"][0]["message"]["content"]
+                    response_placeholder.markdown(ai_response)
+                    # Persist response to runtime session state
+                    st.session_state.chat_history.append({"role": "assistant", "content": ai_response})
+                else:
+                    error_msg = f"❌ API Error: Unable to complete message routing (Status {response.status_code}). Check your Grok billing or key configuration details."
+                    response_placeholder.markdown(error_msg)
+            
+            except Exception as e:
+                response_placeholder.markdown(f"⚠️ Internal network connection timed out: {str(e)}")
+
+# Invoke chatbot sequence
 render_crypto_chatbot()
