@@ -298,16 +298,31 @@ def render_crypto_chatbot():
         }
         
         /* ── CRITICAL FIX FOR THE TEXT INPUT BLACK BOX EFFECT ── */
-        [data-testid="stChatInput"] {
-            background-color: transparent !important;
-        }
-        [data-testid="stChatInput"] textarea {
-            color: #ffffff !important;
-            background-color: #0d1b2a !important; /* Matches main app body dark color */
+        /* पूरे चैट इनपुट कंटेनर को पारदर्शी (Transparent) बनाएं */
+        [data-testid="stChatInput"], 
+        [data-testid="stChatInput"] > div,
+        .stChatInputContainer {
+            background-color: #0d1b2a !important; /* आपके प्रोजेक्ट का मुख्य डार्क रंग */
+            background: #0d1b2a !important;
             border: 1px solid #415a77 !important;
-            box-shadow: none !important;            /* Removes browser shadow overlay */
-            outline: none !important;               /* Fixes focus line artifacts */
-            background-clip: padding-box !important;/* Prevents webkit black bleeding */
+            border-radius: 12px !important;
+            box-shadow: none !important;
+        }
+        
+        /* टेक्स्ट एरिया के अंदर के ब्लैक बॉक्स और टेक्स्ट विजिबिलिटी को फिक्स करें */
+        [data-testid="stChatInput"] textarea {
+            color: #ffffff !important;            /* टाइप करते समय टेक्स्ट का रंग सफ़ेद दिखेगा */
+            -webkit-text-fill-color: #ffffff !important; /* सफारी/क्रोम फिक्स */
+            background-color: transparent !important; /* अंदर का ब्लैक बॉक्स हटेगा */
+            background: transparent !important;
+            box-shadow: none !important;
+            outline: none !important;
+        }
+
+        /* इनपुट बॉक्स के प्लेसहोल्डर (Hint text) का रंग सेट करें */
+        [data-testid="stChatInput"] textarea::placeholder {
+            color: #778da9 !important;
+            opacity: 1 !important;
         }
         </style>
         """,
