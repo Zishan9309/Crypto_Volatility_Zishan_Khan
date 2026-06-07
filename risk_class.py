@@ -354,7 +354,7 @@ def render_crypto_chatbot():
     st.markdown('<h3 class="grok-header">Live Crypto Analytics Assistant</h3>', unsafe_allow_html=True)
 
     # आपकी Groq API KEY
-    GROQ_API_KEY = "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"
+    GROQ_API_KEY = "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"
 
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = [
